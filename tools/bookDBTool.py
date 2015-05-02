@@ -10,10 +10,10 @@
 import  datetime, unittest, string, urllib, MySQLdb
 from optparse import OptionParser
 
-UN=username
-PWD=password
-DB=database
-DBHOST=databasehost
+UN=xxx
+PWD=xxx
+DB=xxx
+DBHOST=xxx
 
 class bookDBTool:
   def __init__(self):

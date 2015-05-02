@@ -8,27 +8,38 @@
 
 <?php
 echo '<tr>';
-if ($_REQUEST['chk_author']) {
-        echo '<th>AUTHOR</th>';}
-if ($_REQUEST['chk_title']) {
-        echo '<th>TITLE</th>';}
-if ($_REQUEST['chk_isbnnumber']) {
-        echo '<th>ISBN</th>';}
-if ($_REQUEST['chk_isbnnumber13']) {
-        echo '<th>ISBN 13</th>';}
-if ($_REQUEST['chk_publishername']) {
-        echo '<th>PUBLISHER</th>';}
-if ($_REQUEST['chk_pages']) {
-        echo '<th>PAGES</th>';}
-if ($_REQUEST['chk_copyrightdate']) {
-        echo '<th>© DATE</th>';}
-if ($_REQUEST['chk_lastread']) {
-	echo '<th>READ DATE</th>';}
-if ($_REQUEST['chk_location']) {
-        echo '<th>LOCATION</th>';}
-if ($_REQUEST['chk_recycled']) {
-	echo '<th>REC\'D</td>';}
-if ($_REQUEST['chk_covertype']) {
-        echo '<th>COVER</th>';}
+if (isset($_REQUEST['chk_author'])) {
+    echo '<th>AUTHOR</th>';
+}
+if (isset($_REQUEST['chk_title'])) {
+    echo '<th>TITLE</th>';
+}
+if (isset($_REQUEST['chk_isbnnumber'])) {
+    echo '<th>ISBN</th>';
+}
+if (isset($_REQUEST['chk_isbnnumber13'])) {
+    echo '<th>ISBN 13</th>';
+}
+if (isset($_REQUEST['chk_publishername'])) {
+    echo '<th>PUBLISHER</th>';
+}
+if (isset($_REQUEST['chk_pages'])) {
+    echo '<th>PAGES</th>';
+}
+if (isset($_REQUEST['chk_copyrightdate'])) {
+    echo '<th>ï¿½ DATE</th>';
+}
+if (isset($_REQUEST['chk_lastread'])) {
+    echo '<th>READ DATE</th>';
+}
+if (isset($_REQUEST['chk_location'])) {
+    echo '<th>LOCATION</th>';
+}
+if (isset($_REQUEST['chk_recycled'])) {
+    echo '<th>REC\'D</td>';
+}
+if (isset($_REQUEST['chk_covertype'])) {
+    echo '<th>COVER</th>';
+}
 echo '</tr>';
 ?>

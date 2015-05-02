@@ -6,10 +6,14 @@
 //
 --->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<?php include('header.php');?>
+<?php
+include('header.php');
+?>
 <h1>Add Entry</h1>
 
-<?php include ('./db_header.php'); ?>
+<?php
+include('./db_header.php');
+?>
 <form name="add" action="./add_entry.php">
 <table>
 <tr>
@@ -39,12 +43,12 @@
 	<td align="right">Location:</td>
 	<td><select name="location">
 <?php
-$result = @mysql_query('SELECT DISTINCT Location FROM `book collection` order by Location');
+$result = mysqli_query($dbcnx, 'SELECT DISTINCT Location FROM `book collection` order by Location');
 if (!$result) {
-	exit('<p>Error performing query: ' . mysql_error() . '</p>');
+    exit('<p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
 }
-while ($row = mysql_fetch_array($result)) {
-	echo '<option>'.$row['Location'].'</option>' ;
+while ($row = mysqli_fetch_array($result)) {
+    echo '<option>' . $row['Location'] . '</option>';
 }
 ?>
 	</select></td>
@@ -59,4 +63,6 @@ while ($row = mysql_fetch_array($result)) {
 </table>
 </form>
 
-<?php include './footer.php'?>
+<?php
+include './footer.php';
+?>

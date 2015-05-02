@@ -6,5 +6,7 @@
 //
 --->
 <hr>
-<?php echo date('h:m a d-M-Y')?> | <a href="./add.php">Add Entry</a> | <a href="./index.php">Browse Collection</a> | <a href="http://www.amazon.com/">Amazon.com</a> | <a href="http://www.alibris.com/">Alibris.com</a>
+<?php
+echo date('h:m a d-M-Y');
+?> | <a href="./add.php">Add Entry</a> | <a href="./index.php">Browse Collection</a> | <a href="http://www.amazon.com/">Amazon.com</a> | <a href="http://www.alibris.com/">Alibris.com</a>
 <hr>
