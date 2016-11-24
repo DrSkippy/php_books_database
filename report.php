@@ -41,9 +41,24 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
         } else {
             $where_str = $where_str . 'AND ';
         }
-        $where_str = $where_str . 'Recycled = 0 ';
+        $where_str = $where_str . ' Recycled = 0 ';
     }
-    
+    if ($_REQUEST['search_nodigital'] == 'yes') {
+        if ($where_str == '') {
+            $where_str = 'WHERE ';
+        } else {
+            $where_str = $where_str . 'AND ';
+        }
+        $where_str = $where_str . ' CoverType != "Digital"';
+    }
+    if ($_REQUEST['search_unread'] == 'yes') {
+        if ($where_str == '') {
+            $where_str = 'WHERE ';
+        } else {
+            $where_str = $where_str . 'AND ';
+        }
+        $where_str = $where_str . ' (LastRead = "0000-00-00" OR LastRead = "")';
+    }
     $search_str = 'SELECT BookCollectionID, Title, Author, CopyrightDate, ISBNNumber, PublisherName, CoverType, Pages, LastRead, PreviouslyRead, Category, Note, Recycled, Location, ISBNNumber13 FROM `book collection` ' . $where_str . ' ORDER BY ' . $_REQUEST['search_order'];
     
     if ($debug)

@@ -322,26 +322,31 @@ if ($_REQUEST['searchtype'] <> "Title")
 	<td align="center">| Display |</td>
 	<td align="center">Order by</td>
 	<td align="right"><a href="./100_day.php">100 Days</a>&nbsp;&nbsp; <a href="./year_rank.php">Year Rank</a></td>
+	<td></td>
 </tr><tr>
 	<td align="right">Author</td>
 	<td align="center"><input type="checkbox" name="chk_author" value="Author" checked></td>
 	<td align="center"><input type="radio" name="search_order" value="Author, Title" checked></td>
 	<td></td>
+	<td></td>
 </tr><tr>
 	<td align="right">Title</td>
 	<td align="center"><input type="checkbox" name="chk_title" value="Title" checked></td>
 	<td align="center"><input type="radio" name="search_order" value="Title"></td>
+	<td></td>
 	<td>Search Term: <input type="text" name="search_term" size="25"></td>
 </tr><tr>
 	<td align="right">Copyright Date</td>
 	<td align="center"><input type="checkbox" name="chk_copyrightdate" value="CopyrightDate"></td>
 	<td align="center"><input type="radio" name="search_order" value="CopyrightDate, Author"></td>
+	<td></td>
 	<td><input type="radio" name="search_type" value="Author">Author &nbsp;&nbsp;<input type="radio" name="search_type" value="Title" checked>Title &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber">ISBN # &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber13">ISBN13 # &nbsp;&nbsp;<input type="radio" name="search_type" value="Tag">Tag</td>
 </tr><tr>
 	<td align=right>Date Last Read</td>
 	<td align="center"><input type="checkbox" name="chk_lastread" value="LastRead"></td>
 	<td align="center"><input type="radio" name="search_order" value="LastRead"></td>
-	<td>Location: <select name="search_cat">
+    <td><input type="checkbox" name="search_unread" value="yes"> Filter Read</td> 
+	<td align="left">Location: <select name="search_cat">
 	<option selected>All</option>
 	<?php
 include('./location_option.php');
@@ -352,9 +357,11 @@ include('./location_option.php');
 	<td align="center"><input type="checkbox" name="chk_isbnnumber" value="ISBNNumber"></td>
 	<td></td>
 	<td></td>
+	<td></td>
 </tr><tr>
 	<td align="right">ISBN Number 13</td>
 	<td align="center"><input type="checkbox" name="chk_isbnnumber13" value="ISBNNumber13"></td>
+	<td></td>
 	<td></td>
 	<td></td>
 </tr><tr>
@@ -363,10 +370,12 @@ include('./location_option.php');
 	<input type="checkbox" name="chk_publishername" value="PublisherName"></td>
 	<td></td>
 	<td></td>
+	<td></td>
 </tr><tr>
 	<td align="right">Pages</td>
 	<td align="center">
 	<input type="checkbox" name="chk_pages" value="Pages"></td>
+	<td></td>
 	<td></td>
 	<td></td>
 </tr><tr>
@@ -374,18 +383,21 @@ include('./location_option.php');
 	<td align="center">
 	<input type="checkbox" name="chk_location" value="Location"></td>
 	<td align="center"><input type="radio" name="search_order" value="Location, Author"></td>
+	<td></td>
 	<td align="left"><input type="checkbox" name="search_numbyyear" value="yes"> Number Read/Year</td>
+	<td></td>
 </tr><tr>
 	<td align="right"> Recycled</td>
 	<td align="center">
 	<input type="checkbox" name="chk_recycled" value="Recycled"></td>
 	<td></td>
-	<td><input type="checkbox" name="search_norecycle" value="yes"> Filter Recycled</td>
+	<td><input type="checkbox" name="search_norecycle" value="yes">Filter Recycled</td>
 </tr><tr>
 	<td align=right> Cover Type</td>
 	<td align="center"><input type="checkbox" name="chk_covertype" value="CoverType"></td>
 	<td></td>
-	<td align="right"><input type="submit" value="   Create Report   "></td>
+    <td align="left"><input type="checkbox" name="search_nodigital" value="yes">Filter Digital</td>
+    <td><input type="submit" value="   Create Report   "></td>
 </tr>
 </table>
 </form>
