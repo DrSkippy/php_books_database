@@ -1,23 +1,11 @@
-#!/usr/bin/env python
-#
-# Written by Scott Hendrickson
-#
-# 2006/01/09
-# 2019/12/15
-#
-# Tools for manipulating the book database 
-###################################################
-
-import sys
-import json
 import logging
 import pymysql
-import optparse
+import pandas as pd
 
 from spellchecker import SpellChecker
 
 class bookDBTool:
-    def __init__(self):
+    def __init__(self, DBHOST, UN, PWD, DB):
         self.db = pymysql.connect(host=DBHOST, port=3306, user=UN, passwd=PWD, db=DB)
 
     def show_tags(self):
@@ -114,46 +102,22 @@ class bookDBTool:
         except pymysql.Error as e:
             logging.error("Error %d: %s" % (e.args[0], e.args[1]))
 
+    def get_dataframe(self, year=None):
+        if year is not None:
+            df = pd.read_sql("select * from `book collection` where YEAR(LastRead)={}".format(year),
+                             self.db, "BookCollectionID", parse_dates=["LastRead", "PreviouslyRead"])
+        else:
+            df = pd.read_sql("select * from `book collection`",
+                             self.db, "BookCollectionID", parse_dates=["LastRead", "PreviouslyRead"])
+        return df
+
+    def get_rank_dataframe(self):
+        search_str = """ select year(LastRead) as Year, sum(Pages) as `Pages Read` from `book collection` 
+            where LastRead is not NULL and LastRead <> "0000-00-00 00:00:00" and year(LastRead) <> "1966" 
+            group by Year order by `Pages Read` desc;"""
+        df = pd.read_sql(search_str, self.db)
+        df["Rank"] = df.index + 1
+        return df
+
     def close(self):
         self.db.close()
-
-
-if __name__ == '__main__':
-    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-    parser = optparse.OptionParser()
-    parser.add_option("-c", "--config", default="./configuration.json", dest="config_filename",
-        help="Configuration file for database access.")
-    parser.add_option("-d", "--cleanup", action="store_true",dest="dup",
-        help="Remove duplicate tag entries from Tag table. Set tags to lowercase.")
-    parser.add_option("-f", dest="tagattr", nargs=2,
-        help="Enter tag and field values, e.g. -f poetry Poetry. Each occurance of (field) in column Category will result in tagging the record with (tag).")
-    parser.add_option("-s", "--show", action="store_true", dest="show",
-        help="Show tags and fields.")
-    (options, args) = parser.parse_args()
-
-    with open(options.config_filename, "r") as config_file:
-        c = json.load(config_file)
-        logging.debug("{}".format(c))
-        try:
-            UN = c["username"].strip()
-            PWD = c["password"].strip()
-            DB = c["database"].strip()
-            DBHOST = c["host"].strip()
-        except KeyError as e:
-            logging.error(e)
-            sys.exit()
-
-    bt = bookDBTool()
-    if (options.tagattr):
-        logging.info("Adding tag " + options.tagattr[0] + " to records in category " + options.tagattr[1])
-        bt.tag_from_category(options.tagattr[0], options.tagattr[1])
-    if (options.dup):
-        logging.info("Updating all tags to lower case...")
-        bt.lower_case_tags()
-        logging.info("Removing duplicate and null tags...")
-        bt.deduplicate_tags()
-    if (options.show):
-        logging.info("Tags:")
-        bt.show_tags()
-        logging.info("Locations:")
-        bt.show_locations()
