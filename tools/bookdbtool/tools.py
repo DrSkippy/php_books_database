@@ -119,5 +119,17 @@ class bookDBTool:
         df["Rank"] = df.index + 1
         return df
 
+    def get_running_year_dataframe(self):
+        search_str = """ SELECT LastRead, Sum(Pages) as Pages
+                    FROM `book collection`
+                    WHERE LastRead is not NULL and LastRead <> "0000-00-00 00:00:00" and year(LastRead) <> "1966" 
+                    GROUP BY LastRead
+                    ORDER BY LastRead ASC;"""
+        df = pd.read_sql(search_str, self.db).set_index("LastRead")
+        df = df.groupby(df.index.to_period('y')).cumsum().reset_index()
+        df["Day"] = df.LastRead.apply(lambda x: x.dayofyear)
+        df["Year"] = df.LastRead.apply(lambda x: x.year)
+        return df
+
     def close(self):
         self.db.close()
