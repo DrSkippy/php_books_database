@@ -1,16 +1,9 @@
-<!---
-//
-// Scott Hendrickson
-// 2013-11-30
-// https://github.com/DrSkippy27/php_books_database
-//
---->
-<?php
-$dbcnx = @mysqli_connect('76.12.234.190', 'your user name here', 'your password here');
-if (!$dbcnx) {
-    exit('<p>Unable to connect to the database server at this time.</p>');
-}
-if (!@mysqli_select_db($dbcnx, 'your database here')) {
-    exit('<p>Unable to locate the database at this time.</p>');
-}
-?>
+U2FsdGVkX1+HF4H5VYykVwaT84mRy27zGe9b/twKGWrQxcl+QdAc8sKhc2xxyhDJ
+J8BD34rbROBIPTArp267MrIBjCGiv0hkVeg1VvCrwymO80rAfml0rO3TqAoDMpgP
+12z1oALHYGn29BE2gRzcuFQo7uTtI74exfC6hTMoQ4cxJ1zsPMtas/NOj8hk8Dsp
+sXsJrGZQfVpGgXqAxaMKPGgbvocv7w+IWEZanO9DM1E9Kp/DYVCOq5vlehLZJUyn
+hUu7wQS3K8EgbxIj6WTVsNHw2FvZw02OnaVwDI0HxLzkE0uexWZYmg9ybBS66f+I
+zexGA3KYQ0SYU93d8LmnuSvBqKWD8rrqATVAOutc7BuNpMVPgEYCIwp1ToSXmyCT
+XbxkwbMEQBBVEXtIR0jwNvK2qacXhW0BuqT5wI64+PKtFaVgAtAcuFCT4CAsfpRV
+uFQXGqSB02kRGkjeluvGkdBIcW6eTtspkVw3cJ65pHajV8/SQ0Mxu5o9J2BkR3p6
+INQz+k0lwrSr7YhdhN1CfA==
