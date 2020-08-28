@@ -1,6 +1,6 @@
 {
-  "username": "scott",
-  "password": "ss_merploft",
-  "database": "scott",
-  "host": "10.0.0.14"
+   "username": "scott",
+   "password": "ss_merploft",
+   "database": "scott",
+   "host": "10.0.0.14"
 }
