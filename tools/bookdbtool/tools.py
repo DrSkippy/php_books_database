@@ -56,7 +56,7 @@ class bookDBTool:
     def lower_case_tags(self):
         c = self.db.cursor()
         try:
-            c.execute("UPDATE `tags` SET Tag = LOWER(Tag)")
+            c.execute("UPDATE `tags` SET Tag = TRIM(LOWER(Tag))")
             self.db.commit()
         except pymysql.Error as e:
             logging.error(e)
