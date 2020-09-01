@@ -8,13 +8,12 @@ class bookDBTool:
     def __init__(self, DBHOST, UN, PWD, DB):
         self.db = pymysql.connect(host=DBHOST, port=3306, user=UN, passwd=PWD, db=DB)
 
-    def show_tags(self):
+    def show_tags(self, only_spell=False):
         spell = SpellChecker()
         st = []
         c = self.db.cursor()
         try:
-            c.execute(
-                "SELECT Tag, COUNT(Tag) as count FROM tags GROUP BY Tag ORDER BY count DESC")
+            c.execute("SELECT Tag, COUNT(Tag) as count FROM tags GROUP BY Tag ORDER BY count DESC")
         except pymysql.Error as e:
             logging.error(e)
         else:
@@ -24,12 +23,17 @@ class bookDBTool:
                 w = spell.unknown(i[0].split(" "))
                 suggest = []
                 if len(w) > 0:
-                    for j in w:
-                        suggest.append(str(spell.candidates(j)))
-                    suggest = ";".join(suggest)
-                else:
+                    # create a list of suggestions for each unknown word in the tag value
+                    suggest = [spell.candidates(x) for x in list(w)]
+                    suggest_str = ";".join([str(x) for x in suggest])
+                    print("  {:>25}  ({:3d})    {}".format(i[0], i[1], suggest_str))
+                    if len(w) == 1 and len(suggest[0]) == 1 and only_spell:
+                        ans = str(input("Rename? (n)")).lower().strip()
+                        if ans == "y":
+                            self.update_tag_value(i[0], suggest[0].pop())
+                elif not only_spell:
                     suggest = ""
-                print("  {}  ({})    {}".format(i[0], i[1], suggest))
+                    print("  {:>25}  ({:3d})    {}".format(i[0], i[1], suggest))
                 st.append(i[0])
         return st
 
@@ -57,6 +61,14 @@ class bookDBTool:
         c = self.db.cursor()
         try:
             c.execute("UPDATE `tags` SET Tag = TRIM(LOWER(Tag))")
+            self.db.commit()
+        except pymysql.Error as e:
+            logging.error(e)
+
+    def update_tag_value(self, current, updated):
+        c = self.db.cursor()
+        try:
+            c.execute("UPDATE `tags` SET Tag = '{}' WHERE Tag = '{}'".format(updated.lower().strip(), current))
             self.db.commit()
         except pymysql.Error as e:
             logging.error(e)
