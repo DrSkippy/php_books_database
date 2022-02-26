@@ -179,14 +179,114 @@ def update_tag_value(current, updated):
 
 
 @app.route('/add_tag_by_id/<id>/<tag>')
-def add_tag(self, id, tag):
+def add_tag(id, tag):
     c = db.cursor()
     try:
-        c.execute(f"insert into tags (BookID, Tag) values (%s, %s)", (id, tag))
+        c.execute("insert into tags (BookID, Tag) values (%s, %s)", (id, tag))
         rdata = json.dumps({"BookID": f"{id}", "Tag": f"{tag}"})
     except pymysql.Error as e:
         app.logger.error(e)
         rdata = json.dumps({"error": str(e)})
+    response_headers = [
+        ('Content-type', 'application/json'),
+        ('Content-Length', str(len(rdata)))
+    ]
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/add_books', methods=['POST'])
+def add_books():
+    """
+    Post Payload:
+    [{
+      "Title": "Delete Me Now",
+      "Author": "Tester, N A",
+      "CopyrightDate": "1999-01-01",
+      "ISBNNumber": "1234",
+      "ISBNNumber13": "1234",
+      "PublisherName": "Printerman",
+      "CoverType": "Hard",
+      "Pages": "7",
+      "LastRead": "0000-00-00",
+      "PreviouslyRead": "0000-00-00",
+      "Location": "Main Collection",
+      "Note": "",
+      "Recycled": 0
+    }]
+
+    E.g.
+    curl -X POST -H "Content-type: application/json" -d @./examples/test_add_book.json \
+    http://172.17.0.2:5000/add_books
+
+    :return:
+    """
+    # records should be a list of dictionaries including all fields
+    records = request.get_json()
+    search_str = ("INSERT INTO `book collection` "
+                  "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
+                  "LastRead, PreviouslyRead, Location, Note, Recycled) "
+                  "VALUES "
+                  "(\"{Title}\", \"{Author}\", \"{CopyrightDate}\", \"{ISBNNumber}\", \"{ISBNNumber13}\", "
+                  "\"{PublisherName}\", \"{CoverType}\", \"{Pages}\", \"{LastRead}\", \"{PreviouslyRead}\", "
+                  "\"{Location}\", \"{Note}\", \"{Recycled}\")")
+    c = db.cursor()
+    rdata = []
+    for record in records:
+        try:
+            c.execute(search_str.format(**record))
+            rdata.append(record)
+        except pymysql.Error as e:
+            app.logger.error(e)
+            rdata.append({"error": str(e)})
+    rdata = json.dumps({"add_books": rdata})
+    response_headers = [
+        ('Content-type', 'application/json'),
+        ('Content-Length', str(len(rdata)))
+    ]
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/update_book', methods=['POST'])
+def update_book():
+    """
+    Post Payload:
+    {
+      "BookCollectionID": 1606,
+      "LastRead": "0000-00-00",
+      "PreviouslyRead": "0000-00-00",
+      "Note": "",
+      "Recycled": 0
+    }
+
+    E.g.
+    curl -X POST -H "Content-type: application/json" -d @./examples/test_update_book.json \
+    http://172.17.0.2:5000/update_book
+
+    :return:
+    """
+    # records should be a list of dictionaries including all fields
+    record = request.get_json()
+    search_str = "UPDATE `book collection` SET "
+    continuation = False
+    for key in record:
+        if key == "BookCollectionID":
+            continue
+        if continuation:
+            search_str += ", "
+        else:
+            continuation = True
+        search_str += f" {key} = \"{record[key]}\""
+    search_str += " WHERE BookCollectionID = {BookCollectionID} "
+    print(search_str)
+    c = db.cursor()
+    rdata = []
+    try:
+        c.execute(search_str.format(**record))
+        rdata.append(record)
+    except pymysql.Error as e:
+        app.logger.error(e)
+        rdata.append({"error": str(e)})
+    rdata = json.dumps({"update_books": rdata})
     response_headers = [
         ('Content-type', 'application/json'),
         ('Content-Length', str(len(rdata)))
