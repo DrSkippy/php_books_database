@@ -30,4 +30,6 @@ COPY ./config/* $APP/config/
 #ENV ENV_MY_SERVICE_NAME=$MY_SERVICE_NAME
 #RUN echo ${ENV_MY_SERVICE_NAME}
 
-ENTRYPOINT poetry run python api.py
+#ENTRYPOINT poetry run python api.py
+#ENTRYPOINT uwsgi -s /tmp/yourapplication.sock --manage-script-name --mount /books=api
+ENTRYPOINT poetry run uwsgi --ini api.ini

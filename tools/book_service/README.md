@@ -1,0 +1,16 @@
+```
+http://172.17.0.2:5000/configuration
+http://172.17.0.2:5000/tag_counts/
+http://172.17.0.2:5000/tag_counts/science
+http://172.17.0.2:5000/tags/2
+http://172.17.0.2:5000/books_read_by_year
+http://172.17.0.2:5000/books_read_by_year/2016
+http://172.17.0.2:5000/books_read
+http://172.17.0.2:5000/books_read/2016
+http://172.17.0.2:5000/books
+http://172.17.0.2:5000/books?Author=john
+http://172.17.0.2:5000/books?Recycled=0
+
+
+
+```

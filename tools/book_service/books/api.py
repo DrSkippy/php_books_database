@@ -30,7 +30,7 @@ def tag_counts(tag=None):
     if tag is not None:
         search_str += f" WHERE Tag LIKE \"{tag}%\""
     search_str += " GROUP BY Tag ORDER BY count DESC"
-    header = ["tag", "count" ]
+    header = ["tag", "count"]
     app.logger.debug(search_str)
     c = db.cursor()
     try:
@@ -70,8 +70,9 @@ def tags(id=None):
     ]
     return Response(response=rdata, status=200, headers=response_headers)
 
-@app.route('/books_read_by_year/<target_year>')
+
 @app.route('/books_read_by_year')
+@app.route('/books_read_by_year/<target_year>')
 def books_read_by_year(target_year=None):
     search_str = ("SELECT YEAR(LastRead) as Year, SUM(Pages) as Pages, COUNT(Pages) as Books\n"
                   "FROM `book collection`\n"
@@ -98,8 +99,8 @@ def books_read_by_year(target_year=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/books_read/<target_year>')
 @app.route('/books_read')
+@app.route('/books_read/<target_year>')
 def books_read(target_year=None):
     search_str = ("SELECT *\n"
                   "FROM `book collection`\n"
@@ -138,9 +139,10 @@ def books():
     where_str = "AND".join(where)
     # run the query
     search_str = ("SELECT *\n"
-                  "FROM `book collection`")
+                  "FROM `book collection`\n")
     if where_str != '':
         search_str += "\nWHERE " + where_str
+    search_str += "\nORDER BY Author, Title ASC"
     header = table_header
     app.logger.debug(search_str)
     c = db.cursor()
