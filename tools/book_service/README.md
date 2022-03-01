@@ -16,16 +16,20 @@ http://172.17.0.2:5000/books?Recycled=0
 
 List of Authors of unrecycled books in alphabetical order:
 ```angular2html
-curl http://172.17.0.2:5000/books?Recycled=0 | jq  .data[][1]
+curl http://172.17.0.2:5000/books?Recycled=0 | jq .data[][1]
 
 ```
 
+Add books:
 ```angular2html
-curl -X POST -H "Content-type: application/json" -d @./examples/test_add_book.json  http://172.17.0.2:5000/add_books
-
+curl -X POST -H "Content-type: application/json" \ 
+-d @./examples/test_add_book.json \
+http://172.17.0.2:5000/add_books
 ```
 
+Update a book:
 ```angular2html
-curl -X POST -H "Content-type: application/json" -d @./examples/test_update_book.json  http://172.17.0.2:5000/update_book
-
+curl -X POST -H "Content-type: application/json" \
+-d @./examples/test_update_book.json \
+http://172.17.0.2:5000/update_book
 ```
