@@ -16,10 +16,7 @@ def configuration():
     rdata = json.dumps({
         "configuration": conf,
         "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -41,10 +38,7 @@ def tag_counts(tag=None):
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -57,17 +51,13 @@ def tags(id=None):
         c.execute(search_str)
     except pymysql.Error as e:
         app.logger.error(e)
-        rdata = json.dumps({"error": str(e)})
         rdata = {"error": str(e)}
     else:
         s = c.fetchall()
         tag_list = [x[0] for x in s]
         s = list(s)
-        rdata = json.dumps({"BookID": f"{id}", "tag_list": f"{tag_list}"})
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+        rdata = json.dumps({"BookID": id, "tag_list": tag_list})
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -92,10 +82,7 @@ def books_read_by_year(target_year=None):
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -119,10 +106,7 @@ def books_read(target_year=None):
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -154,10 +138,7 @@ def books():
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -171,10 +152,7 @@ def update_tag_value(current, updated):
     except pymysql.Error as e:
         app.logger.error(e)
         rdata = json.dumps({"error": str(e)})
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -187,10 +165,7 @@ def add_tag(id, tag):
     except pymysql.Error as e:
         app.logger.error(e)
         rdata = json.dumps({"error": str(e)})
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -239,10 +214,7 @@ def add_books():
             app.logger.error(e)
             rdata.append({"error": str(e)})
     rdata = json.dumps({"add_books": rdata})
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
@@ -287,10 +259,7 @@ def update_book():
         app.logger.error(e)
         rdata.append({"error": str(e)})
     rdata = json.dumps({"update_books": rdata})
-    response_headers = [
-        ('Content-type', 'application/json'),
-        ('Content-Length', str(len(rdata)))
-    ]
+    response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 

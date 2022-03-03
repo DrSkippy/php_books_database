@@ -3,26 +3,15 @@ import logging
 import requests
 
 
-class REPL_Tool:
+class BC_Tool:
     ENDPOINT = "http://192.168.127.8/books"
     PAGE_SIZE = 20
 
     def __init__(self):
         pass
 
-    def help(self, ref):
-        """List available functions for accessing book collection database."""
-        for x in dir(ref):
-            if not x.startswith("_"):
-                print("-"*40)
-                print(x)
-                print("-"*40)
-                print(exec(f"ref.{x}.__doc__"))
-
-
     def _reduce_string(self, row, idxs):
         return [row[i] for i in idxs]
-
 
     def _print_rows(self, data, header, indexes, format_string):
         if len(data) == 0:
@@ -30,7 +19,7 @@ class REPL_Tool:
         else:
             hs = format_string.replace("d", "s").format(*self._reduce_string(header, indexes))
             print(hs)
-            print("-"*len(hs))
+            print("-" * len(hs))
             for i, row in enumerate(data):
                 print(format_string.format(*self._reduce_string(row, indexes)))
                 if i % self.PAGE_SIZE == self.PAGE_SIZE - 1:
@@ -38,7 +27,6 @@ class REPL_Tool:
                     if a.lower().startswith("q"):
                         break
         return
-
 
     def tag_counts(self, tag=None):
         """ Takes 0 or 1 arguments. If an argument is provided, only tags matching this root string will appear. """
@@ -70,9 +58,30 @@ class REPL_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            fmt = "{:12d} | {:75s}\n             | {:25s}"
-            self._print_rows(res["data"], res["header"], [0, 1, 2], fmt)
+            fmt = "{:12d} | {:75s}\n             | {:28s} | {:8s} | {:12s}"
+            self._print_rows(res["data"], res["header"], [0, 1, 2, 6, 8], fmt)
 
+    def book(self, id):
+        """ Takes 1 argument."""
+        q = self.ENDPOINT + f"/books?BookCollectionID={id}"
+        try:
+            r = requests.get(q)
+            res = r.json()
+        except requests.RequestException as e:
+            logging.error(e)
+        else:
+            q = self.ENDPOINT + f"/tags/{id}"
+            try:
+                tr = requests.get(q)
+                tres = tr.json()
+            except requests.RequestException as e:
+                logging.error(e)
+            else:
+                fmt = "{:12d} | {:75s}\n             | {:28s} | {:8s} | {:12s}"
+                self._print_rows(res["data"], res["header"], [0, 1, 2, 6, 8], fmt)
+                fmt = "{} |"*(len(tres["tag_list"])-1)
+                fmt += " {}"
+                print(fmt.format(*tres["tag_list"]))
 
 if __name__ == "__main__":
     rpl = REPL_Tool()

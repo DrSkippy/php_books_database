@@ -47,4 +47,13 @@ def serialize_rows(cursor, header=None):
                 _row.append(d)
         result_rows.append(_row)
     result["data"] = result_rows
-    return json.dumps(result)
+    rdata = json.dumps(result)
+    return rdata
+
+
+def resp_header(rdata):
+    response_header = [
+        ('Content-type', 'application/json'),
+        ('Content-Length', str(len(rdata)))
+    ]
+    return response_header
