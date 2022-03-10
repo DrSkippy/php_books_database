@@ -1,4 +1,4 @@
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 import pymysql
 from flask import Flask, Response, request
@@ -14,6 +14,7 @@ app = Flask(__name__)
 @app.route('/configuration')
 def configuration():
     rdata = json.dumps({
+        "version": __version__,
         "configuration": conf,
         "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
     response_headers = resp_header(rdata)

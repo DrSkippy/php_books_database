@@ -10,18 +10,18 @@ class BC_Tool:
     def __init__(self):
         pass
 
-    def _reduce_string(self, row, idxs):
+    def _column_selector(self, row, idxs):
         return [row[i] for i in idxs]
 
     def _print_rows(self, data, header, indexes, format_string):
         if len(data) == 0:
             print("No data")
         else:
-            hs = format_string.replace("d", "s").format(*self._reduce_string(header, indexes))
+            hs = format_string.replace("d", "s").format(*self._column_selector(header, indexes))
             print(hs)
             print("-" * len(hs))
             for i, row in enumerate(data):
-                print(format_string.format(*self._reduce_string(row, indexes)))
+                print(format_string.format(*self._column_selector(row, indexes)))
                 if i % self.PAGE_SIZE == self.PAGE_SIZE - 1:
                     a = input("<return> to cont, q to quit...")
                     if a.lower().startswith("q"):
@@ -79,9 +79,12 @@ class BC_Tool:
             else:
                 fmt = "{:12d} | {:75s}\n             | {:28s} | {:8s} | {:12s}"
                 self._print_rows(res["data"], res["header"], [0, 1, 2, 6, 8], fmt)
-                fmt = "{} |"*(len(tres["tag_list"])-1)
-                fmt += " {}"
-                print(fmt.format(*tres["tag_list"]))
+                if len(tres["tag_list"]) > 0:
+                    fmt = "{} |"*(len(tres["tag_list"])-1)
+                    fmt += " {}"
+                    print(fmt.format(*tres["tag_list"]))
+                else:
+                    print("<No Tags>")
 
 if __name__ == "__main__":
     rpl = REPL_Tool()

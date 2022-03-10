@@ -50,3 +50,10 @@ curl -kL https://192.168.127.7/books/tag_count
 curl -kL https://192.168.127.7/books/tags/2
 curl -kL https://192.168.127.7/books/books?Recycled=0
 ```
+
+## BUILD and DEPLOY
+
+```angular2html
+docker build -t localhost:32000/book-service .
+docker push localhost:32000/book-service
+```
