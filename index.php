@@ -51,7 +51,9 @@ if (substr($_REQUEST['submit'], 0, 4) == 'Find') {
     if (!($tmp_min_id < $max_id))
         $tmp_min_id = $min_id;
     #	}
-    $search_str = 'SELECT BookCollectionID FROM `book collection` WHERE ' . $_REQUEST['searchtype'] . ' LIKE "%' . $_REQUEST['searchterm'] . '%" AND BookCollectionID BETWEEN ' . $tmp_min_id . ' AND ' . $max_id;
+    $search_str = 'SELECT BookCollectionID FROM `book collection` WHERE ' . $_REQUEST['searchtype']
+    $search_str .= ' LIKE "%' . $_REQUEST['searchterm'] . '%" AND BookCollectionID BETWEEN '
+    $search_str .= $tmp_min_id . ' AND ' . $max_id;
     if ($debug)
         echo $search_str;
     $result = @mysqli_query($dbcnx, $search_str);
@@ -78,20 +80,43 @@ else if ($_REQUEST['submit'] == '   >   ') {
 # Update record with changes
 else if ($_REQUEST['submit'] == 'Update Record') {
     if ($_REQUEST['readtoday']) {
-        # move last read to previously read if using the read today check
-        $previouslyread = $_REQUEST['lastread'];
-        $lastread       = date('Y-m-d h:m:s');
+        $readdate       = date('Y-m-d h:m:s');
     } else {
-        #... or let the user do it manually otherwise
-        $previouslyread = $_REQUEST['previouslyread'];
-        $lastread       = $_REQUEST['lastread'];
+        $readdate       = $_REQUEST['readdate'];
     }
+    // if entry is new, add to db
+    $update_str = 'INSERT INTO `books read` (BookCollectionID, ReadDate) VALUES ("' . $_REQUEST['id'];
+    $update_str .= '","' . $readdate . '")';
+    if ($debug)
+        echo $update_str;
+    $result = @mysqli_query($dbcnx, $update_str);
+    if (!$result) {
+        exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
+    } else {
+        echo '<td>Record ' . $_REQUEST['id'] . ' updated.</td>';
+        $recordselector = $_REQUEST['id'];
+    }
+
     $dt = mktime(0, 0, 0, 1, 1, substr($_REQUEST['copyrightdate'], 0, 4));
     if ($_REQUEST['recycled'] == 'on')
         $recycled = 1;
     else
         $recycled = 0;
-    $update_str = 'UPDATE `book collection` SET ' . 'Title="' . $_REQUEST['title'] . '", Author= "' . $_REQUEST['author'] . '", CopyrightDate="' . date("Y-m-d h:m:s", $dt) . '", ISBNNumber13="' . $_REQUEST['isbnnumber13'] . '", ISBNNumber="' . $_REQUEST['isbnnumber'] . '", PublisherName= "' . $_REQUEST['publishername'] . '", CoverType="' . $_REQUEST['covertype'] . '", Pages= "' . $_REQUEST['pages'] . '", LastRead="' . $lastread . '",PreviouslyRead= "' . $previouslyread . '", Location="' . $_REQUEST['location'] . '", Note="' . $_REQUEST['note'] . '", Recycled="' . $recycled . '" WHERE BookCollectionID = ' . $_REQUEST['id'];
+// $update_str = 'UPDATE `book collection` SET ' . 'Title="' . $_REQUEST['title'] . '", Author= "' .
+// $_REQUEST['author'] . '", CopyrightDate="' . date("Y-m-d h:m:s", $dt) . '", ISBNNumber13="' .
+// $_REQUEST['isbnnumber13'] . '", ISBNNumber="' . $_REQUEST['isbnnumber'] . '", PublisherName= "' .
+// $_REQUEST['publishername'] . '", CoverType="' . $_REQUEST['covertype'] . '", Pages= "' .
+// $_REQUEST['pages'] . '", LastRead="' . $readdate . '",PreviouslyRead= "' . $previouslyread . '", Location="' .
+// $_REQUEST['location'] . '", Note="' . $_REQUEST['note'] . '", Recycled="' . $recycled . '"
+// WHERE BookCollectionID = ' . $_REQUEST['id'];
+    $update_str = 'UPDATE `book collection` SET ' . 'Title="' . $_REQUEST['title'] . '", '
+    $update_str .= 'Author= "' . $_REQUEST['author'] . '", CopyrightDate="' . date("Y-m-d h:m:s", $dt) . '", '
+    $update_str .= 'ISBNNumber13="' . $_REQUEST['isbnnumber13'] . '", ISBNNumber="' . $_REQUEST['isbnnumber'] . ", '
+    $update_str .= 'PublisherName= "' . $_REQUEST['publishername'] . '", CoverType="' . $_REQUEST['covertype'] . '", '
+    $update_str .= 'Pages= "' . $_REQUEST['pages'] . '", '
+    $update_str .= 'Location="' . $_REQUEST['location'] . '", '
+    $update_str .= 'Note="' . $_REQUEST['note'] . '", Recycled="' . $recycled . '" '
+    $update_str .= 'WHERE BookCollectionID = ' . $_REQUEST['id'];
     if ($debug)
         echo $update_str;
     $result = @mysqli_query($dbcnx, $update_str);
@@ -125,7 +150,9 @@ echo '</tr></table>';
 # Make sure query return an actual record, if not, move to the next id number
 $no_record = TRUE;
 while ($no_record) {
-    $search_str = 'SELECT * FROM `book collection` WHERE BookCollectionID = ' . $recordselector;
+//    $search_str = 'SELECT * FROM `book collection` WHERE BookCollectionID = ' . $recordselector;
+    $search_str = 'SELECT a.*, b.ReadDate FROM `book collection` as a, `books read` as b '
+    $search_str .= ' JOIN a.BookCollectionID=b.BookCollectionID WHERE BookCollectionID = ' . $recordselector;
     if ($debug)
         echo $search_str;
     $result = @mysqli_query($dbcnx, $search_str);
@@ -248,12 +275,9 @@ echo substr($row['CopyrightDate'], 0, 4);
 	<td>(dates: yyyy-mm-dd)</td>
 </tr><tr>
 	<td align="right">Last Read:</td>
-	<td><input type="text" name="lastread" size="9" value="<?php
-if ($row['LastRead'] != '' and $row['LastRead'] != '0000-00-00 00:00:00') {
-    # Version > 5.2 $datetime = new DateTime($row['LastRead']);
-    #$datetime = new Date($row['LastRead']);
-    #echo date_format($datetime,'Y-m-d');
-    $tmp = explode(" ", $row['LastRead']);
+	<td><input type="text" name="readdate" size="9" value="<?php
+if ($row['ReadDate'] != '' and $row['ReadDate'] != '0000-00-00 00:00:00') {
+    $tmp = explode(" ", $row['ReadDate']);
     echo $tmp[0];
 } else {
     echo '0000-00-00';
@@ -265,10 +289,6 @@ if ($row['LastRead'] != '' and $row['LastRead'] != '0000-00-00 00:00:00') {
 if ($row['PreviouslyRead'] != '' and $row['PreviouslyRead'] != '0000-00-00 00:00:00') {
     $tmp = explode(" ", $row['PreviouslyRead']);
     echo $tmp[0];
-    #$datetime = DateTime::createFromFormat('Y-m-d H:M:S',  $row['PreviouslyRead']  );
-    #$datetime = new DateTime($row['PreviouslyRead']);
-    #$datetime->setTimeZone(new DateTimeZone("America/Denver"));
-    #echo date_format($datetime,'Y-m-d');
 } else {
     echo '0000-00-00';
 }
@@ -343,8 +363,8 @@ if ($_REQUEST['searchtype'] <> "Title")
 	<td><input type="radio" name="search_type" value="Author">Author &nbsp;&nbsp;<input type="radio" name="search_type" value="Title" checked>Title &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber">ISBN # &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber13">ISBN13 # &nbsp;&nbsp;<input type="radio" name="search_type" value="Tag">Tag</td>
 </tr><tr>
 	<td align=right>Date Last Read</td>
-	<td align="center"><input type="checkbox" name="chk_lastread" value="LastRead"></td>
-	<td align="center"><input type="radio" name="search_order" value="LastRead"></td>
+	<td align="center"><input type="checkbox" name="chk_readdate" value="ReadDate"></td>
+	<td align="center"><input type="radio" name="search_order" value="ReadDate"></td>
     <td><input type="checkbox" name="search_unread" value="yes"> Filter Read</td> 
 	<td align="left">Location: <select name="search_cat">
 	<option selected>All</option>

@@ -30,8 +30,8 @@ while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     if (isset($_REQUEST['chk_copyrightdate'])) {
         echo '<td> ' . substr($row['CopyrightDate'], 0, 4) . '</td>';
     }
-    if (isset($_REQUEST['chk_lastread']) AND (substr($row['LastRead'], 0, 10) <> '0000-00-00')) {
-        echo '<td> ' . substr($row['LastRead'], 0, 10) . '</td>';
+    if (isset($_REQUEST['chk_readdate']) AND (substr($row['ReadDate'], 0, 10) <> '0000-00-00')) {
+        echo '<td> ' . substr($row['ReadDate'], 0, 10) . '</td>';
     } else {
         echo '<td> </td>';
     }

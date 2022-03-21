@@ -29,7 +29,7 @@ if (isset($_REQUEST['chk_pages'])) {
 if (isset($_REQUEST['chk_copyrightdate'])) {
     echo '<th>� DATE</th>';
 }
-if (isset($_REQUEST['chk_lastread'])) {
+if (isset($_REQUEST['chk_readdate'])) {
     echo '<th>READ DATE</th>';
 }
 if (isset($_REQUEST['chk_location'])) {
