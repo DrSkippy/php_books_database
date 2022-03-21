@@ -44,7 +44,7 @@ def serialize_rows(cursor, header=None):
         for d in row:
             if isinstance(d, Decimal):
                 _row.append(float(d))
-            elif isinstance(d, datetime.datetime):
+            elif isinstance(d, datetime.datetime) or isinstance(d, datetime.date):
                 _row.append(d.strftime("%Y-%m-%d"))
             else:
                 _row.append(d)

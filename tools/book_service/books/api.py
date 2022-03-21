@@ -1,4 +1,4 @@
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 import pymysql
 from flask import Flask, Response, request
@@ -73,14 +73,14 @@ def books_read_by_year(target_year=None):
     #    search_str += ("GROUP BY YEAR(LastRead)\n"
     #                   "ORDER BY LastRead ASC;")
 
-    search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books ",
+    search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
                   "FROM `book collection` as a JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID "
                   "WHERE b.ReadDate is not NULL "
                   "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
-    search_str += "GROUP BY Year ORDER BY Year ASC")
+    search_str += "GROUP BY Year ORDER BY Year ASC"
 
     header = ["year", "pages read", "books read"]
     app.logger.debug(search_str)
@@ -106,10 +106,10 @@ def books_read(target_year=None):
     #    if target_year is not None:
     #        search_str += f" and YEAR(LastRead) = {target_year}"
     #    search_str += " ORDER BY LastRead ASC;"
-    search_str = ("SELECT a.*, b.ReadDate ",
-                  "FROM `book collection` as a JOIN `books read` as b ",
-                  "ON a.BookCollectionID = b.BookCollectionID ",
-                  "WHERE b.ReadDate is not NULL ",
+    search_str = ("SELECT a.*, b.ReadDate "
+                  "FROM `book collection` as a JOIN `books read` as b "
+                  "ON a.BookCollectionID = b.BookCollectionID "
+                  "WHERE b.ReadDate is not NULL "
                   "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
@@ -141,8 +141,8 @@ def books():
             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
     where_str = "AND".join(where)
     # run the query
-    search_str = ("SELECT a.*, b.ReadDate ",
-                  "FROM `book collection` as a JOIN `books read` as b ",
+    search_str = ("SELECT a.*, b.ReadDate "
+                  "FROM `book collection` as a LEFT JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID ")
     #    search_str = ("SELECT *\n"
     #                  "FROM `book collection`\n")
@@ -219,11 +219,9 @@ def add_books():
     records = request.get_json()
     search_str = ("INSERT INTO `book collection` "
                   "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
-                  #                  "LastRead, PreviouslyRead, Location, Note, Recycled) "
                   "Location, Note, Recycled) "
                   "VALUES "
                   "(\"{Title}\", \"{Author}\", \"{CopyrightDate}\", \"{ISBNNumber}\", \"{ISBNNumber13}\", "
-                  #                  "\"{PublisherName}\", \"{CoverType}\", \"{Pages}\", \"{LastRead}\", \"{PreviouslyRead}\", "
                   "\"{PublisherName}\", \"{CoverType}\", \"{Pages}\", "
                   "\"{Location}\", \"{Note}\", \"{Recycled}\")")
     c = db.cursor()

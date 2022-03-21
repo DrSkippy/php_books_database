@@ -2,7 +2,7 @@
 Basic API usage:
 ```
 http://172.17.0.2:8083/configuration
-http://172.17.0.2:8083/tag_counts/
+http://172.17.0.2:8083/tag_counts
 http://172.17.0.2:8083/tag_counts/science
 http://172.17.0.2:8083/tags/2
 http://172.17.0.2:8083/books_read_by_year
@@ -22,7 +22,7 @@ curl http://172.17.0.2:8083/books?Recycled=0 | jq .data[][1]
 
 Add books:
 ```angular2html
-curl -X POST -H "Content-type: application/json" \ 
+curl -X POST -H "Content-type: application/json" \
 -d @./examples/test_add_book.json \
 http://172.17.0.2:8083/add_books
 ```
