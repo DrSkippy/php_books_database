@@ -13,8 +13,8 @@ if [ -d $DEST ];  then
  echo " BOOKS BACKUP STARTING..."
  echo
  BOOKSDBDUMP=booksdb_$DT.sql
- mysqldump -h$DBHOST -u$UN -p$PWD $DB "book collection" "tags" > $DEST/$BOOKSDBDUMP
- /cygdrive/c/Program\ Files\ \(x86\)/MySQL/MySQL\ Workbench\ 5.2\ CE/mysqldump.exe -h$DBHOST -u$UN -p$PWD $DB "book collection" "tags" > $DEST/$BOOKSDBDUMP
+ mysqldump -h$DBHOST -u$UN -p$PWD $DB "book collection" "tags" "read books" > $DEST/$BOOKSDBDUMP
+ # /cygdrive/c/Program\ Files\ \(x86\)/MySQL/MySQL\ Workbench\ 5.2\ CE/mysqldump.exe -h$DBHOST -u$UN -p$PWD $DB "book collection" "tags" > $DEST/$BOOKSDBDUMP
  echo "Backups present:"
  ls -lhs ./booksdb*
  echo "Done."

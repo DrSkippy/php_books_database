@@ -18,7 +18,7 @@ include './db_header.php';
 
 #############################################
 # Find the maximum and minimum record numbers
-# for browswer limits, allows looping at end.
+# for browser limits, allows looping at end.
 $search_str = 'SELECT MAX(BookCollectionID) AS max FROM `book collection`';
 if ($debug)
     echo $search_str;

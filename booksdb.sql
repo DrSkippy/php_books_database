@@ -14,8 +14,8 @@ CREATE TABLE `book collection` (
   `PublisherName` varchar(50) default NULL,
   `CoverType` varchar(30) default NULL,
   `Pages` smallint(6) default NULL,
-  `LastRead` datetime NOT NULL default '0000-00-00 00:00:00',
-  `PreviouslyRead` datetime NOT NULL default '0000-00-00 00:00:00',
+-- 2022-03-21 `LastRead` datetime NOT NULL default '0000-00-00 00:00:00',
+-- 2022-03-21  `PreviouslyRead` datetime NOT NULL default '0000-00-00 00:00:00',
   `Category` varchar(10) default NULL,
   `Note` mediumtext,
   `Recycled` tinyint(1) default NULL,
@@ -26,7 +26,7 @@ CREATE TABLE `book collection` (
   KEY `Location_idx` (`Location`),
   FULLTEXT KEY `Author_idx` (`Author`),
   FULLTEXT KEY `Title_idx` (`Title`)
-) ENGINE=MyISAM AUTO_INCREMENT=1401 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7000 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,22 @@ CREATE TABLE `tags` (
   PRIMARY KEY  (`TagID`),
   KEY `BookID_idx` (`BookID`),
   FULLTEXT KEY `Tag_idx` (`Tag`)
-) ENGINE=MyISAM AUTO_INCREMENT=2308 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7000 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 -- Dump completed on 2013-11-30 15:00:20
+
+--
+-- Table structure for table `books read`
+--
+
+DROP TABLE IF EXISTS `books read`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `books read` (
+ `BookCollectionID` int(10) unsigned NOT NULL,
+ `ReadDate` date NOT NULL,
+ `ReadNote` text CHARACTER SET utf8,
+ PRIMARY KEY (`BookCollectionID`,`ReadDate`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
