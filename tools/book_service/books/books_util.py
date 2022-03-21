@@ -2,10 +2,13 @@ import datetime
 import json
 from decimal import Decimal
 
-table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNumber", "PublisherName",
-                "CoverType", "Pages", "LastRead", "PrevLastRead", "Category", "Note", "Recycled",
-                "Location", "ISBNNumber13"]
+# table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNumber", "PublisherName",
+#                "CoverType", "Pages", "LastRead", "PrevLastRead", "Category", "Note", "Recycled",
+#                "Location", "ISBNNumber13"]
 
+table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNumber", "PublisherName",
+                "CoverType", "Pages", "Category", "Note", "Recycled",
+                "Location", "ISBNNumber13"]
 
 def get_configuration():
     config_filename = "./config/configuration.json"

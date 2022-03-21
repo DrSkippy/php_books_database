@@ -65,13 +65,23 @@ def tags(id=None):
 @app.route('/books_read_by_year')
 @app.route('/books_read_by_year/<target_year>')
 def books_read_by_year(target_year=None):
-    search_str = ("SELECT YEAR(LastRead) as Year, SUM(Pages) as Pages, COUNT(Pages) as Books\n"
-                  "FROM `book collection`\n"
-                  "WHERE LastRead is not NULL and LastRead <> \"0000-00-00 00:00:00\" and year(LastRead) <> \"1966\" ")
+    #    search_str = ("SELECT YEAR(LastRead) as Year, SUM(Pages) as Pages, COUNT(Pages) as Books\n"
+    #                  "FROM `book collection`\n"
+    #                  "WHERE LastRead is not NULL and LastRead <> \"0000-00-00 00:00:00\" and year(LastRead) <> \"1966\" ")
+    #    if target_year is not None:
+    #        search_str += f" AND YEAR(LastRead) = {target_year}\n"
+    #    search_str += ("GROUP BY YEAR(LastRead)\n"
+    #                   "ORDER BY LastRead ASC;")
+
+    search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books ",
+                  "FROM `book collection` as a JOIN `books read` as b "
+                  "ON a.BookCollectionID = b.BookCollectionID "
+                  "WHERE b.ReadDate is not NULL "
+                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
-        search_str += f" AND YEAR(LastRead) = {target_year}\n"
-    search_str += ("GROUP BY YEAR(LastRead)\n"
-                   "ORDER BY LastRead ASC;")
+        search_str += f" AND YEAR(b.ReadDate) = {target_year} "
+    search_str += "GROUP BY Year ORDER BY Year ASC")
+
     header = ["year", "pages read", "books read"]
     app.logger.debug(search_str)
     c = db.cursor()
@@ -90,13 +100,21 @@ def books_read_by_year(target_year=None):
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
 def books_read(target_year=None):
-    search_str = ("SELECT *\n"
-                  "FROM `book collection`\n"
-                  "WHERE LastRead is not NULL and LastRead <> \"0000-00-00 00:00:00\" ")
+    #    search_str = ("SELECT *\n"
+    #                  "FROM `book collection`\n"
+    #                  "WHERE LastRead is not NULL and LastRead <> \"0000-00-00 00:00:00\" ")
+    #    if target_year is not None:
+    #        search_str += f" and YEAR(LastRead) = {target_year}"
+    #    search_str += " ORDER BY LastRead ASC;"
+    search_str = ("SELECT a.*, b.ReadDate ",
+                  "FROM `book collection` as a JOIN `books read` as b ",
+                  "ON a.BookCollectionID = b.BookCollectionID ",
+                  "WHERE b.ReadDate is not NULL ",
+                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
-        search_str += f" and YEAR(LastRead) = {target_year}"
-    search_str += " ORDER BY LastRead ASC;"
-    header = table_header
+        search_str += f" AND YEAR(b.ReadDate) = {target_year} "
+    search_str += "ORDER BY b.ReadDate"
+    header = table_header + ["ReadDate"]
     app.logger.debug(search_str)
     c = db.cursor()
     try:
@@ -118,17 +136,20 @@ def books():
     where = []
     for key in args:
         if key == "BookCollectionID":
-            where.append(f"{key} = \"{args.get(key)}\"")
+            where.append(f"a.{key} = \"{args.get(key)}\"")
         else:
-            where.append(f"{key} LIKE \"%{args.get(key)}%\"")
+            where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
     where_str = "AND".join(where)
     # run the query
-    search_str = ("SELECT *\n"
-                  "FROM `book collection`\n")
+    search_str = ("SELECT a.*, b.ReadDate ",
+                  "FROM `book collection` as a JOIN `books read` as b ",
+                  "ON a.BookCollectionID = b.BookCollectionID ")
+    #    search_str = ("SELECT *\n"
+    #                  "FROM `book collection`\n")
     if where_str != '':
-        search_str += "\nWHERE " + where_str
-    search_str += "\nORDER BY Author, Title ASC"
-    header = table_header
+        search_str += "WHERE " + where_str
+    search_str += " ORDER BY a.Author, a.Title ASC"
+    header = table_header + ["ReadDate"]
     app.logger.debug(search_str)
     c = db.cursor()
     try:
@@ -183,12 +204,10 @@ def add_books():
       "PublisherName": "Printerman",
       "CoverType": "Hard",
       "Pages": "7",
-      "LastRead": "0000-00-00",
-      "PreviouslyRead": "0000-00-00",
       "Location": "Main Collection",
       "Note": "",
       "Recycled": 0
-    }]
+    }, ...]
 
     E.g.
     curl -X POST -H "Content-type: application/json" -d @./examples/test_add_book.json \
@@ -200,10 +219,12 @@ def add_books():
     records = request.get_json()
     search_str = ("INSERT INTO `book collection` "
                   "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
-                  "LastRead, PreviouslyRead, Location, Note, Recycled) "
+                  #                  "LastRead, PreviouslyRead, Location, Note, Recycled) "
+                  "Location, Note, Recycled) "
                   "VALUES "
                   "(\"{Title}\", \"{Author}\", \"{CopyrightDate}\", \"{ISBNNumber}\", \"{ISBNNumber13}\", "
-                  "\"{PublisherName}\", \"{CoverType}\", \"{Pages}\", \"{LastRead}\", \"{PreviouslyRead}\", "
+                  #                  "\"{PublisherName}\", \"{CoverType}\", \"{Pages}\", \"{LastRead}\", \"{PreviouslyRead}\", "
+                  "\"{PublisherName}\", \"{CoverType}\", \"{Pages}\", "
                   "\"{Location}\", \"{Note}\", \"{Recycled}\")")
     c = db.cursor()
     rdata = []
@@ -219,14 +240,46 @@ def add_books():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+@app.route('/update_read_date', methods=['POST'])
+def update_read_date():
+    """
+    Post Payload:
+    [{
+      "BookCollectionID": 1606,
+      "ReadDate": "0000-00-00",
+      "ReadNote": ""
+    }, ...]
+
+    E.g.
+    curl -X POST -H "Content-type: application/json" -d @./examples/test_update_read_date.json \
+    http://172.17.0.2:5000/update_read_date
+
+    :return:
+    """
+    # records should be a list of dictionaries including all fields
+    records = request.get_json()
+    search_str = "INSERT INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES "
+    search_str += "(\"{BookCollectionID}\", \"{ReadDate}\", \"{ReadNote}\")"
+    c = db.cursor()
+    rdata = []
+    for record in records:
+        try:
+            c.execute(search_str.format(**record))
+            rdata.append(record)
+        except pymysql.Error as e:
+            app.logger.error(e)
+            rdata.append({"error": str(e)})
+    rdata = json.dumps({"update_read_date": rdata})
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
 @app.route('/update_book', methods=['POST'])
 def update_book():
     """
     Post Payload:
     {
       "BookCollectionID": 1606,
-      "LastRead": "0000-00-00",
-      "PreviouslyRead": "0000-00-00",
       "Note": "",
       "Recycled": 0
     }
@@ -259,7 +312,7 @@ def update_book():
     except pymysql.Error as e:
         app.logger.error(e)
         rdata.append({"error": str(e)})
-    rdata = json.dumps({"update_books": rdata})
+    rdata = json.dumps({"update_book": rdata})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
