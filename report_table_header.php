@@ -27,7 +27,7 @@ if (isset($_REQUEST['chk_pages'])) {
     echo '<th>PAGES</th>';
 }
 if (isset($_REQUEST['chk_copyrightdate'])) {
-    echo '<th>� DATE</th>';
+    echo '<th>C DATE</th>';
 }
 if (isset($_REQUEST['chk_readdate'])) {
     echo '<th>READ DATE</th>';

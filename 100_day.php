@@ -17,11 +17,11 @@ include './db_header.php';
 ##########################################
 # Find the record and populate the fields
 $dt         = mktime(0, 0, 0, date("m") - 3, date("d") - 10, date("Y"));
-$search_str = `SELECT *'
-$search_str .= ' FROM `book collection` AS a'
-$search_str .= ' JOIN `books read` AS b ON a.BookCollectionID = b.BookCollectionID'
-$search_str .= ' WHERE ReadDate > "' . date("Y-m-d", $dt) . '"'
-$search_str .= ' ORDER BY ReadDate`'
+$search_str = 'SELECT *';
+$search_str .= ' FROM `book collection`  a';
+$search_str .= ' JOIN `books read` b ON a.BookCollectionID = b.BookCollectionID';
+$search_str .= ' WHERE ReadDate > "' . date("Y-m-d", $dt) . '"';
+$search_str .= ' ORDER BY ReadDate';
 
 // 2022-03-21:  $search_str = 'SELECT * FROM `book collection` WHERE LastRead > "' . date("Y-m-d", $dt) . '" ORDER BY LastRead';
 

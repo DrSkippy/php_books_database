@@ -51,8 +51,8 @@ if (substr($_REQUEST['submit'], 0, 4) == 'Find') {
     if (!($tmp_min_id < $max_id))
         $tmp_min_id = $min_id;
     #	}
-    $search_str = 'SELECT BookCollectionID FROM `book collection` WHERE ' . $_REQUEST['searchtype']
-    $search_str .= ' LIKE "%' . $_REQUEST['searchterm'] . '%" AND BookCollectionID BETWEEN '
+    $search_str = 'SELECT BookCollectionID FROM `book collection` WHERE ' . $_REQUEST['searchtype'];
+    $search_str .= ' LIKE "%' . $_REQUEST['searchterm'] . '%" AND BookCollectionID BETWEEN ';
     $search_str .= $tmp_min_id . ' AND ' . $max_id;
     if ($debug)
         echo $search_str;
@@ -85,7 +85,7 @@ else if ($_REQUEST['submit'] == 'Update Record') {
         $readdate       = $_REQUEST['readdate'];
     }
     // if entry is new, add to db
-    $update_str = 'INSERT INTO `books read` (BookCollectionID, ReadDate) VALUES ("' . $_REQUEST['id'];
+    $update_str = 'INSERT IGNORE INTO `books read` (BookCollectionID, ReadDate) VALUES ("' . $_REQUEST['id'];
     $update_str .= '","' . $readdate . '")';
     if ($debug)
         echo $update_str;
@@ -109,13 +109,13 @@ else if ($_REQUEST['submit'] == 'Update Record') {
 // $_REQUEST['pages'] . '", LastRead="' . $readdate . '",PreviouslyRead= "' . $previouslyread . '", Location="' .
 // $_REQUEST['location'] . '", Note="' . $_REQUEST['note'] . '", Recycled="' . $recycled . '"
 // WHERE BookCollectionID = ' . $_REQUEST['id'];
-    $update_str = 'UPDATE `book collection` SET ' . 'Title="' . $_REQUEST['title'] . '", '
-    $update_str .= 'Author= "' . $_REQUEST['author'] . '", CopyrightDate="' . date("Y-m-d h:m:s", $dt) . '", '
-    $update_str .= 'ISBNNumber13="' . $_REQUEST['isbnnumber13'] . '", ISBNNumber="' . $_REQUEST['isbnnumber'] . ", '
-    $update_str .= 'PublisherName= "' . $_REQUEST['publishername'] . '", CoverType="' . $_REQUEST['covertype'] . '", '
-    $update_str .= 'Pages= "' . $_REQUEST['pages'] . '", '
-    $update_str .= 'Location="' . $_REQUEST['location'] . '", '
-    $update_str .= 'Note="' . $_REQUEST['note'] . '", Recycled="' . $recycled . '" '
+    $update_str = 'UPDATE `book collection` SET Title="' . $_REQUEST['title'] . '", ';
+    $update_str .= 'Author= "' . $_REQUEST['author'] . '", CopyrightDate="' . date("Y-m-d h:m:s", $dt) . '", ';
+    $update_str .= 'ISBNNumber13="' . $_REQUEST['isbnnumber13'] . '", ISBNNumber="' . $_REQUEST['isbnnumber'] . '", ';
+    $update_str .= 'PublisherName= "' . $_REQUEST['publishername'] . '", CoverType="' . $_REQUEST['covertype'] . '", ';
+    $update_str .= 'Pages= "' . $_REQUEST['pages'] . '", ';
+    $update_str .= 'Location="' . $_REQUEST['location'] . '", ';
+    $update_str .= 'Note="' . $_REQUEST['note'] . '", Recycled="' . $recycled . '" ';
     $update_str .= 'WHERE BookCollectionID = ' . $_REQUEST['id'];
     if ($debug)
         echo $update_str;
@@ -151,8 +151,8 @@ echo '</tr></table>';
 $no_record = TRUE;
 while ($no_record) {
 //    $search_str = 'SELECT * FROM `book collection` WHERE BookCollectionID = ' . $recordselector;
-    $search_str = 'SELECT a.*, b.ReadDate FROM `book collection` as a, `books read` as b '
-    $search_str .= ' JOIN a.BookCollectionID=b.BookCollectionID WHERE BookCollectionID = ' . $recordselector;
+    $search_str = 'SELECT a.*, b.ReadDate FROM `book collection` as a LEFT JOIN `books read` as b ';
+    $search_str .= ' ON a.BookCollectionID=b.BookCollectionID WHERE a.BookCollectionID = ' . $recordselector;
     if ($debug)
         echo $search_str;
     $result = @mysqli_query($dbcnx, $search_str);
@@ -272,7 +272,7 @@ echo $row['Pages'];
 echo substr($row['CopyrightDate'], 0, 4);
 ?>"></td>
 	<td></td>
-	<td>(dates: yyyy-mm-dd)</td>
+	<td></td>
 </tr><tr>
 	<td align="right">Last Read:</td>
 	<td><input type="text" name="readdate" size="9" value="<?php
@@ -284,15 +284,8 @@ if ($row['ReadDate'] != '' and $row['ReadDate'] != '0000-00-00 00:00:00') {
 }
 ?>"></input>
 	<input type="checkbox" name="readtoday"> Today</td>
-	<td align="right">Previously Read:</td>
-	<td><input type="text" name="previouslyread" size="9" value="<?php
-if ($row['PreviouslyRead'] != '' and $row['PreviouslyRead'] != '0000-00-00 00:00:00') {
-    $tmp = explode(" ", $row['PreviouslyRead']);
-    echo $tmp[0];
-} else {
-    echo '0000-00-00';
-}
-?>"></input></td>
+	<td> </td>
+	<td align="right">(dates: YYYY-mm-dd)</td>
 </tr><tr>
 	<td colspan="4"><input type="text" name="newtag" size="6">&nbsp; <input type="submit" name="submit" value="Add Tag"> Tags: <span class="tags"> <?php
 echo $itemtags;

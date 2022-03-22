@@ -23,7 +23,7 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
     } elseif ($_REQUEST['search_term'] == '') {
         $where_str = '';
     } else {
-        $where_str = 'WHERE ' . $_REQUEST['search_type'] . ' LIKE "%' . $_REQUEST['search_term'] . '%" ';
+        $where_str = 'WHERE a.' . $_REQUEST['search_type'] . ' LIKE "%' . $_REQUEST['search_term'] . '%" ';
     }
     
     if ($_REQUEST['search_cat'] != 'All') {
@@ -63,9 +63,9 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
 // Pages, LastRead, PreviouslyRead, Category, Note, Recycled, Location, ISBNNumber13 FROM `book collection` ' .
 // $where_str . ' ORDER BY ' . $_REQUEST['search_order'];
     $search_str = 'SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, a.ISBNNumber, a.PublisherName, ';
-    $search_str .= ' a.CoverType, a.Pages, a.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
-    $search_str .= ' FROM `book collection` as a JOIN `books read` as b ';
-    $search_str .= ' JOIN on a.BookCollectionID = b.BookCollectionID WHERE ' . $where_str;
+    $search_str .= ' a.CoverType, a.Pages, b.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
+    $search_str .= ' FROM `book collection` a JOIN `books read`  b ';
+    $search_str .= ' ON a.BookCollectionID = b.BookCollectionID ' . $where_str;
     $search_str .= ' ORDER BY ' . $_REQUEST['search_order'];
     if ($debug)
         echo $search_str . "<br>";
@@ -80,7 +80,7 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
     
     echo '</table>';
     
-    $search_str1 = 'SELECT SUM(Pages) AS totalpages FROM `book collection` ' . $where_str;
+    $search_str1 = 'SELECT SUM(Pages) AS totalpages FROM `book collection` a ' . $where_str;
     if ($debug)
         echo $search_str1 . "<br>";
     $result1 = @mysqli_query($dbcnx, $search_str1);
@@ -122,9 +122,9 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
 // Pages, LastRead, PreviouslyRead, Category, Note, Recycled, Location, ISBNNumber13 FROM `book collection`
 // WHERE ' . $where_str;
         $search_str = 'SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, a.ISBNNumber, a.PublisherName, ';
-        $search_str .= ' a.CoverType, a.Pages, a.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
-        $search_str .= ' FROM `book collection` as a JOIN `books read` as b ';
-        $search_str .= ' JOIN on a.BookCollectionID = b.BookCollectionID WHERE ' . $where_str;
+        $search_str .= ' a.CoverType, a.Pages, b.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
+        $search_str .= ' FROM `book collection` a JOIN `books read` b ';
+        $search_str .= ' ON a.BookCollectionID = b.BookCollectionID WHERE ' . $where_str;
         if ($debug)
             echo $search_str . "<br>";
         $result = @mysqli_query($dbcnx, $search_str);
@@ -132,9 +132,9 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
             exit('<p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
         }
         if (mysqli_num_rows($result) > 0) {
-            $search_str1 = 'SELECT SUM(a.Pages) AS totalpages '
-            $search_str1 .= ' FROM `book collection` as a JOIN `books read` as b '
-            $search_str1 .= ' JOIN on a.BookCollectionID = b.BookCollectionID WHERE ' . $where_str;
+            $search_str1 = 'SELECT SUM(a.Pages) AS totalpages ';
+            $search_str1 .= ' FROM `book collection` a JOIN `books read` b ';
+            $search_str1 .= ' ON a.BookCollectionID = b.BookCollectionID WHERE ' . $where_str;
             if ($debug)
                 echo $search_str1 . "<br>";
             $result1 = @mysqli_query($dbcnx, $search_str1);
