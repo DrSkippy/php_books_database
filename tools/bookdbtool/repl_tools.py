@@ -6,6 +6,7 @@ from columnar import columnar
 
 class BC_Tool:
     ENDPOINT = "http://192.168.127.8/books"
+    # ENDPOINT = "http://172.17.0.2:8083"
     PAGE_SIZE = 20
     MINIMAL_BOOK_INDEXES = [0, 1, 2, 6, 7, 8]
 
@@ -103,7 +104,7 @@ class BC_Tool:
         else:
             _data = []
             for year, pages, books in res["data"]:
-                q = self.ENDPOINT + f"/books?LastRead={year}"
+                q = self.ENDPOINT + f"/books?ReadDate={year}"
                 try:
                     tr = requests.get(q)
                     tres = tr.json()
