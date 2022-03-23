@@ -1,4 +1,4 @@
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 import pymysql
 from flask import Flask, Response, request
@@ -7,12 +7,28 @@ from books_util import *
 
 conf = get_configuration()
 # server configuration
+from logging.config import dictConfig
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['wsgi']
+    }
+})
+
 app = Flask(__name__)
 
 
 @app.route('/configuration')
 def configuration():
-    db = pymysql.connect(**conf)
     rdata = json.dumps({
         "version": __version__,
         "configuration": conf,
@@ -274,6 +290,7 @@ def tag_counts(tag=None):
         c.execute(search_str)
     except pymysql.Error as e:
         rdata = json.dumps({"error": str(e)})
+        app.logger.error(e)
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
@@ -349,6 +366,7 @@ def tag_maintenance():
                 db.commit()
             except pymysql.Error as e:
                 rdata = {"error": [str(e)]}
+                app.logger.error(e)
             try:
                 # duplicates
                 c.execute("SELECT COUNT(*) FROM tags")
@@ -365,6 +383,7 @@ def tag_maintenance():
                 a = c.fetchall()
                 rdata["tag_maintenance"]["tags_after"] = a[0][0]
             except pymysql.Error as e:
+                app.logger.error(e)
                 if "error" in rdata:
                     rdata["error"].append(e)
                 else:
