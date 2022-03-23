@@ -1,4 +1,4 @@
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 import pymysql
 from flask import Flask, Response, request
@@ -244,13 +244,13 @@ def books_search():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/add_tag_by_id/<id>/<tag>', methods=["put"])
-def add_tag(id, tag):
+@app.route('/add_tag/<book_id>/<tag>', methods=["put"])
+def add_tag(book_id, tag):
     db = pymysql.connect(**conf)
     with db:
         with db.cursor() as c:
             try:
-                c.execute("INSERT IGNORE INTO tags (BookID, Tag) VALUES (%s, %s)", (id, tag))
+                c.execute("INSERT IGNORE INTO tags (BookID, Tag) VALUES (%s, %s)", (book_id, tag))
                 rdata = json.dumps({"BookID": f"{id}", "Tag": f"{tag}"})
             except pymysql.Error as e:
                 app.logger.error(e)
@@ -281,10 +281,10 @@ def tag_counts(tag=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/tags/<id>')
-def tags(id=None):
+@app.route('/tags/<book_id>')
+def tags(book_id=None):
     db = pymysql.connect(**conf)
-    search_str = f"SELECT Tag FROM tags WHERE BookID = {id} ORDER BY Tag"
+    search_str = f"SELECT Tag FROM tags WHERE BookID = {book_id} ORDER BY Tag"
     app.logger.debug(search_str)
     c = db.cursor()
     try:
@@ -296,7 +296,7 @@ def tags(id=None):
         s = c.fetchall()
         tag_list = [x[0] for x in s]
         s = list(s)
-        rdata = json.dumps({"BookID": id, "tag_list": tag_list})
+        rdata = json.dumps({"BookID": book_id, "tag_list": tag_list})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -315,6 +315,25 @@ def update_tag_value(current, updated):
                 app.logger.error(e)
                 rdata = json.dumps({"error": str(e)})
         db.commit()
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+@app.route('/tags_search/<match_str>')
+def tags_search(match_str):
+    db = pymysql.connect(**conf)
+    search_str = ("SELECT * FROM `tags` "
+                  f"WHERE Tag LIKE \"%{match_str}%\" "
+                  "ORDER BY a.Tag ASC")
+    header = ["BookCollectionID", "TagID", "Tag"]
+    c = db.cursor()
+    try:
+        c.execute(search_str)
+    except pymysql.Error as e:
+        app.logger.error(e)
+        rdata = json.dumps({"error": str(e)})
+    else:
+        s = c.fetchall()
+        rdata = serialize_rows(s, header)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 

@@ -76,8 +76,8 @@ def test_books_search():
     res2 = requests.get(ep2)
     print(res2.json())
 
-def test_add_tags_by_id(book_ids):
-    ep = ENDPOINT + "/add_tag_by_id"
+def test_add_tags(book_ids):
+    ep = ENDPOINT + "/add_tag"
     print(f"QUERY={ep}")
     for book_id in book_ids:
         res = requests.put(ep+f"/{book_id}/deleteme")
@@ -101,6 +101,19 @@ def test_update_tag_value():
     res = requests.get(ep)
     print(res.json())
 
+def test_tags_search():
+    ep = ENDPOINT + "/tags_search/apple"
+    print(f"QUERY={ep}")
+    res = requests.get(ep)
+    print(res.json())
+    ep2 = ENDPOINT + "/tags_search/dog"
+    res2 = requests.get(ep2)
+    print(res2.json())
+
+def test_tag_maintenance():
+    ep = ENDPOINT + "/tag_maintenance"
+    res = reqeusts.get(ep)
+    print(res.json())
 
 if __name__ == "__main__":
     test_configuration()
@@ -110,10 +123,13 @@ if __name__ == "__main__":
     test_summary_books_read_by_year()
     test_books_read()
     test_books_search()
-    test_add_tags_by_id(r)
+    test_add_tags(r)
     test_tag_counts()
     test_tags(2)
     test_update_tag_value()
+    test_tags_search()
+    test_tag_maintenance()
+
     print("""For DB Cleanup:
     
     DELETE FROM `tags` where Tag='delete_me';

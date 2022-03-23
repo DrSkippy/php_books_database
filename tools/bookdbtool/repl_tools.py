@@ -1,6 +1,5 @@
 import datetime
 import logging
-import json
 
 import pandas as pd
 import requests
@@ -11,7 +10,22 @@ class BC_Tool:
     ENDPOINT = "http://192.168.127.8/books"
     # ENDPOINT = "http://172.17.0.2:8083"
     PAGE_SIZE = 20
-    MINIMAL_BOOK_INDEXES = [0, 1, 2, 6, 7, 9, -1]
+    COLUMN_INDEX = {
+        "BookCollectionID": 0,
+        "Title": 1,
+        "Author": 2,
+        "CopyrightDate": 3,
+        "ISBNNumber": 4,
+        "PublisherName": 5,
+        "CoverType": 6,
+        "Pages": 7,
+        "Category": 8,
+        "Note": 19,
+        "Location": 11,
+        "ISBNNumber13": 12,
+        "ReadDate": 13
+    }
+    MINIMAL_BOOK_INDEXES = [0, 1, 2, 7, 9, 10, 11, 13]
 
     def __init__(self):
         self.result = None
@@ -23,8 +37,11 @@ class BC_Tool:
         return [self._row_column_selector(i, indexes) for i in data]
 
     def _show_table(self, data, header, indexes):
-        table = columnar(self._column_selector(data, indexes), self._row_column_selector(header, indexes))
-        print(table)
+        try:
+            table = columnar(self._column_selector(data, indexes), self._row_column_selector(header, indexes))
+            print(table)
+        except TypeError as e:
+            print("No data")
 
     def _populate_new_book_record(self):
         proto = {
@@ -189,7 +206,6 @@ class BC_Tool:
             self._show_table(res["data"], res["header"], [0, 1, 2])
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
-
     def add_books(self, n=1):
         """ Takes 0 argument."""
         records = [self._populate_new_book_record() for i in range(n)]
@@ -204,7 +220,6 @@ class BC_Tool:
             for rec in tres["add_books"]:
                 ids.append(rec["BookCollectionID"])
             self.result = ids
-
 
     def update_read_books(self, id_list):
         """ Takes 1 argument."""
