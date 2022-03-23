@@ -9,6 +9,11 @@ class bookDBTool:
         self.db = pymysql.connect(host=DBHOST, port=3306, user=UN, passwd=PWD, db=DB)
 
     def show_tags(self, only_spell=False):
+        """
+        DEPRECATED use book_services docker
+        :param only_spell:
+        :return:
+        """
         spell = SpellChecker()
         st = []
         c = self.db.cursor()
@@ -38,6 +43,10 @@ class bookDBTool:
         return st
 
     def show_locations(self):
+        """
+        DEPRECATED - not used
+        :return:
+        """
         sl = []
         c = self.db.cursor()
         try:
@@ -54,10 +63,20 @@ class bookDBTool:
         return sl
 
     def tag_from_category(self, tag, cat):
+        """
+        DEPRECATED - One time use
+        :param tag:
+        :param cat:
+        :return:
+        """
         cl = self.get_category_ID_list(cat)
         self.add_tag(cl, tag)
 
     def lower_case_tags(self):
+        """
+        DEPRECATE - moved to services
+        :return:
+        """
         c = self.db.cursor()
         try:
             c.execute("UPDATE `tags` SET Tag = TRIM(LOWER(Tag))")
@@ -66,6 +85,12 @@ class bookDBTool:
             logging.error(e)
 
     def update_tag_value(self, current, updated):
+        """
+        DEPRECATE - use book_services
+        :param current:
+        :param updated:
+        :return:
+        """
         c = self.db.cursor()
         try:
             c.execute("UPDATE `tags` SET Tag = '{}' WHERE Tag = '{}'".format(updated.lower().strip(), current))
@@ -74,6 +99,12 @@ class bookDBTool:
             logging.error(e)
 
     def add_tag(self, cl, tag):
+        """
+        DEPRECATE - use book_services
+        :param cl:
+        :param tag:
+        :return:
+        """
         c = self.db.cursor()
         for id in cl:
             print('Inserted: ', id)
@@ -83,6 +114,11 @@ class bookDBTool:
             logging.error(e)
 
     def get_category_ID_list(self, cat):
+        """
+        DEPRECATED - not used
+        :param cat:
+        :return:
+        """
         c = self.db.cursor()
         cat_ID_list = []
         try:

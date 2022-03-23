@@ -273,7 +273,6 @@ def tag_counts(tag=None):
     try:
         c.execute(search_str)
     except pymysql.Error as e:
-        app.logger.error(e)
         rdata = json.dumps({"error": str(e)})
     else:
         s = c.fetchall()
@@ -319,6 +318,41 @@ def update_tag_value(current, updated):
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+@app.route('/tag_maintenance')
+    def lower_case_tags():
+        db = pymysql.connect(**conf)
+        rdata = {"tag_maintenance":{}}
+        with db:
+            with db.cursor() as c:
+                try:
+                    # lower case
+                    c.execute("UPDATE `tags` SET Tag = TRIM(LOWER(Tag))")
+                    db.commit()
+                except pymysql.Error as e:
+                    rdata = {"error": [str(e)]}
+                try:
+                    # duplicates
+                    c.execute("SELECT COUNT(*) FROM tags")
+                    a = c.fetchall()
+                    rdata["tag_maintenance"]["tags_before"] = a[0][0]
+                    c.execute("truncate temp")
+                    c.execute("insert into temp (BookID, Tag) select distinct BookID, Tag from tags")
+                    c.execute("truncate tags")
+                    c.execute("insert into tags (BookID, Tag) select BookID, Tag from temp")
+                    c.execute("truncate temp")
+                    c.execute("delete from tags where Tag=''")
+                    db.commit()
+                    c.execute("SELECT COUNT(*) FROM tags")
+                    a = c.fetchall()
+                    rdata["tag_maintenance"]["tags_after"] = a[0][0]
+                except pymysql.Error as e:
+                    if "error" in rdata:
+                        rdata["error"].append(e)
+                    else:
+                        rdata = {"error": [str(e)]}
+        rdata = json.dumps(rdata)
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=200, headers=response_headers)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
