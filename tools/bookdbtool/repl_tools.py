@@ -121,6 +121,23 @@ class BC_Tool:
             self._show_table(res["data"], res["header"], self.MINIMAL_BOOK_INDEXES)
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
+    def tags_search(self, match_str):
+        """ Takes 1 arguments."""
+        q = self.ENDPOINT + f"/tags_search/{match_str}"
+        try:
+            r = requests.get(q)
+            res = r.json()
+        except requests.RequestException as e:
+            logging.error(e)
+        else:
+            self._show_table(res["data"], res["header"], [0,1,2])
+            self.result = set([x[0] for x in res["data"]])
+
+    def books_matching_tags(self, match_str):
+        self.tags_search(match_str)
+        for i in self.result:
+            self.book(i)
+
     def book(self, book_collection_id):
         """ Takes 1 argument."""
         q = self.ENDPOINT + f"/books_search?BookCollectionID={book_collection_id}"
