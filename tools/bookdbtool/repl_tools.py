@@ -1,5 +1,6 @@
 import datetime
 import logging
+import json
 
 import pandas as pd
 import requests
@@ -41,9 +42,9 @@ class BC_Tool:
         }
         return self._inputer(proto)
 
-    def _populate_update_read_dates(self):
+    def _populate_update_read_dates(self, id):
         proto = {
-            "BookCollectionID": 0,
+            "BookCollectionID": id,
             "ReadDate": datetime.date.today().strftime("%Y-%m-%d"),
             "ReadNote": ""
         }
@@ -184,6 +185,38 @@ class BC_Tool:
         else:
             self._show_table(res["data"], res["header"], [0, 1, 2])
             self.result = pd.DataFrame(res['data'], columns=res["header"])
+
+
+    def add_books(self, n=1):
+        """ Takes 0 argument."""
+        records = [self._populate_new_book_record() for i in range(n)]
+        q = self.ENDPOINT + "/add_books"
+        try:
+            tr = requests.post(q, json=records)
+            tres = tr.json()
+        except requests.RequestException as e:
+            logging.error(e)
+        else:
+            ids = []
+            for rec in tres["add_books"]:
+                ids.append(rec["BookCollectionID"])
+            self.result = ids
+
+
+    def update_read_books(self, id_list):
+        """ Takes 1 argument."""
+        records = [self._populate_update_read_dates(id) for id in id_list]
+        q = self.ENDPOINT + "/update_read_dates"
+        try:
+            tr = requests.post(q, json=records)
+            tres = tr.json()
+        except requests.RequestException as e:
+            logging.error(e)
+        else:
+            ids = []
+            for rec in tres["update_read_dates"]:
+                ids.append(rec["BookCollectionID"])
+            self.result = ids
 
 
 if __name__ == "__main__":

@@ -106,7 +106,7 @@ def update_read_dates():
                     app.logger.error(e)
                     rdata.append({"error": str(e)})
         db.commit()
-    rdata = json.dumps({"update_read_date": rdata})
+    rdata = json.dumps({"update_read_dates": rdata})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
