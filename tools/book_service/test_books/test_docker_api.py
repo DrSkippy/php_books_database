@@ -112,7 +112,7 @@ def test_tags_search():
 
 def test_tag_maintenance():
     ep = ENDPOINT + "/tag_maintenance"
-    res = reqeusts.get(ep)
+    res = requests.get(ep)
     print(res.json())
 
 if __name__ == "__main__":
