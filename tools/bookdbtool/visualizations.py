@@ -1,9 +1,13 @@
-import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 
 
 def running_total_comparison(df1, window=15):
+    df1 = df1.set_index("ReadDate")
+    df1.index = pd.to_datetime(df1.index)
+    df1 = df1.groupby(df1.index.to_period('y')).cumsum().reset_index()
+    df1["Day"] = df1.ReadDate.apply(lambda x: x.dayofyear)
+    df1["Year"] = df1.ReadDate.apply(lambda x: x.year)
     fig_size = [12,12]
     xlim = [0,365]
     ylim = [0,max(df1.Pages)]
@@ -17,13 +21,13 @@ def running_total_comparison(df1, window=15):
 
 
 def yearly_comparisons(df, current_year=2020):
-    now = df.loc[df.Year == current_year]
+    now = df.loc[df.year == current_year]
     fig_size = [12, 6]
-    ax = df.hist("Pages Read", bins=14, color="darkblue", figsize=fig_size)
-    plt.axvline(x=int(now["Pages Read"]), color="red")
+    ax = df.hist("pages read", bins=14, color="darkblue", figsize=fig_size)
+    plt.axvline(x=int(now["pages read"]), color="red")
     plt.show()
-    df.plot.bar(x="Rank", y="Pages Read", width=.95, color="darkblue", figsize=fig_size)
-    plt.axvline(x=int(now["Rank"]) - 1, color="red")
+    df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", figsize=fig_size)
+    plt.axvline(x=int(now["rank"]) - 1, color="red")
     plt.show()
-    df.sort_values("Year").plot.bar(x="Year", y="Pages Read", width=.95, color="darkblue", figsize=fig_size)
+    df.sort_values("year").plot.bar(x="year", y="pages read", width=.95, color="darkblue", figsize=fig_size)
     plt.show()

@@ -1,9 +1,9 @@
 import datetime
 import logging
 
+import pandas as pd
 import requests
 from columnar import columnar
-import pandas as pd
 
 
 class BC_Tool:
@@ -127,7 +127,7 @@ class BC_Tool:
                 self._show_table(_data, res["header"], self.MINIMAL_BOOK_INDEXES)
                 self.result = book_collection_id
 
-    def books_read_by_year(self, year=None):
+    def books_read_by_year_with_summary(self, year=None):
         """ Takes 0 or 1 argument."""
         self.result = []
         q = self.ENDPOINT + "/summary_books_read_by_year"
@@ -157,6 +157,20 @@ class BC_Tool:
                     _data.append(_template)
             self._show_table(_data, tres["header"], self.MINIMAL_BOOK_INDEXES)
 
+    def books_read_by_year(self, year=None):
+        """ Takes 0 or 1 argument."""
+        q = self.ENDPOINT + "/books_read"
+        if year is not None:
+            q += f"/{year}"
+        try:
+            tr = requests.get(q)
+            tres = tr.json()
+        except requests.RequestException as e:
+            logging.error(e)
+        else:
+            self._show_table(tres["data"], tres["header"], self.MINIMAL_BOOK_INDEXES)
+            self.result = pd.DataFrame(tres['data'], columns=tres["header"])
+
     def summary_books_read_by_year(self, year=None):
         """ Takes 0 or 1 argument."""
         q = self.ENDPOINT + "/summary_books_read_by_year"
@@ -168,10 +182,11 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0,1,2])
+            self._show_table(res["data"], res["header"], [0, 1, 2])
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
+
 if __name__ == "__main__":
-    rpl = REPL_Tool()
+    rpl = BC_Tool()
     rpl.tag_counts()
-    rpl.books(Title="science")
+    rpl.books_search(Title="science")

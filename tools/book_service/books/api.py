@@ -169,9 +169,7 @@ def summary_books_read_by_year(target_year=None):
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "GROUP BY Year ORDER BY Year ASC"
-
     header = ["year", "pages read", "books read"]
-    app.logger.debug(search_str)
     c = db.cursor()
     try:
         c.execute(search_str)
@@ -183,7 +181,6 @@ def summary_books_read_by_year(target_year=None):
         rdata = serialize_rows(s, header)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
-
 
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
