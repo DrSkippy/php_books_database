@@ -117,4 +117,6 @@ if __name__ == "__main__":
     print("""For DB Cleanup:
     
     DELETE FROM `tags` where Tag='delete_me';
-    DELETE FROM `book collection` WHERE PublisherName='printerman';""")
+    DELETE FROM `book collection` WHERE PublisherName='Printerman';
+    DELETE FROM `books read` WHERE ReadDate='1945-10-19';
+    """)
