@@ -8,8 +8,8 @@ from columnar import columnar
 
 
 class BC_Tool:
-    # ENDPOINT = "http://192.168.127.8/books"
-    ENDPOINT = "http://172.17.0.2:8083"
+    ENDPOINT = "http://192.168.127.8/books"
+    # ENDPOINT = "http://172.17.0.2:8083"
     PAGE_SIZE = 20
     MINIMAL_BOOK_INDEXES = [0, 1, 2, 6, 7, 9, -1]
 
@@ -42,18 +42,21 @@ class BC_Tool:
         }
         return self._inputer(proto)
 
-    def _populate_update_read_dates(self, id):
+    def _populate_update_read_dates(self, id, today=True):
         proto = {
             "BookCollectionID": id,
             "ReadDate": datetime.date.today().strftime("%Y-%m-%d"),
             "ReadNote": ""
         }
-        return self._inputer(proto)
+        return self._inputer(proto, exclude_keys=["BookCollectionID", "ReadDate"])
 
-    def _inputer(self, proto):
+    def _inputer(self, proto, exclude_keys=[]):
         for key in proto:
-            a = input(f"{key} ({proto[key]}): ")
-            proto[key] = a
+            if key in exclude_keys:
+                print(f"{key}: {proto[key]}")
+            else:
+                a = input(f"{key} ({proto[key]}): ")
+                proto[key] = a
         return proto
 
     def version(self):
