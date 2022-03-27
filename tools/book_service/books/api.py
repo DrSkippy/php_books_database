@@ -1,4 +1,4 @@
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 import pymysql
 from flask import Flask, Response, request
@@ -157,6 +157,7 @@ def update_book_note_status():
             continuation = True
         search_str += f" {key} = \"{record[key]}\""
     search_str += " WHERE BookCollectionID = {BookCollectionID} "
+    app.logger.debug(search_str)
     rdata = []
     with db:
         with db.cursor() as c:
@@ -185,6 +186,7 @@ def summary_books_read_by_year(target_year=None):
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "GROUP BY Year ORDER BY Year ASC"
+    app.logger.debug(search_str)
     header = ["year", "pages read", "books read"]
     c = db.cursor()
     try:
@@ -238,15 +240,15 @@ def books_search():
             where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
         else:
             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
-    where_str = "AND".join(where)
+    where_str = " AND ".join(where)
     search_str = ("SELECT a.*, b.ReadDate "
                   "FROM `book collection` as a LEFT JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID ")
     if where_str != '':
         search_str += "WHERE " + where_str
     search_str += " ORDER BY a.Author, a.Title ASC"
-    header = table_header + ["ReadDate"]
     app.logger.debug(search_str)
+    header = table_header + ["ReadDate"]
     c = db.cursor()
     try:
         c.execute(search_str)
@@ -284,6 +286,7 @@ def tag_counts(tag=None):
     if tag is not None:
         search_str += f" WHERE Tag LIKE \"{tag}%\""
     search_str += " GROUP BY Tag ORDER BY count DESC"
+    app.logger.debug(search_str)
     header = ["Tag", "Count"]
     c = db.cursor()
     try:
@@ -342,6 +345,7 @@ def tags_search(match_str):
                   f"WHERE Tag LIKE \"%{match_str}%\" "
                   "ORDER BY Tag ASC")
     header = ["BookCollectionID", "TagID", "Tag"]
+    app.logger.debug(search_str)
     c = db.cursor()
     try:
         c.execute(search_str)
