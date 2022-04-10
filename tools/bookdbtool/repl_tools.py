@@ -1,3 +1,5 @@
+__version__ = '0.5.0'
+
 import datetime
 import logging
 
@@ -26,6 +28,7 @@ class BC_Tool:
         "ReadDate": 13
     }
     MINIMAL_BOOK_INDEXES = [0, 1, 2, 7, 9, 10, 11, 13]
+    TERMINAL_WIDTH = 180
 
     def __init__(self):
         self.result = None
@@ -38,7 +41,9 @@ class BC_Tool:
 
     def _show_table(self, data, header, indexes):
         try:
-            table = columnar(self._column_selector(data, indexes), self._row_column_selector(header, indexes))
+            table = columnar(self._column_selector(data, indexes), self._row_column_selector(header, indexes),
+                             terminal_width=self.TERMINAL_WIDTH,
+                             no_borders=True)
             print(table)
         except TypeError as e:
             print("No data")
@@ -86,7 +91,8 @@ class BC_Tool:
             logging.error(e)
         else:
             print("Endpoint: {}".format(self.ENDPOINT))
-            print("Version: {}".format(res["version"]))
+            print("Endpoint Version: {}".format(res["version"]))
+            print("Client Version: {}".format(__version__))
 
     def tag_counts(self, tag=None):
         """ Takes 0 or 1 arguments.
