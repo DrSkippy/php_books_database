@@ -89,7 +89,8 @@ class BC_Tool:
             print("Version: {}".format(res["version"]))
 
     def tag_counts(self, tag=None):
-        """ Takes 0 or 1 arguments. If an argument is provided, only tags matching this root string will appear. """
+        """ Takes 0 or 1 arguments.
+        If an argument is provided, only tags matching this root string will appear. """
         q = self.ENDPOINT + "/tag_counts"
         if tag is not None:
             q += f"/{tag}"
@@ -103,7 +104,8 @@ class BC_Tool:
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
     def books_search(self, **query):
-        """ Takes 0 or many arguments. E.g. Title="two citites", Author="Dickens" """
+        """ Takes 0 or many arguments.
+        E.g. Title="two citites", Author="Dickens" """
         q = self.ENDPOINT + "/books_search?"
         first = True
         for k, v in query.items():
@@ -122,7 +124,8 @@ class BC_Tool:
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
     def tags_search(self, match_str):
-        """ Takes 1 arguments."""
+        """ Takes 1 arguments.
+        E.g. "dog" """
         q = self.ENDPOINT + f"/tags_search/{match_str}"
         try:
             r = requests.get(q)
@@ -134,12 +137,15 @@ class BC_Tool:
             self.result = set([x[0] for x in res["data"]])
 
     def books_matching_tags(self, match_str):
+        """ Takes 1 argument.
+        E.g. "science" """
         self.tags_search(match_str)
         for i in self.result:
             self.book(i)
 
     def book(self, book_collection_id):
-        """ Takes 1 argument."""
+        """ Takes 1 argument.
+        Enter the BookCollectionID """
         q = self.ENDPOINT + f"/books_search?BookCollectionID={book_collection_id}"
         try:
             r = requests.get(q)
@@ -166,7 +172,8 @@ class BC_Tool:
                 self.result = book_collection_id
 
     def books_read_by_year_with_summary(self, year=None):
-        """ Takes 0 or 1 argument."""
+        """ Takes 0 or 1 argument.
+        Year or None """
         self.result = []
         q = self.ENDPOINT + "/summary_books_read_by_year"
         if year is not None:
@@ -196,7 +203,8 @@ class BC_Tool:
             self._show_table(_data, tres["header"], self.MINIMAL_BOOK_INDEXES)
 
     def books_read_by_year(self, year=None):
-        """ Takes 0 or 1 argument."""
+        """ Takes 0 or 1 argument.
+        Year or None """
         q = self.ENDPOINT + "/books_read"
         if year is not None:
             q += f"/{year}"
@@ -210,7 +218,8 @@ class BC_Tool:
             self.result = pd.DataFrame(tres['data'], columns=tres["header"])
 
     def summary_books_read_by_year(self, year=None):
-        """ Takes 0 or 1 argument."""
+        """ Takes 0 or 1 argument.
+        Year or None """
         q = self.ENDPOINT + "/summary_books_read_by_year"
         if year is not None:
             q += f"/{year}"
@@ -224,7 +233,8 @@ class BC_Tool:
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
     def add_books(self, n=1):
-        """ Takes 0 argument."""
+        """ Takes 0 or 1 argument.
+        1 (default) or more books to add to the database. """
         records = [self._populate_new_book_record() for i in range(n)]
         q = self.ENDPOINT + "/add_books"
         try:
@@ -239,7 +249,8 @@ class BC_Tool:
             self.result = ids
 
     def update_read_books(self, id_list):
-        """ Takes 1 argument."""
+        """ Takes 1 argument.
+        Update records for BookCollectionIds in list provided. """
         records = [self._populate_update_read_dates(id) for id in id_list]
         q = self.ENDPOINT + "/update_read_dates"
         try:
