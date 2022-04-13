@@ -1,4 +1,4 @@
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 
 import pymysql
 from flask import Flask, Response, request
@@ -285,7 +285,7 @@ def tag_counts(tag=None):
     search_str = "SELECT Tag, COUNT(Tag) as Count FROM tags"
     if tag is not None:
         search_str += f" WHERE Tag LIKE \"{tag}%\""
-    search_str += " GROUP BY Tag ORDER BY count DESC"
+    search_str += " GROUP BY Tag ORDER BY count DESC, Tag ASC"
     app.logger.debug(search_str)
     header = ["Tag", "Count"]
     c = db.cursor()
@@ -330,7 +330,7 @@ def update_tag_value(current, updated):
                 _updated = updated.lower().strip(" ")
                 records = c.execute("UPDATE `tags` SET Tag = '{}' WHERE Tag = '{}'".format(
                     _updated, current))
-                rdata = json.dumps({"tag_update": f"{current} >> {updated}", "updated_tags": records})
+                rdata = json.dumps({"data": {"tag_update": f"{current} >> {updated}", "updated_tags": records}})
             except pymysql.Error as e:
                 app.logger.error(e)
                 rdata = json.dumps({"error": str(e)})

@@ -1,4 +1,4 @@
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 import datetime
 import logging
@@ -90,9 +90,13 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            print("Endpoint: {}".format(self.ENDPOINT))
+            print("*" * 50)
+            print("        Book Records and Reading Database")
+            print("*" * 50)
+            print("Endpoint:         {}".format(self.ENDPOINT))
             print("Endpoint Version: {}".format(res["version"]))
-            print("Client Version: {}".format(__version__))
+            print("Client Version:   {}".format(__version__))
+            print("*" * 50)
 
     def tag_counts(self, tag=None):
         """ Takes 0 or 1 arguments.
@@ -139,7 +143,7 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0,1,2])
+            self._show_table(res["data"], res["header"], [0, 1, 2])
             self.result = set([x[0] for x in res["data"]])
 
     def books_matching_tags(self, match_str):
@@ -199,6 +203,8 @@ class BC_Tool:
                 except requests.RequestException as e:
                     logging.error(e)
                 else:
+                    _template = [" " for i in range(len(tres["data"][0]))]
+                    _data.append(_template)
                     self.result.append(pd.DataFrame(tres['data'], columns=tres["header"]))
                     _data.extend(tres["data"])
                     _template = ["" for i in range(len(tres["data"][0]))]
@@ -269,6 +275,20 @@ class BC_Tool:
             for rec in tres["update_read_dates"]:
                 ids.append(rec["BookCollectionID"])
             self.result = ids
+
+
+    def update_tag_value(self, value, new_value):
+        """ Takes 2 argument.
+        current value of tag and new value of tag """
+        q = self.ENDPOINT + f"/update_tag_value/{value}/{new_value}"
+        try:
+            r = requests.get(q)
+            res = r.json()
+        except requests.RequestException as e:
+            logging.error(e)
+        else:
+            self._show_table(res["data"], res["header"], [0, 1, 2])
+            self.result = pd.DataFrame(res['data'], columns=res["header"])
 
 
 if __name__ == "__main__":
