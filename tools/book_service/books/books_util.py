@@ -10,6 +10,7 @@ table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNum
                 "CoverType", "Pages", "Category", "Note", "Recycled",
                 "Location", "ISBNNumber13"]
 
+
 def get_configuration():
     config_filename = "./config/configuration.json"
     with open(config_filename, "r") as config_file:

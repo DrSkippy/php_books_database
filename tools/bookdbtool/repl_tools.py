@@ -229,7 +229,7 @@ class BC_Tool:
             self._show_table(tres["data"], tres["header"], self.MINIMAL_BOOK_INDEXES)
             self.result = pd.DataFrame(tres['data'], columns=tres["header"])
 
-    def summary_books_read_by_year(self, year=None):
+    def summary_books_read_by_year(self, year=None, show=True):
         """ Takes 0 or 1 argument.
         Year or None """
         q = self.ENDPOINT + "/summary_books_read_by_year"
@@ -241,8 +241,20 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0, 1, 2])
+            self._show_table(res["data"], res["header"], [0, 1, 2]) if show else None
             self.result = pd.DataFrame(res['data'], columns=res["header"])
+
+    def year_rank(self, df=None, pages=True):
+        if df is None:
+            self.summary_books_read_by_year(show=False)
+            df = self.result
+        if pages:
+            df = df.sort_values("pages read")
+        else:
+            df = df.sort_values("books read")
+        df.reset_index(inplace=True, drop=True)
+        print("\n", df)
+        self.result  = df
 
     def add_books(self, n=1):
         """ Takes 0 or 1 argument.
@@ -278,7 +290,7 @@ class BC_Tool:
 
 
     def update_tag_value(self, value, new_value):
-        """ Takes 2 argument.
+        """ Takes 2 arguments,
         current value of tag and new value of tag """
         q = self.ENDPOINT + f"/update_tag_value/{value}/{new_value}"
         try:
@@ -290,6 +302,28 @@ class BC_Tool:
             self._show_table(res["data"], res["header"], [0, 1, 2])
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
+    def add_tags(self, book_collection_id, tags=[]):
+        """ Takes 2 arguments.
+        current BookCollectionID and list of tags to add """
+        assert(book_collection_id is not None)
+        q = self.ENDPOINT + f"/add_tag/{book_collection_id}/" + "{}"
+        result = {"data":[], "error": []}
+        for t in tags:
+            try:
+                r = requests.put(q.format(t))
+                res = r.json()
+                if "error" in res:
+                    result["error"].append(res["error"])
+                else:
+                    result["data"].append(res)
+            except requests.RequestException as e:
+                logging.error(e)
+                result["error"].append(e)
+        else:
+            print("Added {} tags to book with id={}".format(len(result["data"]), book_collection_id))
+            if len(result["error"]) > 0:
+                print(" with errors={}".format(", ".join(result["error"])))
+            self.result = book_collection_id
 
 if __name__ == "__main__":
     rpl = BC_Tool()

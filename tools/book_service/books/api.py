@@ -200,6 +200,7 @@ def summary_books_read_by_year(target_year=None):
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
 def books_read(target_year=None):
@@ -265,6 +266,7 @@ def books_search():
 @app.route('/add_tag/<book_id>/<tag>', methods=["put"])
 def add_tag(book_id, tag):
     db = pymysql.connect(**conf)
+    tag = tag.lower()
     with db:
         with db.cursor() as c:
             try:
@@ -338,6 +340,7 @@ def update_tag_value(current, updated):
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+
 @app.route('/tags_search/<match_str>')
 def tags_search(match_str):
     db = pymysql.connect(**conf)
@@ -358,10 +361,11 @@ def tags_search(match_str):
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+
 @app.route('/tag_maintenance')
 def tag_maintenance():
     db = pymysql.connect(**conf)
-    rdata = {"tag_maintenance":{}}
+    rdata = {"tag_maintenance": {}}
     with db:
         with db.cursor() as c:
             try:
@@ -395,6 +399,7 @@ def tag_maintenance():
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
