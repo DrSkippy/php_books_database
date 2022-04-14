@@ -98,6 +98,8 @@ class BC_Tool:
             print("Client Version:   {}".format(__version__))
             print("*" * 50)
 
+    ver = version
+
     def tag_counts(self, tag=None):
         """ Takes 0 or 1 arguments.
         If an argument is provided, only tags matching this root string will appear. """
@@ -112,6 +114,8 @@ class BC_Tool:
         else:
             self._show_table(res["data"], res["header"], [0, 1])
             self.result = pd.DataFrame(res['data'], columns=res["header"])
+
+    tc = tag_counts
 
     def books_search(self, **query):
         """ Takes 0 or many arguments.
@@ -133,6 +137,8 @@ class BC_Tool:
             self._show_table(res["data"], res["header"], self.MINIMAL_BOOK_INDEXES)
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
+    bs = books_search
+
     def tags_search(self, match_str):
         """ Takes 1 arguments.
         E.g. "dog" """
@@ -146,12 +152,16 @@ class BC_Tool:
             self._show_table(res["data"], res["header"], [0, 1, 2])
             self.result = set([x[0] for x in res["data"]])
 
+    ts = tags_search
+
     def books_matching_tags(self, match_str):
         """ Takes 1 argument.
         E.g. "science" """
         self.tags_search(match_str)
         for i in self.result:
             self.book(i)
+
+    bmt = books_matching_tags
 
     def book(self, book_collection_id):
         """ Takes 1 argument.
@@ -214,6 +224,8 @@ class BC_Tool:
                     _data.append(_template)
             self._show_table(_data, tres["header"], self.MINIMAL_BOOK_INDEXES)
 
+    brys = books_read_by_year_with_summary
+
     def books_read_by_year(self, year=None):
         """ Takes 0 or 1 argument.
         Year or None """
@@ -228,6 +240,8 @@ class BC_Tool:
         else:
             self._show_table(tres["data"], tres["header"], self.MINIMAL_BOOK_INDEXES)
             self.result = pd.DataFrame(tres['data'], columns=tres["header"])
+
+    bry = books_read_by_year
 
     def summary_books_read_by_year(self, year=None, show=True):
         """ Takes 0 or 1 argument.
@@ -244,17 +258,19 @@ class BC_Tool:
             self._show_table(res["data"], res["header"], [0, 1, 2]) if show else None
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
+    sbry = summary_books_read_by_year
+
     def year_rank(self, df=None, pages=True):
         if df is None:
             self.summary_books_read_by_year(show=False)
             df = self.result
         if pages:
-            df = df.sort_values("pages read")
+            df = df.sort_values("pages read", ascending=False)
         else:
-            df = df.sort_values("books read")
+            df = df.sort_values("books read", ascending=False)
         df.reset_index(inplace=True, drop=True)
         print("\n", df)
-        self.result  = df
+        self.result = df
 
     def add_books(self, n=1):
         """ Takes 0 or 1 argument.
@@ -272,6 +288,8 @@ class BC_Tool:
                 ids.append(rec["BookCollectionID"])
             self.result = ids
 
+    ab = add_books
+
     def update_read_books(self, id_list):
         """ Takes 1 argument.
         Update records for BookCollectionIds in list provided. """
@@ -288,6 +306,7 @@ class BC_Tool:
                 ids.append(rec["BookCollectionID"])
             self.result = ids
 
+    urb = update_read_books
 
     def update_tag_value(self, value, new_value):
         """ Takes 2 arguments,
@@ -305,9 +324,9 @@ class BC_Tool:
     def add_tags(self, book_collection_id, tags=[]):
         """ Takes 2 arguments.
         current BookCollectionID and list of tags to add """
-        assert(book_collection_id is not None)
+        assert (book_collection_id is not None)
         q = self.ENDPOINT + f"/add_tag/{book_collection_id}/" + "{}"
-        result = {"data":[], "error": []}
+        result = {"data": [], "error": []}
         for t in tags:
             try:
                 r = requests.put(q.format(t))
@@ -324,6 +343,9 @@ class BC_Tool:
             if len(result["error"]) > 0:
                 print(" with errors={}".format(", ".join(result["error"])))
             self.result = book_collection_id
+
+    at = add_tags
+
 
 if __name__ == "__main__":
     rpl = BC_Tool()
