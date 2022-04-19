@@ -166,6 +166,7 @@ class BC_Tool:
     def book(self, book_collection_id):
         """ Takes 1 argument.
         Enter the BookCollectionID """
+        assert isinstance(book_collection_id, int), "Requires in integer Book ID"
         q = self.ENDPOINT + f"/books_search?BookCollectionID={book_collection_id}"
         try:
             r = requests.get(q)
@@ -324,7 +325,7 @@ class BC_Tool:
     def add_tags(self, book_collection_id, tags=[]):
         """ Takes 2 arguments.
         current BookCollectionID and list of tags to add """
-        assert (book_collection_id is not None)
+        assert isinstance(book_collection_id, int), "Requires in integer Book ID"
         q = self.ENDPOINT + f"/add_tag/{book_collection_id}/" + "{}"
         result = {"data": [], "error": []}
         for t in tags:
