@@ -17,7 +17,7 @@ if ($_REQUEST['recycled'] == "yes") {
     $recycled = 0;
 }
 $dt         = mktime(0, 0, 0, 1, 1, $_REQUEST['copyrightdate']);
-$insert_str = 'INSERT INTO `book collection` '
+$insert_str  = 'INSERT INTO `book collection` '
 $insert_str .= '(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, '
 // $insert_str .= 'CoverType, Pages, LastRead, PreviouslyRead, Location, Note, Recycled) '
 $insert_str .= 'CoverType, Pages, Location, Note, Recycled) '
