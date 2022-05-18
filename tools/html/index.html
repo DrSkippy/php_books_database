@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+Access-Control-Allow-Origin: *
+    </head>
+    <body>
+        <script>
+                const url = 'http://192.168.127.8/books/configuration';
+                fetch(url)
+                .then(data => data.json())
+                .then((json) => {
+                    alert(JSON.stringify(json));
+                })
+        </script>
+    </body>
+</html>

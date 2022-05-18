@@ -57,6 +57,7 @@ def serialize_rows(cursor, header=None):
 
 def resp_header(rdata):
     response_header = [
+        ('Access-Control-Allow-Origin', '*'),
         ('Content-type', 'application/json'),
         ('Content-Length', str(len(rdata)))
     ]
