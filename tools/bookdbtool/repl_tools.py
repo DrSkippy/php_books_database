@@ -52,7 +52,7 @@ class BC_Tool:
         proto = {
             "Title": "",
             "Author": "",
-            "CopyrightDate": "",
+            "CopyrightDate": "2000-01-01",
             "ISBNNumber": "",
             "ISBNNumber13": "",
             "PublisherName": "",

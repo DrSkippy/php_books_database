@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="table-style.css">
+</head>
+<body>
+<h1>Result</h1>
+<table id='mytable' class="styled-table">
+    <thead>
+    <tr>
+        <th>BookCollectionID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>CopyrightDate</th>
+        <th>Pages</th>
+        <th>ReadDate</th>
+    </tr>
+    </thead>
+    <tbody>
+    <div>
+    </div>
+    </tbody>
+</table>
+<h1>Summary (all years)</h1>
+<table id='sumtable' class="styled-table">
+    <thead>
+    <tr>
+        <th>BookCollectionID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>CopyrightDate</th>
+        <th>Publisher</th>
+        <th>Type</th>
+        <th>Pages</th>
+        <th>Recyl'd</th>
+        <th>Location</th>
+        <th>ISBN</th>
+        <th>ISBN13</th>
+        <th>ReadDate</th>
+        <th>Note</th>
+    </tr>
+    </thead>
+    <tbody>
+    <div>
+    </div>
+    </tbody>
+</table>
+<script>
+    var bookCollectionID = 102;
+
+    function setval(bcid) {
+        bookCollectionID = bcid;
+        var urlId = "http://192.168.127.8/books/books_search?BookCollectionID=" + bookCollectionID;
+        $.getJSON(urlId, function (data) {
+            var obj = data['data'];
+            for (var i = 0; i < obj.length; i++) {
+                var tr = "<tr id='replace-me'>" +
+                    "<td>" + obj[i][0] + "</td>" +
+                    "<td>" + obj[i][1] + "</td>" +
+                    "<td>" + obj[i][2] + "</td>" +
+                    "<td>" + obj[i][3] + "</td>" +
+                    "<td>" + obj[i][5] + "</td>" +
+                    "<td>" + obj[i][6] + "</td>" +
+                    "<td>" + obj[i][7] + "</td>" +
+                    "<td>" + obj[i][10] + "</td>" +
+                    "<td>" + obj[i][11] + "</td>" +
+                    "<td>" + obj[i][4] + "</td>" +
+                    "<td>" + obj[i][12] + "</td>" +
+                    "<td>" + obj[i][13] + "</td>" +
+                    "<td>" + obj[i][9] + "</td></tr>";
+                    $("#replace-me").replaceWith(tr);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        var url = "http://192.168.127.8/books/books_search?";
+        if (urlParams.has("author")) {
+            url = url + "author=" + urlParams.get("author");
+        } else if (urlParams.has("title")) {
+            url = url + "title=" + urlParams.get("title");
+        }
+        $.getJSON(url, function (data) {
+            var obj = data['data'];
+            for (var i = 0; i < obj.length; i++) {
+                var tr = "<tr>" +
+                    "<td><button onclick=\"setval(" + obj[i][0] + ")\">" + obj[i][0].toString() + "</button></td>" +
+                    "<td>" + obj[i][1] + "</td>" +
+                    "<td>" + obj[i][2] + "</td>" +
+                    "<td>" + obj[i][3] + "</td>" +
+                    "<td>" + obj[i][7] + "</td>" +
+                    "<td>" + obj[i][13] + "</td></tr>";
+                $("#mytable").append(tr);
+            }
+
+        });
+        var tr = "<tr id='replace-me'>" +
+                "<td></td>" +
+                    "<td>(select a record)</td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td>" +
+                    "<td></td></tr>";
+        $("#sumtable").append(tr);
+    })
+
+</script>
+</body>
+</html>
+
