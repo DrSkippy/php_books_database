@@ -3,9 +3,9 @@ $(document).ready(function () {
     const urlParams = new URLSearchParams(queryString);
     var url = baseApiUrl + "/books_search?";
     if (urlParams.has("author")) {
-        url = url + "author=" + urlParams.get("author");
+        url += "author=" + urlParams.get("author");
     } else if (urlParams.has("title")) {
-        url = url + "title=" + urlParams.get("title");
+        url += "title=" + urlParams.get("title");
     }
     $.getJSON(url, function (data) {
         var obj = data['data'];

@@ -117,7 +117,7 @@ def test_tag_maintenance():
     print(res.json())
 
 def test_status_read(id):
-    ep = ENDPOINT + f"/status/read/{id}"
+    ep = ENDPOINT + f"/status_read/{id}"
     print(f"QUERY={ep}")
     res = requests.get(ep)
     print(res.json())

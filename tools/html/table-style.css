@@ -49,3 +49,36 @@ h1 {
     margin: 18px 0 !important;
     padding: 12px 0 5px 5px;
 }
+
+
+.styled-inner-table {
+    border-collapse: collapse;
+    margin: 25px 20px;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-inner-table thead tr {
+    background-color: #e089c8;
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-inner-table th,
+.styled-inner-table td {
+    padding: 12px 15px;
+}
+
+.styled-inner-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-inner-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-inner-table tbody tr:last-of-type {
+    border-bottom: 2px solid #e089c8;
+}
