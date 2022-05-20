@@ -2,6 +2,7 @@
 <html>
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/php_books_database/tools/html/base.js"></script>
     <link rel="stylesheet" href="table-style.css">
 </head>
 <body>
@@ -22,44 +23,31 @@
     </div>
     </tbody>
 </table>
-<script>
-    $(document).ready(function () {
-        const queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        var url = "http://192.168.127.8/books/books_read";
-        if (urlParams.has("year")) {
-            $.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
-            const year = urlParams.get('year');
-            url = url + "/" + year
-            var url1 = "http://192.168.127.8/books/summary_books_read_by_year/" + year;
-        }
-        $.getJSON(url, function (data) {
-            var obj = data['data'];
-            for (var i = 0; i < obj.length; i++) {
-                var tr = "<tr>" +
-                    "<td>" + obj[i][0] + "</td>" +
-                    "<td>" + obj[i][1] + "</td>" +
-                    "<td>" + obj[i][2] + "</td>" +
-                    "<td>" + obj[i][3] + "</td>" +
-                    "<td>" + obj[i][7] + "</td>" +
-                    "<td>" + obj[i][13] + "</td></tr>";
-                $("#mytable").append(tr);
-            }
-        });
-        if (urlParams.has("year")) {
-            $.getJSON(url1, function (data) {
-                var obj = data['data'];
-                for (var i = 0; i < obj.length; i++) {
-                    var tr = "<tr class='summary-row'>" +
-                        "<td>" + obj[i][0] + "</td><td></td><td></td><td></td>" +
-                        "<td>" + obj[i][1] + "</td>" +
-                        "<td>" + obj[i][2] + "</td></tr>";
-                    $("#mytable").append(tr);
-                }
-            });
-        }
-    });
-</script>
+<h1>Record Detail</h1>
+<table id='sumtable' class="styled-table">
+    <thead>
+    <tr>
+        <th>BookCollectionID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>CopyrightDate</th>
+        <th>Publisher</th>
+        <th>Type</th>
+        <th>Pages</th>
+        <th>Recyl'd</th>
+        <th>Location</th>
+        <th>ISBN</th>
+        <th>ISBN13</th>
+        <th>ReadDate</th>
+        <th>Note</th>
+    </tr>
+    </thead>
+    <tbody>
+    <div>
+    </div>
+    </tbody>
+</table>
+<script src="/php_books_database/tools/html/books_read_by_year_scripts.js"> </script>
 </body>
 </html>
 

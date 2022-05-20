@@ -18,7 +18,7 @@ docker build -t localhost:32000/book-service .
 docker push localhost:32000/book-service
 ```
 
-### Deployment
+### Deployment to K8s
 ```
 kubectl apply -f deployment.yaml 
 kubectl apply -f ingress.yaml 

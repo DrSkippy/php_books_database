@@ -3,6 +3,7 @@ import json
 import requests
 
 ENDPOINT = "http://172.17.0.2:8083"
+ENDPOINT = "http://192.168.127.8"
 
 
 def test_configuration():
@@ -115,6 +116,12 @@ def test_tag_maintenance():
     res = requests.get(ep)
     print(res.json())
 
+def test_status_read(id):
+    ep = ENDPOINT + f"/status/read/{id}"
+    print(f"QUERY={ep}")
+    res = requests.get(ep)
+    print(res.json())
+
 if __name__ == "__main__":
     test_configuration()
     r = test_add_books()
@@ -129,6 +136,7 @@ if __name__ == "__main__":
     test_update_tag_value()
     test_tags_search()
     test_tag_maintenance()
+    test_status_read(1696)
 
     print("""For DB Cleanup:
     

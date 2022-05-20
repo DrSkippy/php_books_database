@@ -1,4 +1,6 @@
 /tools/myconfig.json
 .idea/
 tools/.ipynb_checkpoints/
-tools/bookdbtool/__pycache__/
+__pycache__/
+.DS_Store
+.python-version

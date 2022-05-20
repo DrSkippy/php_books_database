@@ -322,6 +322,23 @@ def tags(book_id=None):
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+@app.route('/status/read/<book_id>')
+def status_read(book_id=None):
+    db = pymysql.connect(**conf)
+    search_str = f"SELECT * FROM `books read` WHERE BookCollctionID = {book_id} ORDER BY ReadDate ASC;"
+    app.logger.debug(search_str)
+    c = db.cursor()
+    header = ["BookCollectionId", "ReadDate", "ReadNote"]
+    try:
+        c.execute(search_str)
+    except pymysql.Error as e:
+        app.logger.error(e)
+        rdata = {"error": str(e)}
+    else:
+        s = c.fetchall()
+        rdata = serialize_rows(s, header)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
 
 @app.route('/update_tag_value/<current>/<updated>')
 def update_tag_value(current, updated):

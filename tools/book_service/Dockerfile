@@ -1,5 +1,5 @@
 
-FROM python:3.8
+FROM python:3.8.12
 RUN apt update && apt upgrade -y
 
 ENV APP /books
