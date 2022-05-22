@@ -127,6 +127,44 @@ def update_read_dates():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+@app.route('/update_edit_read_note', methods=['POST'])
+def update_edit_read_note():
+    """
+    Post Payload:
+    {
+      "BookCollectionID": 1606,
+      "ReadNote": "New note."
+    }
+
+    E.g.
+    curl -X POST -H "Content-type: application/json" -d @./examples/test_update_edit_read_note.json \
+    http://172.17.0.2:5000/update_update_edit_read_note
+
+    :return:
+    """
+    # records should be a single dictionaries including all fields
+    db = pymysql.connect(**conf)
+    record = request.get_json()
+    search_str = "UPDATE `books read` SET "
+    # ReadNote required
+    search_str += "ReadNote=\"{ReadNote}\""
+    search_str += " WHERE BookCollectionID = {BookCollectionID} "
+    app.logger.debug(search_str)
+    rdata = []
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(search_str.format(**record))
+                rdata.append(record)
+            except pymysql.Error as e:
+                app.logger.error(e)
+                rdata.append({"error": str(e)})
+        db.commit()
+    rdata = json.dumps({"update_read": rdata})
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
 @app.route('/update_book_note_status', methods=['POST'])
 def update_book_note_status():
     """
@@ -322,6 +360,7 @@ def tags(book_id=None):
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+
 @app.route('/status_read/<book_id>')
 def status_read(book_id=None):
     db = pymysql.connect(**conf)
@@ -339,6 +378,7 @@ def status_read(book_id=None):
         rdata = serialize_rows(s, header)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
+
 
 @app.route('/update_tag_value/<current>/<updated>')
 def update_tag_value(current, updated):

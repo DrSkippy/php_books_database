@@ -58,10 +58,14 @@ function navigate(idInc) {
 }
 
 function update() {
-    var data = JSON.stringify({
+    var dataRead = JSON.stringify({
+        "BookCollectionID": bookCollectionID,
+        "ReadNote": readReadNoteValue
+    });
+    var dataBook = JSON.stringify({
         "BookCollectionID": bookCollectionID,
         "ReadDate": readReadDate,
-        "ReadNote": readREadNoteValue
+        "ReadNote": readReadNoteValue
     });
     // Creating a XHR object
     var xhr = new XMLHttpRequest();
