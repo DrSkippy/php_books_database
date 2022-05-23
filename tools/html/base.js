@@ -1,10 +1,9 @@
 //const baseApiUrl = "http://192.168.127.8/books";
-
-const baseApiUrl = "http://10.0.0.14/books";
+//const baseApiUrl = "http://10.0.0.14/books";
+const baseApiUrl = "http://192.168.127.13:83";
 var bookCollectionID = 102;
 
 function setval(bcid) {
-    //$.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
     bookCollectionID = bcid;
     var urlId = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
     var urlTag = baseApiUrl + "/tags/" + bookCollectionID;

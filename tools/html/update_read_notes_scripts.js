@@ -40,9 +40,9 @@ function populateFields() {
     document.getElementById('bookTitleField').innerHTML = bookTitle;
     document.getElementById('bookAuthorField').innerHTML = bookAuthor;
     document.getElementById('readReadDateField').innerHTML = readReadDate;
-    document.getElementById('bookNoteField').innerHTML = '<textarea name="bookNoteValue" ' +
+    document.getElementById('bookNoteField').innerHTML = '<textarea id="bookNoteValue" ' +
         'cols="45" rows="5">' + bookNote + '</textarea>';
-    document.getElementById('readReadNoteField').innerHTML = '<textarea name="readReadNoteValue" ' +
+    document.getElementById('readReadNoteField').innerHTML = '<textarea id="readReadNoteValue" ' +
         'cols="45" rows="5">' + readReadNote + '</textarea>';
 }
 
@@ -57,29 +57,32 @@ function navigate(idInc) {
     populateFields();
 }
 
-function update() {
+function update_note() {
+    readNote = document.getElementById("readReadNoteValue").value
+    bookNote = document.getElementById("bookNoteValue").value
+
     var dataRead = JSON.stringify({
         "BookCollectionID": bookCollectionID,
-        "ReadNote": readReadNoteValue
+        "ReadNote": readNote
     });
     var dataBook = JSON.stringify({
         "BookCollectionID": bookCollectionID,
-        "ReadDate": readReadDate,
-        "ReadNote": readReadNoteValue
+        "Note": bookNote
     });
-    // Creating a XHR object
-    var xhr = new XMLHttpRequest();
-    var url = "submit.php";
-    // open a connection
-    xhr.open("POST", url, true);
-    // Set the request header i.e. which type of content you are sending
+    console.log(dataRead);
+    console.log(dataBook);
+
+    var urlBook = baseApiUrl + "/update_book_note_status";
+    var urlRead = baseApiUrl + "/update_edit_read_note";
+
+    // Post the data
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", urlBook, false);
     xhr.setRequestHeader("Content-Type", "application/json");
-    // Create a state change callback
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            // Print received data from server
-            result.innerHTML = this.responseText;
-        }
-    };
-    xhr.send(data);
+    xhr.send(dataBook);
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", urlRead, false);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(dataRead);
+    navigate(1);
 }
