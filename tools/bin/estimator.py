@@ -83,7 +83,6 @@ else:
                     row.append(datetime.datetime.strptime(row[0], FMT))
                     data.append(row)
     data, start_date = day_number(data)
-    print(data)
     est, range = line_fit_and_estimate(data, float(header[1]))
     est_date = start_date + datetime.timedelta(days=est)
     est_date_max = start_date + datetime.timedelta(days=range[0])
