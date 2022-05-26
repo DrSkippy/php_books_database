@@ -8,6 +8,7 @@
 ###################################################
 import csv
 import datetime
+import string
 import sys
 
 import numpy as np
@@ -49,24 +50,45 @@ def line_fit_and_estimate(data, total_pages):
 
 
 ###################################################
-filename = sys.argv[1]
-header = None
-data = []
-with open(filename, "r") as book_file:
-    rdr = csv.reader(book_file)
-    for row in rdr:
-        if header is None:
-            header = row
-        else:
-            row.append(datetime.datetime.strptime(row[0], FMT))
-            data.append(row)
+if len(sys.argv) < 2:
+    # setup and estimate
+    title = input("Enter book title: ")
+    fn = title.strip().lower().replace(" ", "_")
+    filename = f"./book_estimates/{fn}.txt"
+    start_date = input("Enter start date (YYYY-MM-DD): ")
+    start_date = datetime.datetime.strptime(start_date, FMT)
+    pages = int(input("Number of pages: "))
+    print(f"Book Title={title}")
+    print(f"File Name={filename}")
+    print(f"Start Date={start_date}")
+    with open(filename, "w") as of:
+        of.write(f"\"{title}\", {pages}\n")
+        for i in range(30):
+            dt = start_date + datetime.timedelta(days=i)
+            of.write("{},\n".format(dt.strftime(FMT)))
+else:
+    # estimate
+    filename = sys.argv[1]
+    header = None
+    data = []
+    with open(filename, "r") as book_file:
+        rdr = csv.reader(book_file)
+        for row in rdr:
+            if header is None:
+                header = row
+            else:
+                if row[0].startswith("#") or row[1] is None or row[1] == "":
+                    continue
+                else:
+                    row.append(datetime.datetime.strptime(row[0], FMT))
+                    data.append(row)
+    data, start_date = day_number(data)
+    print(data)
+    est, range = line_fit_and_estimate(data, float(header[1]))
+    est_date = start_date + datetime.timedelta(days=est)
+    est_date_max = start_date + datetime.timedelta(days=range[0])
+    est_date_min = start_date + datetime.timedelta(days=range[1])
 
-data, start_date = day_number(data)
-est, range = line_fit_and_estimate(data, float(header[1]))
-est_date = start_date + datetime.timedelta(days=est)
-est_date_max = start_date + datetime.timedelta(days=range[0])
-est_date_min = start_date + datetime.timedelta(days=range[1])
-
-print(f"Book: {header[0]}")
-print("Estimated complete: {}  Earliest: {} Latest: {}".format(est_date.strftime(FMT), est_date_min.strftime(FMT),
-                                                               est_date_max.strftime(FMT)))
+    print(f"Book: {header[0]}")
+    print("Estimated complete: {}  Earliest: {} Latest: {}".format(est_date.strftime(FMT), est_date_min.strftime(FMT),
+                                                                   est_date_max.strftime(FMT)))
