@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    topnavbar();
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     var url = baseApiUrl + "/books_read";

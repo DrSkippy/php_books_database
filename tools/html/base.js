@@ -1,7 +1,16 @@
 //const baseApiUrl = "http://192.168.127.8/books";
 //const baseApiUrl = "http://10.0.0.14/books";
-const baseApiUrl = "http://192.168.127.13:83";
+const baseApiUrl = "http://localhost";
+//const baseApiUrl = "http://192.168.127.13:83";
 var bookCollectionID = 102;
+
+function topnavbar() {
+    document.getElementById("insertTopNavBar").innerHTML = '<div class="topnav">' +
+        '<a href="/php_books_database/tools/html/index.html">Home</a>' +
+        '<a href="/php_books_database/tools/html/progress.html">Yearly Reading Progress</a>' +
+        '<a href="/php_books_database/tools/html/books_read_by_year.html">Books Read</a>' +
+        '<a href="/php_books_database/tools/html/update_read_notes.html">Update Notes</a></div>';
+}
 
 function setval(bcid) {
     bookCollectionID = bcid;

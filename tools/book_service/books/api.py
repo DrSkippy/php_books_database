@@ -242,7 +242,7 @@ def summary_books_read_by_year(target_year=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-def _books_read(target_year):
+def _books_read(target_year=None):
     db = pymysql.connect(**conf)
     search_str = ("SELECT a.*, b.ReadDate "
                   "FROM `book collection` as a JOIN `books read` as b "
@@ -465,7 +465,9 @@ def tag_maintenance():
     return Response(response=rdata, status=200, headers=response_headers)
 
 @app.route("/image/year_progress_comparison.png")
-def year_progress_comparison():
+@app.route("/image/year_progress_comparison.png/<window>")
+def year_progress_comparison(window=15):
+    window = int(window)
     img = BytesIO()
     _, s, h = _books_read()
     df1 = pd.DataFrame(s, columns=h)
@@ -474,16 +476,18 @@ def year_progress_comparison():
     df1 = df1.groupby(df1.index.to_period('y')).cumsum().reset_index()
     df1["Day"] = df1.ReadDate.apply(lambda x: x.dayofyear)
     df1["Year"] = df1.ReadDate.apply(lambda x: x.year)
-    fig_size = [12,12]
+    fig_size = [8,8]
     xlim = [0,365]
     ylim = [0,max(df1.Pages)]
     years = df1.Year.unique()[-window:].tolist()
+    current_year = max(years)
     y = years.pop(0)
     _df = df1.loc[df1.Year == y]
     ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, label=y)
     for y in years:
         _df = df1.loc[df1.Year == y]
-        ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, ax=ax, label=y)
+        lw = 1 if y != current_year else 4
+        ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, ax=ax, label=y, lw=lw)
     plt.savefig(img, format='png')
     img.seek(0)
     return send_file(img, mimetype='image/png')

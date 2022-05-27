@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    topnavbar();
     var url1 = baseApiUrl + "/summary_books_read_by_year";
     $.getJSON(url1, function (data) {
         var obj = data['data'];

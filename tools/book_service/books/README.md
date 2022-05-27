@@ -10,7 +10,14 @@
 8. Add tags to book record
 9. Search for books by tag
 
+## BUILD and TEST
 
+On OSX: 
+```angular2html
+docker build . -t book_service
+docker run -p 127.0.0.1:80:8083 book_service
+http://localhost/configuration
+```
 ## BUILD and DEPLOY
 
 ```angular2html

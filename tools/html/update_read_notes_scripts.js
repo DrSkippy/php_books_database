@@ -6,7 +6,7 @@ var readReadNote = "Read Note";
 var idArrayIndex = 0;
 
 $(document).ready(function () {
-
+    topnavbar();
     $.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
 
     const queryString = window.location.search;
