@@ -1,4 +1,4 @@
-__version__ = '0.5.3'
+__version__ = '0.6.0'
 
 import pymysql
 from flask import Flask, Response, request, send_file
