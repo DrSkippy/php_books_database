@@ -1,7 +1,10 @@
 __version__ = '0.5.3'
 
 import pymysql
-from flask import Flask, Response, request
+from flask import Flask, Response, request, send_file
+from io import BytesIO
+import pandas as pd
+from matplotlib import pylab as plt
 
 from books_util import *
 
@@ -239,9 +242,7 @@ def summary_books_read_by_year(target_year=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/books_read')
-@app.route('/books_read/<target_year>')
-def books_read(target_year=None):
+def _books_read(target_year):
     db = pymysql.connect(**conf)
     search_str = ("SELECT a.*, b.ReadDate "
                   "FROM `book collection` as a JOIN `books read` as b "
@@ -262,6 +263,12 @@ def books_read(target_year=None):
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
+    return rdata, s, header
+
+@app.route('/books_read')
+@app.route('/books_read/<target_year>')
+def books_read(target_year=None):
+    rdata, _, _ = _books_read(target_year)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -457,6 +464,29 @@ def tag_maintenance():
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+@app.route("/image/year_progress_comparison.png")
+def year_progress_comparison():
+    img = BytesIO()
+    _, s, h = _books_read()
+    df1 = pd.DataFrame(s, columns=h)
+    df1 = df1.set_index("ReadDate")
+    df1.index = pd.to_datetime(df1.index)
+    df1 = df1.groupby(df1.index.to_period('y')).cumsum().reset_index()
+    df1["Day"] = df1.ReadDate.apply(lambda x: x.dayofyear)
+    df1["Year"] = df1.ReadDate.apply(lambda x: x.year)
+    fig_size = [12,12]
+    xlim = [0,365]
+    ylim = [0,max(df1.Pages)]
+    years = df1.Year.unique()[-window:].tolist()
+    y = years.pop(0)
+    _df = df1.loc[df1.Year == y]
+    ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, label=y)
+    for y in years:
+        _df = df1.loc[df1.Year == y]
+        ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, ax=ax, label=y)
+    plt.savefig(img, format='png')
+    img.seek(0)
+    return send_file(img, mimetype='image/png')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
