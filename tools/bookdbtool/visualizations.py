@@ -13,11 +13,14 @@ def running_total_comparison(df1, window=15):
     ylim = [0,max(df1.Pages)]
     years = df1.Year.unique()[-window:].tolist()
     y = years.pop(0)
+    this_year = max(years)
     _df = df1.loc[df1.Year == y]
     ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, label=y)
     for y in years:
         _df = df1.loc[df1.Year == y]
-        ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, ax=ax, label=y)
+        lw = 3 if y == this_year else 1
+        ax = _df.plot("Day", "Pages", figsize=fig_size, xlim=xlim, ylim=ylim, ax=ax, label=y, lw=lw)
+    plt.show()
 
 
 def yearly_comparisons(df, current_year=2020):
