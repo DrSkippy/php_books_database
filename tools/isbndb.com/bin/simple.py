@@ -1,16 +1,13 @@
-import requests as req
 import json
+from lib.isbn_com import api
  
-with open("./config/config.json", "r") as infile:
-    config = json.load(infile)
+isbn_com = api()
 
 print("Enter s to stop")
-h = {'Authorization': config["key"]}
 ans = None
 while ans is None:
     ans = input("Enter isbn13: ")
     if not ans.startswith("s"):
-        url = config["url_isbn"].format(ans)
-        resp = req.get(url, headers=h)
-        print(json.dumps(resp.json(), indent=4, sort_keys=True))
+        res = isbn_com.get_book_by_isbn(ans)
+        print(json.dumps(res, indent=4, sort_keys=True))
         ans = None
