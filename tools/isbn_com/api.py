@@ -1,7 +1,9 @@
 import requests as req
 import json
 
-class endpoint:
+
+
+class Endpoint:
 
     CONFIG_FILENAME = "./configuration.json"
 
@@ -20,4 +22,5 @@ class endpoint:
         for isbn in isbn_list:
             result[isbn] = self.get_book_by_isbn(isbn)
         return result
+
 

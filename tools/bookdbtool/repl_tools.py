@@ -3,10 +3,15 @@ __version__ = '0.5.1'
 import datetime
 import logging
 import os
+import pprint
+
+pp = pprint.PrettyPrinter(indent=3)
 
 import pandas as pd
 import requests
 from columnar import columnar
+
+from isbn_com.api import Endpoint as isbn
 
 
 class BC_Tool:
@@ -27,10 +32,24 @@ class BC_Tool:
         "ISBNNumber13": 12,
         "ReadDate": 13
     }
+    COLLECTION_DB_DICT = {
+        "Title": "",
+        "Author": "",
+        "CopyrightDate": "2000-01-01",
+        "ISBNNumber": "",
+        "ISBNNumber13": "",
+        "PublisherName": "",
+        "CoverType": "Digital, Hard, Soft",
+        "Pages": 0,
+        "Location": "Main Collection, DOWNLOAD, Oversized, Pets, Woodwork, Reference, Birding",
+        "Note": "",
+        "Recycled": "0=No or 1=Yes"
+    }
     MINIMAL_BOOK_INDEXES = [0, 1, 2, 7, 9, 10, 11, 13]
     page_size = 35
     terminal_width = 180
     LINES_TO_ROWS = 1.3
+    DIVIDER_WIDTH = 50
 
     def __init__(self):
         self.result = None
@@ -63,19 +82,7 @@ class BC_Tool:
             print("No data")
 
     def _populate_new_book_record(self):
-        proto = {
-            "Title": "",
-            "Author": "",
-            "CopyrightDate": "2000-01-01",
-            "ISBNNumber": "",
-            "ISBNNumber13": "",
-            "PublisherName": "",
-            "CoverType": "Digital, Hard, Soft",
-            "Pages": 0,
-            "Location": "Main Collection, DOWNLOAD, Oversized, Pets, Woodwork, Reference, Birding",
-            "Note": "",
-            "Recycled": "0=No or 1=Yes"
-        }
+        proto = self.COLLECTION_DB_DICT.copy()
         return self._inputer(proto)
 
     def _populate_update_read_dates(self, id, today=True):
@@ -84,15 +91,36 @@ class BC_Tool:
             "ReadDate": datetime.date.today().strftime("%Y-%m-%d"),
             "ReadNote": ""
         }
-        return self._inputer(proto, exclude_keys=["BookCollectionID", "ReadDate"])
+        return self._inputer(proto, exclude_keys=["BookCollectionID"])
 
     def _inputer(self, proto, exclude_keys=[]):
-        for key in proto:
-            if key in exclude_keys:
-                print(f"{key}: {proto[key]}")
-            else:
-                a = input(f"{key} ({proto[key]}): ")
-                proto[key] = a
+        verified = False
+        while not verified:
+            for key in proto:
+                if key in exclude_keys:
+                    print(f"{key}: {proto[key]}")
+                else:
+                    a = input(f"{key} ({proto[key]}     'a' to accept): ")
+                    a = a.strip()
+                    if a != "a":
+                        proto[key] = a
+            print("*" * self.DIVIDER_WIDTH)
+            pp.pprint(proto)
+            a = input("'x' to try again, 'a' to accept: ")
+            a = a.strip()
+            if a == "a":
+                verified = True
+        return proto
+
+    def _endpoint_to_collection_db(self, isbn_dict):
+        proto = self.COLLECTION_DB_DICT.copy()
+        proto["Title"] = isbn_dict["book"]["title"]
+        proto["Author"] = isbn_dict["book"]["authors"][0]
+        proto["ISBNNumber"] = isbn_dict["book"]["isbn"]
+        proto["ISBNNumber13"] = isbn_dict["book"]["isbn13"]
+        proto["PublisherName"] = isbn_dict["book"]["publisher"]
+        proto["Pages"] = isbn_dict["book"]["pages"]
+        proto["CopyrightDate"] = isbn_dict["book"]["date_published"][:10]  # yyyy-mm-dd
         return proto
 
     def version(self):
@@ -104,13 +132,13 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            print("*" * 50)
+            print("*" * self.DIVIDER_WIDTH)
             print("        Book Records and Reading Database")
-            print("*" * 50)
+            print("*" * self.DIVIDER_WIDTH)
             print("Endpoint:         {}".format(self.ENDPOINT))
             print("Endpoint Version: {}".format(res["version"]))
             print("Client Version:   {}".format(__version__))
-            print("*" * 50)
+            print("*" * self.DIVIDER_WIDTH)
 
     ver = version
 
@@ -173,11 +201,11 @@ class BC_Tool:
         E.g. "science" """
         self.tags_search(match_str)
         for i in self.result:
-            self.book(int(i))
+            self.book(int(i), pagination)
 
     bmt = books_matching_tags
 
-    def book(self, book_collection_id):
+    def book(self, book_collection_id, pagination=True):
         """ Takes 1 argument.
         Enter the BookCollectionID """
         assert isinstance(book_collection_id, int), "Requires in integer Book ID"
@@ -291,19 +319,41 @@ class BC_Tool:
         """ Takes 0 or 1 argument.
         1 (default) or more books to add to the database. """
         records = [self._populate_new_book_record() for i in range(n)]
+        self._add_books(records)
+        return
+
+    ab = add_books
+
+    def add_books_by_isbn(self, book_isbn):
+        """ 1 argument.
+        Add a book to the database by retrieving information from online isbn database. """
+        a = isbn()
+        res_json = a.get_book_by_isbn(book_isbn)
+        if res_json is not None:
+            proto = self._endpoint_to_collection_db(res_json)
+            proto = self._inputer(proto)
+            records = [proto]
+            self._add_books(records)
+        else:
+            logging.error(f"No records found for isbn {book_isbn}.")
+        return
+
+    abi = add_books_by_isbn
+
+    def _add_books(self, records):
         q = self.ENDPOINT + "/add_books"
         try:
             tr = requests.post(q, json=records)
             tres = tr.json()
         except requests.RequestException as e:
             logging.error(e)
+            res = {"errors": [str(e)]}
         else:
             ids = []
             for rec in tres["add_books"]:
                 ids.append(rec["BookCollectionID"])
             self.result = ids
-
-    ab = add_books
+        return
 
     def update_read_books(self, id_list):
         """ Takes 1 argument.
