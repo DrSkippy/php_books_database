@@ -2,6 +2,7 @@ __version__ = '0.5.1'
 
 import datetime
 import logging
+import os
 
 import pandas as pd
 import requests
@@ -11,7 +12,6 @@ from columnar import columnar
 class BC_Tool:
     ENDPOINT = "http://192.168.127.8/books"
     # ENDPOINT = "http://172.17.0.2:8083"
-    PAGE_SIZE = 20
     COLUMN_INDEX = {
         "BookCollectionID": 0,
         "Title": 1,
@@ -28,7 +28,9 @@ class BC_Tool:
         "ReadDate": 13
     }
     MINIMAL_BOOK_INDEXES = [0, 1, 2, 7, 9, 10, 11, 13]
-    TERMINAL_WIDTH = 180
+    page_size = 35
+    terminal_width = 180
+    LINES_TO_ROWS = 1.3
 
     def __init__(self):
         self.result = None
@@ -39,12 +41,24 @@ class BC_Tool:
     def _column_selector(self, data, indexes):
         return [self._row_column_selector(i, indexes) for i in data]
 
-    def _show_table(self, data, header, indexes):
+    def _show_table(self, data, header, indexes, pagination=True):
+        [self.terminal_width, page_size] = os.get_terminal_size()
+        if pagination:
+            self.page_size = int(page_size / self.LINES_TO_ROWS)
+        else:
+            self.page_size = 10000
         try:
-            table = columnar(self._column_selector(data, indexes), self._row_column_selector(header, indexes),
-                             terminal_width=self.TERMINAL_WIDTH,
-                             no_borders=True)
-            print(table)
+            i = 0
+            while i < len(data):
+                d = len(data) - i if len(data) - i < self.page_size else self.page_size
+                print(columnar(self._column_selector(data[i:i + d], indexes),
+                               self._row_column_selector(header, indexes),
+                               terminal_width=self.terminal_width,
+                               no_borders=True))
+                i += d
+                a = input("Return to continue; q to quit...") if i < len(data) else ""
+                if a.startswith("q"):
+                    break
         except TypeError as e:
             print("No data")
 
@@ -100,7 +114,7 @@ class BC_Tool:
 
     ver = version
 
-    def tag_counts(self, tag=None):
+    def tag_counts(self, tag=None, pagination=True):
         """ Takes 0 or 1 arguments.
         If an argument is provided, only tags matching this root string will appear. """
         q = self.ENDPOINT + "/tag_counts"
@@ -112,7 +126,7 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0, 1])
+            self._show_table(res["data"], res["header"], [0, 1], pagination)
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
     tc = tag_counts
@@ -139,7 +153,7 @@ class BC_Tool:
 
     bs = books_search
 
-    def tags_search(self, match_str):
+    def tags_search(self, match_str, pagination=True):
         """ Takes 1 arguments.
         E.g. "dog" """
         q = self.ENDPOINT + f"/tags_search/{match_str}"
@@ -149,17 +163,17 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0, 1, 2])
+            self._show_table(res["data"], res["header"], [0, 1, 2], pagination)
             self.result = set([x[0] for x in res["data"]])
 
     ts = tags_search
 
-    def books_matching_tags(self, match_str):
+    def books_matching_tags(self, match_str, pagination=True):
         """ Takes 1 argument.
         E.g. "science" """
         self.tags_search(match_str)
         for i in self.result:
-            self.book(i)
+            self.book(int(i))
 
     bmt = books_matching_tags
 
@@ -189,10 +203,10 @@ class BC_Tool:
                     if len(tres["tag_list"]) > 0:
                         _template[1] = "\n".join(tres["tag_list"])
                         _data.append(_template)
-                self._show_table(_data, res["header"], self.MINIMAL_BOOK_INDEXES)
+                self._show_table(_data, res["header"], self.MINIMAL_BOOK_INDEXES, pagination)
                 self.result = book_collection_id
 
-    def books_read_by_year_with_summary(self, year=None):
+    def books_read_by_year_with_summary(self, year=None, pagination=True):
         """ Takes 0 or 1 argument.
         Year or None """
         self.result = []
@@ -223,11 +237,11 @@ class BC_Tool:
                     _template[1] = f"Books = {books}"
                     _template[2] = f"Pages = {pages}"
                     _data.append(_template)
-            self._show_table(_data, tres["header"], self.MINIMAL_BOOK_INDEXES)
+            self._show_table(_data, tres["header"], self.MINIMAL_BOOK_INDEXES, pagination)
 
     brys = books_read_by_year_with_summary
 
-    def books_read_by_year(self, year=None):
+    def books_read_by_year(self, year=None, pagination=True):
         """ Takes 0 or 1 argument.
         Year or None """
         q = self.ENDPOINT + "/books_read"
@@ -239,12 +253,12 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(tres["data"], tres["header"], self.MINIMAL_BOOK_INDEXES)
+            self._show_table(tres["data"], tres["header"], self.MINIMAL_BOOK_INDEXES, pagination)
             self.result = pd.DataFrame(tres['data'], columns=tres["header"])
 
     bry = books_read_by_year
 
-    def summary_books_read_by_year(self, year=None, show=True):
+    def summary_books_read_by_year(self, year=None, show=True, pagination=True):
         """ Takes 0 or 1 argument.
         Year or None """
         q = self.ENDPOINT + "/summary_books_read_by_year"
@@ -256,7 +270,7 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0, 1, 2]) if show else None
+            self._show_table(res["data"], res["header"], [0, 1, 2], pagination) if show else None
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
     sbry = summary_books_read_by_year
@@ -309,7 +323,7 @@ class BC_Tool:
 
     urb = update_read_books
 
-    def update_tag_value(self, value, new_value):
+    def update_tag_value(self, value, new_value, pagination=True):
         """ Takes 2 arguments,
         current value of tag and new value of tag """
         q = self.ENDPOINT + f"/update_tag_value/{value}/{new_value}"
@@ -319,7 +333,7 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0, 1, 2])
+            self._show_table(res["data"], res["header"], [0, 1, 2], pagination)
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
     def add_tags(self, book_collection_id, tags=[]):
