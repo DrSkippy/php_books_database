@@ -1,13 +1,13 @@
 import requests as req
 import json
 
-class api:
+class endpoint:
 
-    CONFIG_FILENAME = "./config/config.json"
+    CONFIG_FILENAME = "./configuration.json"
 
     def __init__(self):
         with open(self.CONFIG_FILENAME, "r") as infile:
-            self.config = json.load(infile)
+            self.config = json.load(infile)["isbn_com"]
 
     def get_book_by_isbn(self, isbn=None):
         headers = {'Authorization': self.config["key"]}

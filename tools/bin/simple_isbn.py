@@ -1,7 +1,7 @@
 import json
-from lib.isbn_com import api
+from isbn_com.api import endpoint as isbn
  
-isbn_com = api()
+isbn_com = isbn()
 
 print("Enter s to stop")
 ans = None
