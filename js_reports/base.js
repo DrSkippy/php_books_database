@@ -6,10 +6,10 @@ var bookCollectionID = 102;
 
 function topnavbar() {
     document.getElementById("insertTopNavBar").innerHTML = '<div class="topnav">' +
-        '<a href="/php_books_database/tools/html/index.html">Home</a>' +
-        '<a href="/php_books_database/tools/html/progress.html">Yearly Reading Progress</a>' +
-        '<a href="/php_books_database/tools/html/books_read_by_year.html">Books Read</a>' +
-        '<a href="/php_books_database/tools/html/update_read_notes.html">Update Notes</a></div>';
+        '<a href="/php_books_database/js_reports/index.html">Home</a>' +
+        '<a href="/php_books_database/js_reports/progress.html">Yearly Reading Progress</a>' +
+        '<a href="/php_books_database/js_reports/books_read_by_year.html">Books Read</a>' +
+        '<a href="/php_books_database/js_reports/update_read_notes.html">Update Notes</a></div>';
 }
 
 function setval(bcid) {

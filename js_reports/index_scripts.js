@@ -4,7 +4,7 @@ $(document).ready(function () {
     $.getJSON(url1, function (data) {
         var obj = data['data'];
         for (var i = 0; i < obj.length; i++) {
-            var url = new URL("/php_books_database/tools/html/books_read_by_year.html", window.location);
+            var url = new URL("/php_books_database/js_reports/books_read_by_year.html", window.location);
             url.searchParams.append("year", obj[i][0]);
             var tr = "<tr>" +
                 "<td><a href=" + url.href + ">" + obj[i][0] + "</a></td>" +
