@@ -1,3 +1,12 @@
-U2FsdGVkX1/dCmFjvXgKjvGgFdmk0N+jC+SwJswJNfOqNQKg3qs0OIrEOMLpP1jl
-pKd/TvAOqKZxDtMCy86mO8LMDgCnePgUyN/pfgUhbcn4ADyTTAj2y4OyxveHlu6N
-KCrRauGQdRnas0ElcBQFW9a4sFJ5KVV8EMeGaOGhGi4=
+{
+  "database": {
+    "username": "scott",
+    "password": "123_ss_merploft",
+    "database": "scott",
+    "host": "10.0.0.14"
+  },
+  "isbn_com": {
+    "url_isbn": "https://api2.isbndb.com/book/{}",
+    "key": "48036_24022a704759c94327d5b4f25c298415"
+  }
+}
