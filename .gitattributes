@@ -1,4 +1,3 @@
 #pattern  filter=crypt diff=crypt merge=crypt
 db_header.php filter=crypt diff=crypt merge=crypt
 configuration.json filter=crypt diff=crypt merge=crypt
-config.json filter=crypt diff=crypt merge=crypt
