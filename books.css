@@ -17,9 +17,16 @@ p {
 }
 
 h1 {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1.6em;
-  color: var(--deep-taupe);
+    background: var(--slate-gray);
+    /* box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5); */
+    color: #FFFFFF;
+    font-family: sans-serif;
+    font-size: 1.1em;
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    margin: 18px 0 !important;
+    padding: 12px 0 5px 5px;
 }
 
 body {
@@ -34,11 +41,11 @@ table {
   margin: 2px;
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: 12px;
-  color: var(--slate-gray);
+  color: var(--deep-taupe);
 }
 
 table th {
-  color: var(--slate-gray);
+  color: var(--deep-taupe);
 }
 
 .redtext {

@@ -10,7 +10,7 @@
 include('header.php');
 ?>
 
-<h1>Browse book collection</h1>
+<h1>Browse Book Collection</h1>
 
 <?php
 $debug = 0;
