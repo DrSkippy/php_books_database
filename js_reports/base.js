@@ -1,6 +1,6 @@
 //const baseApiUrl = "http://192.168.127.8/books";
-//const baseApiUrl = "http://10.0.0.14/books";
-const baseApiUrl = "http://localhost";
+const baseApiUrl = "http://10.0.0.14/books";
+//const baseApiUrl = "http://localhost";
 //const baseApiUrl = "http://192.168.127.13:83";
 var bookCollectionID = 102;
 
