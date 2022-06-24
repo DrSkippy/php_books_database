@@ -1,3 +1,5 @@
+# Previously this. Now use named colors from colors.css
+#
 # http://colorschemedesigner.com/#0W21Tw0w0w0w0
 #
 # Primary Color:
@@ -14,32 +16,32 @@
 p {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: 1.0em;
-  color: #A66E00;
+  color: var(--deep-taupe);
 }
 
 h1 {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 1.6em;
-  color: #A66E00;
+  color: var(--deep-taupe);
 }
 
 body {
   margin: 2px;
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: 12px;
-  color: #A66E00;
-  background-color: #FFBE40;
+  color: var(--slate-gray);
+  background-color: var(--aquamarine-light );
 }
 
 table {
   margin: 2px;
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: 12px;
-  color: #06276F;
+  color: var(--aquamarine-light );
 }
 
 table th {
-  color: #1142AA;
+  color: var(--slate-gray);
 }
 
 .redtext {
@@ -47,25 +49,25 @@ table th {
 }
 
 a {
-  color: #2A4580;
+  color: var(--slate-gray);
   text-decoration: none;
   font-weight: bold;
   padding: 2px 4px 2px 4px;
 }
 
 a:link {
-  color: #2A4580;
+  color: var(--slate-gray);
 
 }
 
 a:visited {
-  color: #2A4580;
+  color: var(--slate-gray);
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: none;
-  background-color: #FFCF73;
+  background-color: var(--umber);
 }
 
 a:active {
@@ -75,7 +77,7 @@ a:active {
 .tags {
   padding: 2px 4px 2px 4px;
   background-color: #white;
-  color: #A66E00;
+  color: var(--umber);
   font-style: italic;
   font-weight: bold;
 }

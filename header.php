@@ -8,6 +8,7 @@
 <html>
 <head>
 <link href="books.css" rel="stylesheet" type="text/css"/>
+<link href="colors.css" rel="stylesheet" type="text/css"/>
 <link rel="shortcut icon" href="./favicon.ico" mce_href="./favicon.ico"/>
 </head>
 <body>
