@@ -59,9 +59,6 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
         }
         $where_str = $where_str . ' (b.ReadDate = "0000-00-00" OR b.ReadDate = "")';
     }
-// $search_str = 'SELECT BookCollectionID, Title, Author, CopyrightDate, ISBNNumber, PublisherName, CoverType,
-// Pages, LastRead, PreviouslyRead, Category, Note, Recycled, Location, ISBNNumber13 FROM `book collection` ' .
-// $where_str . ' ORDER BY ' . $_REQUEST['search_order'];
     $search_str = 'SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, a.ISBNNumber, a.PublisherName, ';
     $search_str .= ' a.CoverType, a.Pages, b.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
     $search_str .= ' FROM `book collection` a JOIN `books read`  b ';
@@ -111,7 +108,7 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
     $row      = mysqli_fetch_array($result);
     $year_max = substr($row['max'], 0, 4);
     
-    echo '<table>';
+    echo '<table class="styled-table">';
     
     foreach (range($year_min, $year_max) as $year) {
 // $where_str  = 'LastRead BETWEEN "' . $year . '-01-00 00:00:00" AND "' . ($year + 1) .
