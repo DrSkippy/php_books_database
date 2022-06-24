@@ -7,7 +7,7 @@
 --->
 
 <?php
-echo '<tr>';
+echo '<tr><thead>';
 if (isset($_REQUEST['chk_author'])) {
     echo '<th>AUTHOR</th>';
 }
@@ -41,5 +41,5 @@ if (isset($_REQUEST['chk_recycled'])) {
 if (isset($_REQUEST['chk_covertype'])) {
     echo '<th>COVER</th>';
 }
-echo '</tr>';
+echo '</thead></tr>';
 ?>
