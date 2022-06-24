@@ -319,8 +319,8 @@ if ($_REQUEST['searchtype'] <> "Title")
 </form>
 <hr>
 <form name="query" action="./report.php">
+<h1>Create Reports</h1>
 <table>
-<tr><td colspan=4><h1>Create Report</h1></td></tr>
 <tr>
 	<td align="right">Column</td>
 	<td align="center">| Display |</td>

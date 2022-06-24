@@ -32,7 +32,7 @@ h1 {
 body {
   margin: 2px;
   font-family: sans-serif;
-  font-size: 12px;
+  #font-size: 12px;
   color: var(--slate-gray);
   background-color: var(--aquamarine-light );
 }
