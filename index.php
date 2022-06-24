@@ -10,7 +10,7 @@
 include('header.php');
 ?>
 
-<table><tr><td><h1>Browse book collection</h1></td>
+<h1>Browse book collection</h1>
 
 <?php
 $debug = 0;
@@ -102,13 +102,6 @@ else if ($_REQUEST['submit'] == 'Update Record') {
         $recycled = 1;
     else
         $recycled = 0;
-// $update_str = 'UPDATE `book collection` SET ' . 'Title="' . $_REQUEST['title'] . '", Author= "' .
-// $_REQUEST['author'] . '", CopyrightDate="' . date("Y-m-d h:m:s", $dt) . '", ISBNNumber13="' .
-// $_REQUEST['isbnnumber13'] . '", ISBNNumber="' . $_REQUEST['isbnnumber'] . '", PublisherName= "' .
-// $_REQUEST['publishername'] . '", CoverType="' . $_REQUEST['covertype'] . '", Pages= "' .
-// $_REQUEST['pages'] . '", LastRead="' . $readdate . '",PreviouslyRead= "' . $previouslyread . '", Location="' .
-// $_REQUEST['location'] . '", Note="' . $_REQUEST['note'] . '", Recycled="' . $recycled . '"
-// WHERE BookCollectionID = ' . $_REQUEST['id'];
     $update_str = 'UPDATE `book collection` SET Title="' . $_REQUEST['title'] . '", ';
     $update_str .= 'Author= "' . $_REQUEST['author'] . '", CopyrightDate="' . date("Y-m-d h:m:s", $dt) . '", ';
     $update_str .= 'ISBNNumber13="' . $_REQUEST['isbnnumber13'] . '", ISBNNumber="' . $_REQUEST['isbnnumber'] . '", ';
@@ -144,13 +137,11 @@ else if ($_REQUEST['submit'] == 'Add Tag') {
     $recordselector = $min_id;
     $searchtype     = 'Author';
 }
-echo '</tr></table>';
 ##########################################
 # Find the record and populate the fields
 # Make sure query return an actual record, if not, move to the next id number
 $no_record = TRUE;
 while ($no_record) {
-//    $search_str = 'SELECT * FROM `book collection` WHERE BookCollectionID = ' . $recordselector;
     $search_str = 'SELECT a.*, b.ReadDate FROM `book collection` as a LEFT JOIN `books read` as b ';
     $search_str .= ' ON a.BookCollectionID=b.BookCollectionID WHERE a.BookCollectionID = ' . $recordselector;
     if ($debug)
