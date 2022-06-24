@@ -134,11 +134,11 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
                 exit('<p>Error performing Sum query: ' . mysqli_error($dbcnx) . '</p>');
             }
             $row1 = mysqli_fetch_array($result1);
-            echo '<tr><td colspan="100%"><h1>' . $year . '</h1></td></tr>';
+            echo '<tr><td align="center" colspan="100%"><h2>' . $year . '</h2></td></tr>';
             include './report_table_header.php';
             include('./report_table.php');
-            echo '<tr><td align="right"><i>' . mysqli_num_rows($result);
-            echo ' Books ** </i></td><td><i> ' . $row1['totalpages'] . ' Pages</i></td></tr>';
+            echo '<tr><td align="right"><i>***' . mysqli_num_rows($result);
+            echo ' Books *** </i></td><td><i> ' . $row1['totalpages'] . ' Pages</i></td></tr>';
             mysqli_free_result($result1);
         }
         mysqli_free_result($result);
