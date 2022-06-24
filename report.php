@@ -61,7 +61,7 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
     }
     $search_str = 'SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, a.ISBNNumber, a.PublisherName, ';
     $search_str .= ' a.CoverType, a.Pages, b.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
-    $search_str .= ' FROM `book collection` a JOIN `books read`  b ';
+    $search_str .= ' FROM `book collection` a LEFT JOIN `books read`  b ';
     $search_str .= ' ON a.BookCollectionID = b.BookCollectionID ' . $where_str;
     $search_str .= ' ORDER BY ' . $_REQUEST['search_order'];
     if ($debug)
@@ -71,7 +71,7 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
         exit('<p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
     }
     
-    echo '<p>' . mysqli_num_rows($result) . ' entries found<hr><table>';
+    echo '<p>' . mysqli_num_rows($result) . ' entries found<hr><table class="styled-table">';
     include './report_table_header.php';
     include './report_table.php';
     
