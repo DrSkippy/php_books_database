@@ -30,8 +30,8 @@ if (!$result) {
     exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
 }
 ?>
-<table cellspacing=5 cellpadding=1 border=0>
-<tr><th>Rank</th><th>Year</th><th>Pages Read</th></tr>
+<table class="styled-table">
+<tr><thead><th>Rank</th><th>Year</th><th>Pages Read</th></thead></tr>
 <?php
 $count = 0;
 while ($row = mysqli_fetch_array($result)) {
