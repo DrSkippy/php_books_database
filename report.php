@@ -111,13 +111,8 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
     echo '<table class="styled-table">';
     
     foreach (range($year_min, $year_max) as $year) {
-// $where_str  = 'LastRead BETWEEN "' . $year . '-01-00 00:00:00" AND "' . ($year + 1) .
-// '-01-00 00:00:00" ORDER BY ' . $_REQUEST['search_order'];
         $where_str  = 'b.ReadDate BETWEEN "' . $year . '-01-00 00:00:00" AND "' . ($year + 1);
         $where_str .= '-01-00 00:00:00" ORDER BY ' . $_REQUEST['search_order'];
-// $search_str = 'SELECT BookCollectionID, Title, Author, CopyrightDate, ISBNNumber, PublisherName, CoverType,
-// Pages, LastRead, PreviouslyRead, Category, Note, Recycled, Location, ISBNNumber13 FROM `book collection`
-// WHERE ' . $where_str;
         $search_str = 'SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, a.ISBNNumber, a.PublisherName, ';
         $search_str .= ' a.CoverType, a.Pages, b.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
         $search_str .= ' FROM `book collection` a JOIN `books read` b ';
@@ -139,7 +134,7 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
                 exit('<p>Error performing Sum query: ' . mysqli_error($dbcnx) . '</p>');
             }
             $row1 = mysqli_fetch_array($result1);
-            echo '<tr><td><br><h1>' . $year . '</h1></td></tr>';
+            echo '<tr><td colspan="100%"><h1>' . $year . '</h1></td></tr>';
             include './report_table_header.php';
             include('./report_table.php');
             echo '<tr><td align="right"><i>' . mysqli_num_rows($result);
