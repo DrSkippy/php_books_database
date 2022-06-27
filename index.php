@@ -85,8 +85,8 @@ else if ($_REQUEST['submit'] == 'Update Record') {
         $readdate       = $_REQUEST['readdate'];
     }
     // if entry is new, add to db
-    $update_str = 'INSERT IGNORE INTO `books read` (BookCollectionID, ReadDate) VALUES ("' . $_REQUEST['id'];
-    $update_str .= '","' . $readdate . '")';
+    $update_str = 'INSERT IGNORE INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES ("' . $_REQUEST['id'];
+    $update_str .= '","' . $readdate . '","' . $readnote . '")';
     if ($debug)
         echo $update_str;
     $result = @mysqli_query($dbcnx, $update_str);
@@ -209,7 +209,7 @@ echo $row['PublisherName'];
 	<td> </td>
 </tr><tr>
 	<td align="right" valign="top">Note:</td>
-	<td colspan="2"><textarea name="note" cols="28" rows="3"><?php
+	<td colspan="2"><textarea name="note" cols="28" rows="5"><?php
 echo $row['Note'];
 ?></textarea>
 	</td>
@@ -275,8 +275,8 @@ if ($row['ReadDate'] != '' and $row['ReadDate'] != '0000-00-00 00:00:00') {
 }
 ?>"></input>
 	<input type="checkbox" name="readtoday"> Today</td>
-	<td> </td>
-	<td align="right">(dates: YYYY-mm-dd)</td>
+	<td colspan="2"><textarea name="note" cols="28" rows="3"><?php
+echo $row['ReadNote'];></td>
 </tr><tr>
 	<td colspan="4"><input type="text" name="newtag" size="6">&nbsp; <input type="submit" name="submit" value="Add Tag"> Tags: <span class="tags"> <?php
 echo $itemtags;
