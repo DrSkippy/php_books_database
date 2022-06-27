@@ -38,7 +38,7 @@ $(document).ready(function () {
             }
         });
     }
-    const idArrayURLEnc = map(idArray, "idArray=").join("&");
+    const idArrayURLEnc = map(idArray, function(x) {"idArray=" + x.toString();}).join("&");
     console.log(idArray);
     console.log(idArrayURLEnc);
     document.getElementById("updatereadnotesurl").innerHTML = '<a href=' +
