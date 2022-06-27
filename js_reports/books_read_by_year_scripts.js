@@ -9,8 +9,12 @@ $(document).ready(function () {
         url = url + "/" + year
         var url1 = baseApiUrl + "/summary_books_read_by_year/" + year;
     }
+    var idArray = [];
     $.getJSON(url, function (data) {
         var obj = data['data'];
+        idArray = obj.map(function(x) {
+            return x[0];
+        });
         for (var i = 0; i < obj.length; i++) {
             var tr = "<tr>" +
                 "<td><button onclick=\"setval(" + obj[i][0] + ")\">" + obj[i][0].toString() + "</button></td>" +
@@ -34,5 +38,6 @@ $(document).ready(function () {
             }
         });
     }
+    console.log(idArray);
     createDetailTableRows();
 });
