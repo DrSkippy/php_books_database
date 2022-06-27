@@ -13,6 +13,7 @@ $(document).ready(function () {
     const urlParams = new URLSearchParams(queryString);
     // ...&idArray[]=1604&idArray{}=1605&idArray[]=1696
     idArray = urlParams.getAll("idArray[]");
+    console.log(idArray);
     populateFields();
 });
 

@@ -17,7 +17,6 @@ http://172.17.0.2:8083/books?Recycled=0
 List of Authors of unrecycled books in alphabetical order:
 ```angular2html
 curl http://172.17.0.2:8083/books?Recycled=0 | jq .data[][1]
-
 ```
 
 Add books:
