@@ -325,7 +325,7 @@ if ($_REQUEST['searchtype'] <> "Title")
 	<td align="right">Column</td>
 	<td align="center">| Display |</td>
 	<td align="center">Order by</td>
-	<td align="right"><a href="./100_day.php">100 Days</a>&nbsp;&nbsp; <a href="./year_rank.php">Year Rank</a></td>
+	<td></td>
 	<td></td>
 </tr><tr>
 	<td align="right">Author</td>

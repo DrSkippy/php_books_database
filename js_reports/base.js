@@ -10,6 +10,7 @@ function topnavbar() {
         '<a href="/php_books_database/index.php">Browse Collection Home</a>' +
         '<a href="/php_books_database/js_reports/progress.html">Yearly Reading Progress</a>' +
         '<a href="/php_books_database/js_reports/books_read_by_year.html">Books Read</a>' +
+        '<a href="/php_books_database/year_rank.php">Year Rank</a>' +
         '<a href="/php_books_database/js_reports/update_read_notes.html">Update Notes</a></div>';
 }
 
