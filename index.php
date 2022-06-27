@@ -5,7 +5,6 @@
 // https://github.com/DrSkippy27/php_books_database
 //
 --->
-
 <?php
 include('header.php');
 ?>
@@ -15,14 +14,13 @@ include('header.php');
 <?php
 $debug = 0;
 include './db_header.php';
-
 #############################################
 # Find the maximum and minimum record numbers
 # for browser limits, allows looping at end.
 $search_str = 'SELECT MAX(BookCollectionID) AS max FROM `book collection`';
 if ($debug)
     echo $search_str;
-$result = @mysqli_query($dbcnx, $search_str);
+$result     = @mysqli_query($dbcnx, $search_str);
 if (!$result) {
     exit('<p>Error performing Max query: ' . mysqli_error($dbcnx) . '</p>');
 }
@@ -31,12 +29,12 @@ $max_id     = $row['max'];
 $search_str = 'SELECT MIN(BookCollectionID) AS min FROM `book collection`';
 if ($debug)
     echo $search_str;
-$result = @mysqli_query($dbcnx, $search_str);
+$result     = @mysqli_query($dbcnx, $search_str);
 if (!$result) {
     exit('<p>Error performing Min query: ' . mysqli_error($dbcnx) . '</p>');
 }
-$row    = mysqli_fetch_array($result);
-$min_id = $row['min'];
+$row        = mysqli_fetch_array($result);
+$min_id     = $row['min'];
 
 #############################################
 # Record displayed on basis of what recordselector is set to.
@@ -56,7 +54,7 @@ if (substr($_REQUEST['submit'], 0, 4) == 'Find') {
     $search_str .= $tmp_min_id . ' AND ' . $max_id;
     if ($debug)
         echo $search_str;
-    $result = @mysqli_query($dbcnx, $search_str);
+    $result     = @mysqli_query($dbcnx, $search_str);
     if (!$result) {
         exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
     }
@@ -89,7 +87,7 @@ else if ($_REQUEST['submit'] == 'Update Record') {
     $update_str .= '","' . $readdate . '","' . $readnote . '")';
     if ($debug)
         echo $update_str;
-    $result = @mysqli_query($dbcnx, $update_str);
+    $result     = @mysqli_query($dbcnx, $update_str);
     if (!$result) {
         exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
     } else {
@@ -123,7 +121,6 @@ else if ($_REQUEST['submit'] == 'Update Record') {
 # Add new tag to this record
 else if ($_REQUEST['submit'] == 'Add Tag') {
     $insert_str = 'INSERT into tags (Tag, BookID) VALUES ("' . $_REQUEST['newtag'] . '","' . $_REQUEST['id'] . '")';
-    
     if ($debug)
         echo $insert_str;
     if ($_REQUEST['newtag'] != '') {
@@ -232,7 +229,7 @@ if (substr($row['CoverType'], 0, 4) == 'Digi')
 <?php
 if ($row['Recycled'])
     echo 'checked';
-?>></input>
+?></input>
 	</td>
 </tr><tr>
 	<td align="right">Location:</td>
@@ -275,7 +272,7 @@ if ($row['ReadDate'] != '' and $row['ReadDate'] != '0000-00-00 00:00:00') {
 }
 ?>"></input>
 	<input type="checkbox" name="readtoday"> Today </td>
-	<td align="right" valign="top">Read Note:</td>
+	<td align="right" valign="top">Read Note:<br>(new only)</td>
 	<td><textarea name="readnote" cols="35" rows="3"><?php
 echo $row['ReadNote'];?></textarea></td>
 </tr><tr>
