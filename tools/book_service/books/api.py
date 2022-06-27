@@ -1,10 +1,12 @@
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 import pymysql
 from flask import Flask, Response, request, send_file
 from io import BytesIO
 import pandas as pd
 from matplotlib import pylab as plt
+from flask_cors import CORS
+
 
 from books_util import *
 
@@ -28,7 +30,7 @@ dictConfig({
 })
 
 app = Flask(__name__)
-
+cors = CORS(app)
 
 @app.route('/configuration')
 def configuration():
