@@ -11,8 +11,8 @@ $(document).ready(function () {
 
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    // ...&idArray[]=1604&idArray[]=1605&idArray[]=1696
-    idArray = urlParams.getAll("idArray[]");
+    // ...&idArray=1604&idArray=1605&idArray=1696
+    idArray = urlParams.getAll("idArray");
     console.log(idArray);
     populateFields();
 });
