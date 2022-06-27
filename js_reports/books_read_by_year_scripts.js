@@ -38,9 +38,11 @@ $(document).ready(function () {
             }
         });
     }
+    const idArrayURLEnc = map(idArray, "idArray=").join("&");
     console.log(idArray);
+    console.log(idArrayURLEnc);
     document.getElementById("updatereadnotesurl").innerHTML = '<a href=' +
-        '"/php_books_database/js_reports/update_read_notes.html">' +
+        '"/php_books_database/js_reports/update_read_notes.html?' + idArrayURLEnc + '">' +
         'Update book read notes for items in this list</a>';
     createDetailTableRows();
 });
