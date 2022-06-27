@@ -9,7 +9,7 @@ $(document).ready(function () {
         url = url + "/" + year
         var url1 = baseApiUrl + "/summary_books_read_by_year/" + year;
     }
-    var idArray = [];
+    var idArray;
     $.getJSON(url, function (data) {
         var obj = data['data'];
         idArray = obj.map(function(x) {
