@@ -12,7 +12,11 @@ def history():
 
 scope_vars = {"bc": rt.BC_Tool(), "history": history}
 
-header = """Welcome to the Book Collection Database REPL!\nWe hope you enjoy your stay!\nFor help use help(bc)."""
-footer = "Thanks for visiting the REPL today!"
+header =  "************************************************************************\n"
+header += "** Welcome to the Book Collection Database REPL!                      **\n"
+header += "** For help, please use help(bc).                                     **\n"
+header += "** Use exit() to leave the REPL.                                      **\n"
+header += "************************************************************************\n"
+footer = "Thanks for visiting the Book Collection REPL today!"
 
 InteractiveConsole(locals=scope_vars).interact(header, footer)

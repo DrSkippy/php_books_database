@@ -85,9 +85,9 @@ class BC_Tool:
         proto = self.COLLECTION_DB_DICT.copy()
         return self._inputer(proto)
 
-    def _populate_update_read_dates(self, id, today=True):
+    def _populate_update_read_dates(self, book_collection_id, today=True):
         proto = {
-            "BookCollectionID": id,
+            "BookCollectionID": book_collection_id,
             "ReadDate": datetime.date.today().strftime("%Y-%m-%d"),
             "ReadNote": ""
         }
@@ -143,8 +143,11 @@ class BC_Tool:
     ver = version
 
     def tag_counts(self, tag=None, pagination=True):
-        """ Takes 0 or 1 arguments.
-        If an argument is provided, only tags matching this root string will appear. """
+        """
+        Arguments
+            tag: String for which you want a tag count. Required.
+            pagination: True or False. Default is True to paginate the results according to the screen size.
+        """
         q = self.ENDPOINT + "/tag_counts"
         if tag is not None:
             q += f"/{tag}"
@@ -159,9 +162,21 @@ class BC_Tool:
 
     tc = tag_counts
 
+    def columns(self):
+        """
+        Show the book collection database columns.
+        """
+        print("\n".join(list(self.COLUMN_INDEX.keys())))
+
     def books_search(self, **query):
-        """ Takes 0 or many arguments.
-        E.g. Title="two citites", Author="Dickens" """
+        """
+        Arguments
+            query is optional, use named variables for columns you wish to match.
+                E.g. bc.book_search(Title="two cities", Author="Dickens")
+
+        Use bc.columns() to see a list of columns.
+        bc.result is a Pandas DataFrame.
+        """
         q = self.ENDPOINT + "/books_search?"
         first = True
         for k, v in query.items():
@@ -182,8 +197,14 @@ class BC_Tool:
     bs = books_search
 
     def tags_search(self, match_str, pagination=True):
-        """ Takes 1 arguments.
-        E.g. "dog" """
+        """
+        Arguments
+            match_str is string that partially aor fully matches a tag in the database.
+            pagination: True or False. Default is True to paginate the results according to the screen size.
+        Returns
+            List of tags matching match_str.
+            bc.result is a list of book collection ids for books with matching tag.
+        """
         q = self.ENDPOINT + f"/tags_search/{match_str}"
         try:
             r = requests.get(q)
@@ -197,8 +218,15 @@ class BC_Tool:
     ts = tags_search
 
     def books_matching_tags(self, match_str, pagination=True):
-        """ Takes 1 argument.
-        E.g. "science" """
+        """
+        Arguments
+            match_str is string that partially aor fully matches a tag in the database.
+            pagination: True or False. Default is True to paginate the results according to the screen size.Takes 1 argument.
+        Returns
+            List of matching tags followed by
+            Book records for books with tags matching match_str.
+            bc.result is a list of book collection ids for books with matching tag.
+        """
         self.tags_search(match_str)
         for i in self.result:
             self.book(int(i), pagination)
@@ -206,8 +234,14 @@ class BC_Tool:
     bmt = books_matching_tags
 
     def book(self, book_collection_id, pagination=True):
-        """ Takes 1 argument.
-        Enter the BookCollectionID """
+        """
+        Argument
+            book_collection_id for the book you wish to retrieve. Required.
+            pagination: True or False. Default is True to paginate the results according to the screen size.Takes 1 argument.
+        Returns
+            Book records with tag list and read status.
+            bc.result is a book collection id.
+        """
         assert isinstance(book_collection_id, int), "Requires in integer Book ID"
         q = self.ENDPOINT + f"/books_search?BookCollectionID={book_collection_id}"
         try:
@@ -235,8 +269,14 @@ class BC_Tool:
                 self.result = book_collection_id
 
     def books_read_by_year_with_summary(self, year=None, pagination=True):
-        """ Takes 0 or 1 argument.
-        Year or None """
+        """
+        Arguments
+            year is the 4 digit year of for which you want a summary. Options, blank returns all books read.
+            pagination: True or False. Default is True to paginate the results according to the screen size.Takes 1 argument.
+        Returns
+            table of books for each year with a yearly summary.
+            bc.result is a list of Pandas DataFrames.
+        """
         self.result = []
         q = self.ENDPOINT + "/summary_books_read_by_year"
         if year is not None:
@@ -270,8 +310,14 @@ class BC_Tool:
     brys = books_read_by_year_with_summary
 
     def books_read_by_year(self, year=None, pagination=True):
-        """ Takes 0 or 1 argument.
-        Year or None """
+        """
+        Arguments
+            year is the 4 digit year of for which you want a list. Options, blank returns all books read.
+            pagination: True or False. Default is True to paginate the results according to the screen size.Takes 1 argument.
+        Returns
+            table of books for years.
+            bc.result is a Pandas DataFrame.
+        """
         q = self.ENDPOINT + "/books_read"
         if year is not None:
             q += f"/{year}"
@@ -287,8 +333,15 @@ class BC_Tool:
     bry = books_read_by_year
 
     def summary_books_read_by_year(self, year=None, show=True, pagination=True):
-        """ Takes 0 or 1 argument.
-        Year or None """
+        """
+        Arguments
+            year is the 4 digit year of for which you want a list. Options, blank returns all books read.
+            show=False will put results in bc.result, but will not print the list
+            pagination: True or False. Default is True to paginate the results according to the screen size.Takes 1 argument.
+        Returns
+            table of books for years.
+            bc.result is a Pandas DataFrame.
+        """
         q = self.ENDPOINT + "/summary_books_read_by_year"
         if year is not None:
             q += f"/{year}"
@@ -304,6 +357,14 @@ class BC_Tool:
     sbry = summary_books_read_by_year
 
     def year_rank(self, df=None, pages=True):
+        """
+        Arguments
+            df is a Pandas Dataframe with summary information (see summary_books_read_by_year). Optional.
+            pages=True sort by pages read per year; False gives sort by books read per year.
+        Returns
+            table of books for years.
+            bc.result is a Pandas DataFrame.
+        """
         if df is None:
             self.summary_books_read_by_year(show=False)
             df = self.result
@@ -316,31 +377,48 @@ class BC_Tool:
         self.result = df
 
     def add_books(self, n=1):
-        """ Takes 0 or 1 argument.
-        1 (default) or more books to add to the database. """
+        """
+        Creates records interactively and adds to the collection.
+        Arguments
+            n is the number of books to add to the collection.
+        Returns
+            None or error
+            bc.result is list of book_collection_ids added.
+        """
+        res = None
         records = [self._populate_new_book_record() for i in range(n)]
-        self._add_books(records)
-        return
+        res = self._add_books(records)
+        return res
 
     ab = add_books
 
-    def add_books_by_isbn(self, book_isbn):
-        """ 1 argument.
-        Add a book to the database by retrieving information from online isbn database. """
+    def add_books_by_isbn(self, book_isbn_list):
+        """
+        Creates records from isbn lookup and adds to the collection.
+        Arguments
+            List of isbns (strings) of the books you wish to add to the collection. Required.
+        Returns
+            None or error
+            bc.result is list of ids added.
+        """
+        assert(isinstance(book_isbn_list, list))
+        res = []
         a = isbn()
-        res_json = a.get_book_by_isbn(book_isbn)
-        if res_json is not None:
-            proto = self._endpoint_to_collection_db(res_json)
-            proto = self._inputer(proto)
-            records = [proto]
-            self._add_books(records)
-        else:
-            logging.error(f"No records found for isbn {book_isbn}.")
-        return
+        for book_isbn in book_isbn_list:
+            res_json = a.get_book_by_isbn(book_isbn)
+            if res_json is not None:
+                proto = self._endpoint_to_collection_db(res_json)
+                proto = self._inputer(proto)
+                records = [proto]
+                res.append(self._add_books(records))
+            else:
+                logging.error(f"No records found for isbn {book_isbn}.")
+        return res
 
     abi = add_books_by_isbn
 
     def _add_books(self, records):
+        res = "Added."
         q = self.ENDPOINT + "/add_books"
         try:
             tr = requests.post(q, json=records)
@@ -349,16 +427,16 @@ class BC_Tool:
             logging.error(e)
             res = {"errors": [str(e)]}
         else:
-            ids = []
+            book_collection_id_list = []
             for rec in tres["add_books"]:
-                ids.append(rec["BookCollectionID"])
-            self.result = ids
-        return
+                book_collection_id_list.append(rec["BookCollectionID"])
+            self.result = book_collection_id_list
+        return res
 
-    def update_read_books(self, id_list):
+    def update_read_books(self, book_collection_id_list):
         """ Takes 1 argument.
         Update records for BookCollectionIds in list provided. """
-        records = [self._populate_update_read_dates(id) for id in id_list]
+        records = [self._populate_update_read_dates(id) for id in book_collection_id_list]
         q = self.ENDPOINT + "/update_read_dates"
         try:
             tr = requests.post(q, json=records)
@@ -366,17 +444,17 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            ids = []
+            new_book_collection_id_list = []
             for rec in tres["update_read_dates"]:
-                ids.append(rec["BookCollectionID"])
-            self.result = ids
+                new_book_collection_id_list.append(rec["BookCollectionID"])
+            self.result = new_book_collection_id_list
 
     urb = update_read_books
 
-    def update_tag_value(self, value, new_value, pagination=True):
+    def update_tag_value(self, tag_value, new_tag_value, pagination=True):
         """ Takes 2 arguments,
         current value of tag and new value of tag """
-        q = self.ENDPOINT + f"/update_tag_value/{value}/{new_value}"
+        q = self.ENDPOINT + f"/update_tag_value/{tag_value}/{new_tag_value}"
         try:
             r = requests.get(q)
             res = r.json()
@@ -388,7 +466,12 @@ class BC_Tool:
 
     def add_tags(self, book_collection_id, tags=[]):
         """ Takes 2 arguments.
-        current BookCollectionID and list of tags to add """
+        Arguments
+            book_collection_id is the BookCollectionID of the target book record
+            tags is a list of tags to add (strings)
+        Returns
+            bc.result is the book_collection_id
+        """
         assert isinstance(book_collection_id, int), "Requires in integer Book ID"
         q = self.ENDPOINT + f"/add_tag/{book_collection_id}/" + "{}"
         result = {"data": [], "error": []}
