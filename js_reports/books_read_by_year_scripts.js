@@ -39,5 +39,8 @@ $(document).ready(function () {
         });
     }
     console.log(idArray);
+    document.getElementById("updatereadnotesurl").innerHTML = '<a href=' +
+        '"/php_books_database/js_reports/update_read_notes.html">' +
+        'Update book read notes for items in this list</a>';
     createDetailTableRows();
 });
