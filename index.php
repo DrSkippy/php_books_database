@@ -142,7 +142,7 @@ else if ($_REQUEST['submit'] == 'Add Tag') {
 # Make sure query return an actual record, if not, move to the next id number
 $no_record = TRUE;
 while ($no_record) {
-    $search_str = 'SELECT a.*, b.ReadDate FROM `book collection` as a LEFT JOIN `books read` as b ';
+    $search_str = 'SELECT a.*, b.ReadDate, b.ReadNote FROM `book collection` as a LEFT JOIN `books read` as b ';
     $search_str .= ' ON a.BookCollectionID=b.BookCollectionID WHERE a.BookCollectionID = ' . $recordselector;
     if ($debug)
         echo $search_str;
@@ -184,11 +184,11 @@ echo ('<input type="hidden" name="rs" value="' . $recordselector . '">');
 <table>
 <tr>
 	<td align="right" width="100">Author:</td>
-	<td><input type="text" size="25" name="author" value="<?php
+	<td><input type="text" size="35" name="author" value="<?php
 echo $row['Author'];
 ?>"></td>
 	<td align="right" width="110">Title:</td>
-	<td><input type="text" size="30" name="title" value="<?php
+	<td><input type="text" size="35" name="title" value="<?php
 echo $row['Title'];
 ?>"></td>
 </tr><tr>
@@ -209,7 +209,7 @@ echo $row['PublisherName'];
 	<td> </td>
 </tr><tr>
 	<td align="right" valign="top">Note:</td>
-	<td colspan="2"><textarea name="note" cols="28" rows="5"><?php
+	<td colspan="2"><textarea name="note" cols="35" rows="5"><?php
 echo $row['Note'];
 ?></textarea>
 	</td>
@@ -274,9 +274,10 @@ if ($row['ReadDate'] != '' and $row['ReadDate'] != '0000-00-00 00:00:00') {
     echo '0000-00-00';
 }
 ?>"></input>
-	<input type="checkbox" name="readtoday"> Today</td>
-	<td colspan="2"><textarea name="note" cols="28" rows="3"><?php
-echo $row['ReadNote'];></td>
+	<input type="checkbox" name="readtoday"> Today </td>
+	<td align="right" valign="top">Read Note:</td>
+	<td><textarea name="readnote" cols="35" rows="3"><?php
+echo $row['ReadNote'];?></textarea></td>
 </tr><tr>
 	<td colspan="4"><input type="text" name="newtag" size="6">&nbsp; <input type="submit" name="submit" value="Add Tag"> Tags: <span class="tags"> <?php
 echo $itemtags;
