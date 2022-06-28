@@ -1,4 +1,4 @@
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 
 import pymysql
 from flask import Flask, Response, request, send_file
@@ -247,7 +247,7 @@ def _summary_books_read_by_year(target_year=None):
 @app.route('/summary_books_read_by_year')
 @app.route('/summary_books_read_by_year/<target_year>')
 def summary_books_read_by_year(target_year=None):
-    rdata, _, _ = _summary_books_read_by_year()
+    rdata, _, _ = _summary_books_read_by_year(target_year)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -522,7 +522,6 @@ def all_years(year=None):
     df.reset_index()
     now = df.loc[df.year == year]
     app.logger.debug(now)
-    app.logger.debug(df)
     fig, axs = plt.subplots(3, 1, figsize = [10, 18])
     df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
     axs[0].axvline(x=int(now["pages read"]), color="red")
