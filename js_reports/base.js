@@ -11,7 +11,7 @@ function topnavbar() {
         '<a href="/php_books_database/js_reports/progress.html">Yearly Progress</a>' +
         '<a href="/php_books_database/js_reports/books_read_by_year.html">Books Read - All</a>' +
         '<a href="/php_books_database/year_rank.php">Years Ranked</a>' +
-        ''</div>';
+        '</div>';
 }
 
 function setval(bcid) {
