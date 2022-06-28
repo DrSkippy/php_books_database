@@ -518,13 +518,12 @@ def all_years(year=None):
     df.sort_values(by=["rank"], inplace=True)
     df.reset_index()
     now = df.loc[df.year == year]
-    fig, axs = plt.subplot(3)
-    fig_size = [10, 6]
-    axs[0] = df.hist("pages read", bins=14, color="darkblue", figsize=fig_size, ax=axs[0])
+    fig, axs = plt.subplots(3, 1, fig_size = [10, 18])
+    df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
     axs[0].axvline(x=int(now["pages read"]), color="red")
-    df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", figsize=fig_size, ax=axs[1])
+    df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", ax=axs[1])
     axs[1].axvline(x=int(now["rank"]) - 1, color="red")
-    df.sort_values("year").plot.bar(x="year", y="pages read", width=.95, color="darkblue", figsize=fig_size, ax=axs[2])
+    df.sort_values("year").plot.bar(x="year", y="pages read", width=.95, color="darkblue", ax=axs[2])
     plt.savefig(img, format='png')
     img.seek(0)
     return send_file(img, mimetype='image/png')
