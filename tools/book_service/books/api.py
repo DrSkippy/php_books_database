@@ -1,4 +1,4 @@
-__version__ = '0.7.0'
+__version__ = '0.7.1'
 
 import pymysql
 from flask import Flask, Response, request, send_file
@@ -6,7 +6,6 @@ from io import BytesIO
 import pandas as pd
 from matplotlib import pylab as plt
 from flask_cors import CORS
-
 
 from books_util import *
 
@@ -31,6 +30,7 @@ dictConfig({
 
 app = Flask(__name__)
 cors = CORS(app)
+
 
 @app.route('/configuration')
 def configuration():
@@ -219,9 +219,7 @@ def update_book_note_status():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/summary_books_read_by_year')
-@app.route('/summary_books_read_by_year/<target_year>')
-def summary_books_read_by_year(target_year=None):
+def _summary_books_read_by_year(target_year=None):
     db = pymysql.connect(**conf)
     search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
                   "FROM `book collection` as a JOIN `books read` as b "
@@ -231,8 +229,9 @@ def summary_books_read_by_year(target_year=None):
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "GROUP BY Year ORDER BY Year ASC"
-    app.logger.debug(search_str)
     header = ["year", "pages read", "books read"]
+    app.logger.debug(search_str)
+    s = None
     c = db.cursor()
     try:
         c.execute(search_str)
@@ -242,6 +241,13 @@ def summary_books_read_by_year(target_year=None):
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
+    return rdata, s, header
+
+
+@app.route('/summary_books_read_by_year')
+@app.route('/summary_books_read_by_year/<target_year>')
+def summary_books_read_by_year(target_year=None):
+    rdata, _, _ = _summary_books_read_by_year()
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -258,6 +264,7 @@ def _books_read(target_year=None):
     search_str += "ORDER BY b.ReadDate"
     header = table_header + ["ReadDate"]
     app.logger.debug(search_str)
+    s = None
     c = db.cursor()
     try:
         c.execute(search_str)
@@ -268,6 +275,7 @@ def _books_read(target_year=None):
         s = c.fetchall()
         rdata = serialize_rows(s, header)
     return rdata, s, header
+
 
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
@@ -468,6 +476,7 @@ def tag_maintenance():
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+
 @app.route("/image/year_progress_comparison.png")
 @app.route("/image/year_progress_comparison.png/<window>")
 def year_progress_comparison(window=15):
@@ -480,9 +489,9 @@ def year_progress_comparison(window=15):
     df1 = df1.groupby(df1.index.to_period('y')).cumsum().reset_index()
     df1["Day"] = df1.ReadDate.apply(lambda x: x.dayofyear)
     df1["Year"] = df1.ReadDate.apply(lambda x: x.year)
-    fig_size = [8,8]
-    xlim = [0,365]
-    ylim = [0,max(df1.Pages)]
+    fig_size = [8, 8]
+    xlim = [0, 365]
+    ylim = [0, max(df1.Pages)]
     years = df1.Year.unique()[-window:].tolist()
     current_year = max(years)
     y = years.pop(0)
@@ -503,8 +512,11 @@ def all_years(year=None):
     img = BytesIO()
     if year is None:
         year = datetime.datetime.now().year
-    _, s, h = _books_read()
+    _, s, h = _summary_books_read_by_year()
     df = pd.DataFrame(s, columns=h)
+    df["rank"] = df["pages read"].rank(ascending=False)
+    df.sort_values(by=["rank"], inplace=True)
+    df.reset_index()
     now = df.loc[df.year == year]
     fig, axs = plt.subplot(3)
     fig_size = [10, 6]
@@ -516,7 +528,6 @@ def all_years(year=None):
     plt.savefig(img, format='png')
     img.seek(0)
     return send_file(img, mimetype='image/png')
-
 
 
 if __name__ == "__main__":
