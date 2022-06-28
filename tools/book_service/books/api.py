@@ -518,7 +518,7 @@ def all_years(year=None):
     df.sort_values(by=["rank"], inplace=True)
     df.reset_index()
     now = df.loc[df.year == year]
-    fig, axs = plt.subplots(3, 1, fig_size = [10, 18])
+    fig, axs = plt.subplots(3, 1, figsize = [10, 18])
     df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
     axs[0].axvline(x=int(now["pages read"]), color="red")
     df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", ax=axs[1])
