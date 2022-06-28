@@ -77,14 +77,25 @@ else if ($_REQUEST['submit'] == '   >   ') {
 }
 # Update record with changes
 else if ($_REQUEST['submit'] == 'Update Record') {
+    # Add or update books read table record if use enters a new date
+    $new_flag = True;
     if ($_REQUEST['readtoday']) {
+        # new date! Don't alter the new_flag
         $readdate       = date('Y-m-d h:m:s');
-    } else {
+    } elseif ($_REQUEST['readdate'] != $readdate and $readdate != "0000-00-00 00:00:00") {
+        # new date! and valid change... Don't alter the new_flag
         $readdate       = $_REQUEST['readdate'];
+    } else {
+        $new_flag = False;
+    };
+    if($new_flag) {
+        $update_str     = 'INSERT IGNORE INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES ("' . $_REQUEST['id'];
+        $update_str    .= '","' . $readdate . '","' . $readnote . '")';
+    } else {
+        $update_str     = 'UPDATE IGNORE INTO `books read` (BookCollectionID, ReadNote) VALUES ("' . $_REQUEST['id'];
+        $update_str    .= '"","' . $readnote . '") WHERE ReadDate = "' . $readdate . '";';
     }
-    // if entry is new, add to db
-    $update_str = 'INSERT IGNORE INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES ("' . $_REQUEST['id'];
-    $update_str .= '","' . $readdate . '","' . $readnote . '")';
+    # execute query
     if ($debug)
         echo $update_str;
     $result     = @mysqli_query($dbcnx, $update_str);
@@ -94,7 +105,7 @@ else if ($_REQUEST['submit'] == 'Update Record') {
         echo '<td>Record ' . $_REQUEST['id'] . ' updated.</td>';
         $recordselector = $_REQUEST['id'];
     }
-
+    # Update book collection table record
     $dt = mktime(0, 0, 0, 1, 1, substr($_REQUEST['copyrightdate'], 0, 4));
     if ($_REQUEST['recycled'] == 'on')
         $recycled = 1;

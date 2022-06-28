@@ -1,4 +1,4 @@
-__version__ = '0.6.1'
+__version__ = '0.7.0'
 
 import pymysql
 from flask import Flask, Response, request, send_file
@@ -69,6 +69,8 @@ def add_books():
     # records should be a list of dictionaries including all fields
     db = pymysql.connect(**conf)
     records = request.get_json()
+    if len(records["CopyrightDate"].strip() == 4):
+        records["CopyrightDate"] += "-01-01 00:00:00"  # make it a valid date string!
     search_str = ("INSERT INTO `book collection` "
                   "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
                   "Location, Note, Recycled) "
@@ -95,8 +97,8 @@ def add_books():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/update_read_dates', methods=['POST'])
-def update_read_dates():
+@app.route('/add_read_dates', methods=['POST'])
+def add_read_dates():
     """
     Post Payload:
     [{
@@ -498,12 +500,12 @@ def year_progress_comparison(window=15):
 @app.route("/image/all_years.png")
 @app.route("/image/all_years.png/<year>")
 def all_years(year=None):
+    img = BytesIO()
     if year is None:
         year = datetime.datetime.now().year
-    now = df.loc[df.year == year]
     _, s, h = _books_read()
     df = pd.DataFrame(s, columns=h)
-    img = BytesIO()
+    now = df.loc[df.year == year]
     fig, axs = plt.subplot(3)
     fig_size = [10, 6]
     axs[0] = df.hist("pages read", bins=14, color="darkblue", figsize=fig_size, ax=axs[0])

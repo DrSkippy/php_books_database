@@ -85,7 +85,7 @@ class BC_Tool:
         proto = self.COLLECTION_DB_DICT.copy()
         return self._inputer(proto)
 
-    def _populate_update_read_dates(self, book_collection_id, today=True):
+    def _populate_add_read_dates(self, book_collection_id, today=True):
         proto = {
             "BookCollectionID": book_collection_id,
             "ReadDate": datetime.date.today().strftime("%Y-%m-%d"),
@@ -120,7 +120,10 @@ class BC_Tool:
         proto["ISBNNumber13"] = isbn_dict["book"]["isbn13"]
         proto["PublisherName"] = isbn_dict["book"]["publisher"]
         proto["Pages"] = isbn_dict["book"]["pages"]
-        proto["CopyrightDate"] = isbn_dict["book"]["date_published"][:10]  # yyyy-mm-dd
+        _pub  = isbn_dict["book"]["date_published"][:10]  # yyyy-mm-dd
+        if len(_pub) == 4:
+            _pub += "-01-01"
+        proto["CopyrightDate"] = _pub
         return proto
 
     def version(self):
@@ -433,11 +436,11 @@ class BC_Tool:
             self.result = book_collection_id_list
         return res
 
-    def update_read_books(self, book_collection_id_list):
+    def add_read_books(self, book_collection_id_list):
         """ Takes 1 argument.
         Update records for BookCollectionIds in list provided. """
-        records = [self._populate_update_read_dates(id) for id in book_collection_id_list]
-        q = self.ENDPOINT + "/update_read_dates"
+        records = [self._populate_add_read_dates(id) for id in book_collection_id_list]
+        q = self.ENDPOINT + "/add_read_dates"
         try:
             tr = requests.post(q, json=records)
             tres = tr.json()
@@ -449,7 +452,7 @@ class BC_Tool:
                 new_book_collection_id_list.append(rec["BookCollectionID"])
             self.result = new_book_collection_id_list
 
-    urb = update_read_books
+    arb = add_read_books
 
     def update_tag_value(self, tag_value, new_tag_value, pagination=True):
         """ Takes 2 arguments,
