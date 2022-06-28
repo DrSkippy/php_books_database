@@ -522,7 +522,7 @@ def all_years(year=None):
     df.reset_index()
     now = df.loc[df.year == year]
     app.logger.debug(now)
-    app.logger.debut(df)
+    app.logger.debug(df)
     fig, axs = plt.subplots(3, 1, figsize = [10, 18])
     df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
     axs[0].axvline(x=int(now["pages read"]), color="red")
