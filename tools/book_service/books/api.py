@@ -516,6 +516,7 @@ def all_years(year=None):
     img = BytesIO()
     _, s, h = _summary_books_read_by_year()
     df = pd.DataFrame(s, columns=h)
+    df['pages read'] = df['pages read'].astype(float)
     df["rank"] = df["pages read"].rank(ascending=False)
     df.sort_values(by=["rank"], inplace=True)
     df.reset_index()
