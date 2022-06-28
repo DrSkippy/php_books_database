@@ -509,22 +509,26 @@ def year_progress_comparison(window=15):
 @app.route("/image/all_years.png")
 @app.route("/image/all_years.png/<year>")
 def all_years(year=None):
-    img = BytesIO()
     if year is None:
         year = datetime.datetime.now().year
+    else:
+        year = int(year)
+    img = BytesIO()
     _, s, h = _summary_books_read_by_year()
     df = pd.DataFrame(s, columns=h)
     df["rank"] = df["pages read"].rank(ascending=False)
     df.sort_values(by=["rank"], inplace=True)
     df.reset_index()
     now = df.loc[df.year == year]
+    app.logger.debug(now)
+    app.logger.debut(df)
     fig, axs = plt.subplots(3, 1, figsize = [10, 18])
     df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
     axs[0].axvline(x=int(now["pages read"]), color="red")
     df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", ax=axs[1])
     axs[1].axvline(x=int(now["rank"]) - 1, color="red")
     df.sort_values("year").plot.bar(x="year", y="pages read", width=.95, color="darkblue", ax=axs[2])
-    plt.savefig(img, format='png')
+    fig.savefig(img, format='png')
     img.seek(0)
     return send_file(img, mimetype='image/png')
 
