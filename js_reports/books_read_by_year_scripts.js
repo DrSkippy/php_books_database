@@ -3,11 +3,21 @@ $(document).ready(function () {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     var url = baseApiUrl + "/books_read";
+    $.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
     if (urlParams.has("year")) {
-        $.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
         const year = urlParams.get('year');
         url = url + "/" + year
-        var url1 = baseApiUrl + "/summary_books_read_by_year/" + year;
+        const url1 = baseApiUrl + "/summary_books_read_by_year/" + year;
+        $.getJSON(url1, function (data) {
+            var obj = data['data'];
+            for (var i = 0; i < obj.length; i++) {
+                var tr = "<tr class='summary-row'>" +
+                    "<td>" + obj[i][0] + "</td><td></td><td></td><td></td>" +
+                    "<td>" + obj[i][1] + "</td>" +
+                    "<td>" + obj[i][2] + "</td></tr>";
+                $("#mytable").append(tr);
+            }
+        });
     }
     var idArray;
     $.getJSON(url, function (data) {
@@ -26,18 +36,6 @@ $(document).ready(function () {
             $("#mytable").append(tr);
         }
     });
-    if (urlParams.has("year")) {
-        $.getJSON(url1, function (data) {
-            var obj = data['data'];
-            for (var i = 0; i < obj.length; i++) {
-                var tr = "<tr class='summary-row'>" +
-                    "<td>" + obj[i][0] + "</td><td></td><td></td><td></td>" +
-                    "<td>" + obj[i][1] + "</td>" +
-                    "<td>" + obj[i][2] + "</td></tr>";
-                $("#mytable").append(tr);
-            }
-        });
-    };
     const idArrayURLEnc = idArray.map(function(x) {return "idArray=" + x.toString();}).join("&");
     console.log(idArray);
     console.log(idArrayURLEnc);
