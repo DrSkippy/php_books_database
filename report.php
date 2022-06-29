@@ -138,7 +138,7 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
             include './report_table_header.php';
             include('./report_table.php');
             echo '<tr><td align="right"><i>***' . mysqli_num_rows($result);
-            echo ' Books *** </i></td><td><i> ' . $row1['totalpages'] . ' Pages</i></td></tr>';
+            echo ' Books *** </i></td><td colspan=100%><i> ' . $row1['totalpages'] . ' Pages</i></td></tr>';
             mysqli_free_result($result1);
         }
         mysqli_free_result($result);
