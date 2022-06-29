@@ -26,16 +26,18 @@ $(document).ready(function () {
             $("#mytable").append(tr);
         }
     });
-    $.getJSON(url1, function (data) {
-        var obj = data['data'];
-        for (var i = 0; i < obj.length; i++) {
-            var tr = "<tr class='summary-row'>" +
-                "<td>" + obj[i][0] + "</td><td></td><td></td><td></td>" +
-                "<td>" + obj[i][1] + "</td>" +
-                "<td>" + obj[i][2] + "</td></tr>";
-            $("#mytable").append(tr);
-        }
-    });
+    if (urlParams.has("year")) {
+        $.getJSON(url1, function (data) {
+            var obj = data['data'];
+            for (var i = 0; i < obj.length; i++) {
+                var tr = "<tr class='summary-row'>" +
+                    "<td>" + obj[i][0] + "</td><td></td><td></td><td></td>" +
+                    "<td>" + obj[i][1] + "</td>" +
+                    "<td>" + obj[i][2] + "</td></tr>";
+                $("#mytable").append(tr);
+            }
+        });
+    };
     const idArrayURLEnc = idArray.map(function(x) {return "idArray=" + x.toString();}).join("&");
     console.log(idArray);
     console.log(idArrayURLEnc);
