@@ -82,10 +82,8 @@ else if ($_REQUEST['submit'] == 'Update Record') {
     if ($_REQUEST['readtoday']) {
         # new date! Don't alter the new_flag
         $readdate       = date('Y-m-d h:m:s');
-    } elseif ($_REQUEST['readdate'] != $readdate and $readdate != "0000-00-00 00:00:00") {
-        # new date! and valid change... Don't alter the new_flag
-        $readdate       = $_REQUEST['readdate'];
     } else {
+        $readdate       = $_REQUEST['readdate'];
         $new_flag = False;
     };
     if($new_flag) {
@@ -98,6 +96,7 @@ else if ($_REQUEST['submit'] == 'Update Record') {
     # execute query
     if ($debug)
         echo $update_str;
+        echo nl2br('\n');
     $result     = @mysqli_query($dbcnx, $update_str);
     if (!$result) {
         exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
