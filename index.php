@@ -90,10 +90,10 @@ else if ($_REQUEST['submit'] == 'Update Record') {
     };
     if($new_flag) {
         $update_str     = 'INSERT IGNORE INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES ("' . $_REQUEST['id'];
-        $update_str    .= '","' . $readdate . '","' . $readnote . '")';
+        $update_str    .= '","' . $readdate . '","' . $_REQUEST['readnote'] . '")';
     } else {
         $update_str     = 'UPDATE IGNORE INTO `books read` (BookCollectionID, ReadNote) VALUES ("' . $_REQUEST['id'];
-        $update_str    .= '"","' . $readnote . '") WHERE ReadDate = "' . $readdate . '";';
+        $update_str    .= '"","' . $_REQUEST['readnote'] . '") WHERE ReadDate = "' . $readdate . '";';
     }
     # execute query
     if ($debug)
