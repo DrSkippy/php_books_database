@@ -4,6 +4,9 @@ var bookAuthor = "Book Author";
 var bookNote = "Book Note";
 var readReadNote = "Read Note";
 var idArrayIndex = 0;
+var idArraySubIndex = 0;
+var subArraySize = 0;
+var idSubInc = 0;
 
 $(document).ready(function () {
     topnavbar();
@@ -19,14 +22,18 @@ $(document).ready(function () {
 
 function populateFields() {
     bookCollectionID = idArray[idArrayIndex];
-
     var urlBook = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
     var urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
 
     $.getJSON(urlRead, function (data) {
         var obj = data['data'];
-        readReadDate = obj[0][1];
-        readReadNote = obj[0][2];
+        subArraySize = obj.length;
+        if (idArraySubIndex <= -1) {
+            // last element in the subArray
+            idArraySubIndex = subArraySize - 1;
+        }
+        readReadDate = obj[idArraySubIndex][1];
+        readReadNote = obj[idArraySubIndex][2];
     });
 
     $.getJSON(urlBook, function (data) {
@@ -47,23 +54,46 @@ function populateFields() {
         'cols="45" rows="5">' + readReadNote + '</textarea>';
 }
 
-function navigate(idInc) {
-    if (idArrayIndex == 0 && idInc == -1) {
-        idArrayIndex = idArray.length - 1;
-    } else if (idArrayIndex == idArray.length - 1 && idInc == 1) {
-        idArrayIndex = 0;
+function navigate(direction) {
+    if (direction == 1) {
+        // moving forward
+        if (idArraySubIndex < subArraySize - 1) {
+            // increment sub index, leave index alone
+            idArraySubIndex += 1;
+        } else {
+            // increment index, set sub index to first element
+            idArraySubIndex = 0;
+            idArrayIndex += 1;
+            if (idArrayIndex == idArray.length - 1) {
+                // wrap index if necessary
+                idArrayIndex = 0;
+            }
+        }
     } else {
-        idArrayIndex += idInc;
+        // moving backward
+        if (idArraySubIndex > 0) {
+            // decrement sub index, leave index alone
+            idArraySubIndex -= 1;
+        } else {
+            // -1 is last element in previous array, see above
+            idArraySubIndex = -1;
+            idArrayIndex -= 1;
+            if (idArrayIndex <= -1) {
+                idArrayIndex = idArray.length;
+            }
+        }
     }
     populateFields();
 }
 
 function update_note() {
     readNote = document.getElementById("readReadNoteValue").value
+    readDate = document.getElementById("readReadDateValue").value
     bookNote = document.getElementById("bookNoteValue").value
 
     var dataRead = JSON.stringify({
         "BookCollectionID": bookCollectionID,
+        "ReadDate": readDate,
         "ReadNote": readNote
     });
     var dataBook = JSON.stringify({

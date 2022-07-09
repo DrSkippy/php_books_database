@@ -1,4 +1,4 @@
-__version__ = '0.7.2'
+__version__ = '0.7.3'
 
 import pymysql
 from flask import Flask, Response, request, send_file
@@ -140,6 +140,7 @@ def update_edit_read_note():
     Post Payload:
     {
       "BookCollectionID": 1606,
+      "ReadDate": "0000-00-00"
       "ReadNote": "New note."
     }
 
@@ -155,7 +156,7 @@ def update_edit_read_note():
     search_str = "UPDATE `books read` SET "
     # ReadNote required
     search_str += "ReadNote=\"{ReadNote}\""
-    search_str += " WHERE BookCollectionID = {BookCollectionID} "
+    search_str += " WHERE BookCollectionID = {BookCollectionID} AND ReadDate = {ReadDate}"
     app.logger.debug(search_str)
     rdata = []
     with db:
