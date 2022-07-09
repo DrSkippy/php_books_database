@@ -48,7 +48,8 @@ function populateFields() {
     document.getElementById('readBookCollectionIDField').innerHTML = bookCollectionID;
     document.getElementById('bookTitleField').innerHTML = bookTitle;
     document.getElementById('bookAuthorField').innerHTML = bookAuthor;
-    document.getElementById('readReadDateField').innerHTML = readReadDate;
+    document.getElementById('readReadDateField').innerHTML = '<input type="text" id="bookReadDateValue" ' + 
+        'size=15 value=' + readReadDate + '></input>';
     document.getElementById('bookNoteField').innerHTML = '<textarea id="bookNoteValue" ' +
         'cols="45" rows="5">' + bookNote + '</textarea>';
     document.getElementById('readReadNoteField').innerHTML = '<textarea id="readReadNoteValue" ' +
@@ -90,7 +91,7 @@ function navigate(direction) {
 
 function update_note() {
     readNote = document.getElementById("readReadNoteValue").value
-    readDate = document.getElementById("readReadDateField").value
+    readDate = document.getElementById("bookReadDateValue").value
     bookNote = document.getElementById("bookNoteValue").value
 
     var dataRead = JSON.stringify({
