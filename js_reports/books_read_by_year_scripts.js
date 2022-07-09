@@ -43,4 +43,5 @@ $(document).ready(function () {
         '"/php_books_database/js_reports/update_read_notes.html?' + idArrayURLEnc + '">' +
         'Update book read notes for items in this list</a>';
     createDetailTableRows();
+    $.ajaxSetup({async: true});  // suppress async so the summary row is always at the bottom
 });
