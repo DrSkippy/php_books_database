@@ -28,8 +28,9 @@ function populateFields() {
     $.getJSON(urlRead, function (data) {
         var obj = data['data'];
         subArraySize = obj.length;
-        if (idArraySubIndex <= -1) {
+        if (idArraySubIndex < 0) {
             // last element in the subArray
+            // this happens when navigating backward
             idArraySubIndex = subArraySize - 1;
         }
         readReadDate = obj[idArraySubIndex][1];
@@ -64,7 +65,7 @@ function navigate(direction) {
             // increment index, set sub index to first element
             idArraySubIndex = 0;
             idArrayIndex += 1;
-            if (idArrayIndex == idArray.length - 1) {
+            if (idArrayIndex > idArray.length - 1) {
                 // wrap index if necessary
                 idArrayIndex = 0;
             }
@@ -78,8 +79,9 @@ function navigate(direction) {
             // -1 is last element in previous array, see above
             idArraySubIndex = -1;
             idArrayIndex -= 1;
-            if (idArrayIndex <= -1) {
-                idArrayIndex = idArray.length;
+            if (idArrayIndex < 0) {
+                // wrap index if necessary
+                idArrayIndex = idArray.length - 1;
             }
         }
     }
