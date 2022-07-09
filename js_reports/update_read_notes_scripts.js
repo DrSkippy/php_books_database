@@ -90,7 +90,7 @@ function navigate(direction) {
 
 function update_note() {
     readNote = document.getElementById("readReadNoteValue").value
-    readDate = document.getElementById("readReadDateValue").value
+    readDate = document.getElementById("readReadDateField").value
     bookNote = document.getElementById("bookNoteValue").value
 
     var dataRead = JSON.stringify({
