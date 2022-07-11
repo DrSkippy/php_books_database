@@ -7,3 +7,7 @@ Change the username, password, database host and database names, then create the
 
 
 ![alt text](./img/screen1.png "Browse Collection")
+
+![alt text](./img/reports.png "Browse Collection")
+
+![alt text](./img/yearly_progress.png "Browse Collection")
