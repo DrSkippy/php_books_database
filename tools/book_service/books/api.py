@@ -82,7 +82,7 @@ def add_books():
         with db.cursor() as c:
             for record in records:
                 try:
-                    if len(record["CopyrightDate"].strip() == 4):
+                    if len(record["CopyrightDate"].strip()) == 4:
                         record["CopyrightDate"] += "-01-01 00:00:00"  # make it a valid date string!
                     c.execute(search_str.format(**record))
                     c.execute(book_id_str)
