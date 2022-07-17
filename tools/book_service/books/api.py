@@ -67,10 +67,8 @@ def add_books():
     :return:
     """
     # records should be a list of dictionaries including all fields
-    db = pymysql.connect(**conf)
     records = request.get_json()
-    if len(records["CopyrightDate"].strip() == 4):
-        records["CopyrightDate"] += "-01-01 00:00:00"  # make it a valid date string!
+    db = pymysql.connect(**conf)
     search_str = ("INSERT INTO `book collection` "
                   "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
                   "Location, Note, Recycled) "
@@ -84,6 +82,8 @@ def add_books():
         with db.cursor() as c:
             for record in records:
                 try:
+                    if len(record["CopyrightDate"].strip() == 4):
+                        record["CopyrightDate"] += "-01-01 00:00:00"  # make it a valid date string!
                     c.execute(search_str.format(**record))
                     c.execute(book_id_str)
                     record["BookCollectionID"] = c.fetchall()[0][0]
