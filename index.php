@@ -91,7 +91,7 @@ else if ($_REQUEST['submit'] == 'Update Record') {
         $update_str    .= '","' . $readdate . '","' . $_REQUEST['readnote'] . '")';
     } else {
         $update_str     = 'UPDATE IGNORE INTO `books read` (BookCollectionID, ReadNote) VALUES ("' . $_REQUEST['id'];
-        $update_str    .= '"","' . $_REQUEST['readnote'] . '") WHERE ReadDate = "' . $readdate . '";';
+        $update_str    .= '","' . $_REQUEST['readnote'] . '") WHERE ReadDate = "' . $readdate . '";';
     }
     # execute query
     if ($debug)
