@@ -15,7 +15,8 @@ from isbn_com.api import Endpoint as isbn
 
 
 class BC_Tool:
-    ENDPOINT = "http://192.168.127.8/books"
+    # ENDPOINT = "http://192.168.127.8/books"
+    ENDPOINT = "http://192.168.127.6:83"
     # ENDPOINT = "http://172.17.0.2:8083"
     COLUMN_INDEX = {
         "BookCollectionID": 0,
@@ -118,12 +119,19 @@ class BC_Tool:
         proto["Author"] = isbn_dict["book"]["authors"][0]
         proto["ISBNNumber"] = isbn_dict["book"]["isbn"]
         proto["ISBNNumber13"] = isbn_dict["book"]["isbn13"]
-        proto["PublisherName"] = isbn_dict["book"]["publisher"]
+        try:
+            proto["PublisherName"] = isbn_dict["book"]["publisher"]
+        except KeyError:
+            proto["PublisherName"] = "unknown"
         proto["Pages"] = isbn_dict["book"]["pages"]
-        _pub  = isbn_dict["book"]["date_published"][:10]  # yyyy-mm-dd
-        if len(_pub) == 4:
-            _pub += "-01-01"
-        proto["CopyrightDate"] = _pub
+        try:
+            _pub  = str(isbn_dict["book"]["date_published"])[:10]  # yyyy-mm-dd
+            if len(_pub) == 4:
+                _pub += "-01-01"
+            proto["CopyrightDate"] = _pub
+        except KeyError:
+            proto["CopyrightDate"] = "0000-01-01"
+
         return proto
 
     def version(self):
@@ -413,6 +421,7 @@ class BC_Tool:
                 proto = self._endpoint_to_collection_db(res_json)
                 proto = self._inputer(proto)
                 records = [proto]
+                self.result = proto
                 res.append(self._add_books(records))
             else:
                 logging.error(f"No records found for isbn {book_isbn}.")

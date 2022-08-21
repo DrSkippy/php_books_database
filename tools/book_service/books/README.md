@@ -32,8 +32,25 @@ kubectl apply -f ingress.yaml
 kubectl expose deployment book-service --type=LoadBalancer --port=8083
 ```
 
-### Updated Image
+### Updated Image on K8s
 
 ```angular2html
 kubectl rollout restart deployment/book-service
 ```
+
+### Deploy to Linux Desktop
+
+In base.js, set
+
+```
+const baseApiUrl = "http://192.168.127.6:83";
+```
+
+On Ubuntu Desktop at this IP address, run
+
+```
+scott@scott-ubuntu:~/Working/php_books_database/tools/book_service$ docker run -d -p83:8083 book_service
+361d8b22a39880abddebe142899256eb7e394a7ce2e017844a083e9afe0b4c1d
+```
+
+
