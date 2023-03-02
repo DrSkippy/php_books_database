@@ -10,3 +10,8 @@
 echo date('h:m a d-M-Y');
 ?> | <a href="./index.php">Browse Collection</a> | <a href="./js_reports/index.html">Reports Home</a> | <a href="./add.php">Add Entry</a>   | <a href="./year_rank.php">Years Ranked</a> | <a href="./js_reports/progress.html">Yearly Progress</a>
 <hr>
+<script>
+$(document).ready(function () {
+    topnavbar();
+});
+</script>
