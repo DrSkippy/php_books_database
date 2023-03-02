@@ -15,8 +15,8 @@ from isbn_com.api import Endpoint as isbn
 
 
 class BC_Tool:
-    # ENDPOINT = "http://192.168.127.8/books"
-    ENDPOINT = "http://192.168.127.6:83"
+    ENDPOINT = "http://192.168.127.8/books"
+    # ENDPOINT = "http://192.168.127.6:83"
     # ENDPOINT = "http://172.17.0.2:8083"
     COLUMN_INDEX = {
         "BookCollectionID": 0,
