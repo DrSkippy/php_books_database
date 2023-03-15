@@ -1,3 +1,25 @@
+/*
+ Previously this. Now use named colors from colors.css
+ http://colorschemedesigner.com/0W21Tw0w0w0w0
+ Primary Color:
+ FFA900    BF8F30    A66E00    FFBE40    FFCF73
+ Complementary Color:
+ 1142AA    2A4580    06276F    4573D5    6C8DD5
+*/
+
+
+body {
+    margin: 1px;
+    font-family: sans-serif;
+    color: var(--slate-gray);
+    #background-color: var(--aquamarine-light);
+}
+
+p {
+    font-family: sans-serif;
+    font-size: 1.0em;
+    color: var(--deep-taupe);
+}
 
 .styled-table {
     border-collapse: collapse;
@@ -51,6 +73,19 @@ h1 {
 }
 
 
+h2 {
+    background: var(--umber);
+    /* box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5); */
+    color: #FFFFFF;
+    font-family: sans-serif;
+    font-size: 1.0em;
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    margin: 18px 0 !important;
+    padding: 12px 0 5px 5px;
+}
+
 .styled-inner-table {
     border-collapse: collapse;
     margin: 25px 20px;
@@ -86,28 +121,66 @@ h1 {
 
 /* Add a black background color to the top navigation */
 .topnav {
-  background-color: var(--deep-taupe);
-  overflow: hidden;
+    background-color: var(--deep-taupe);
+    overflow: hidden;
 }
 
 /* Style the links inside the navigation bar */
 .topnav a {
-  float: left;
-  color: var(--green-sheen);
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
+    float: left;
+    color: var(--green-sheen);
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
 }
 
 /* Change the color of links on hover */
 .topnav a:hover {
-  background-color: var(--slate-gray);
-  color: var(--aquamarine);
+    background-color: var(--slate-gray);
+    color: var(--aquamarine);
 }
 
 /* Add a color to the active/current link */
 .topnav a.active {
-  background-color: var(--green-sheen);
-  color: white;
+    background-color: var(--green-sheen);
+    color: white;
 }
+
+
+.redtext {
+    color: #2A4580;
+}
+
+a {
+    color: var(--slate-gray);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 2px 4px 2px 4px;
+}
+
+a:link {
+    color: var(--slate-gray);
+
+}
+
+a:visited {
+    color: var(--slate-gray);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+    background-color: var(--umber);
+}
+
+a:active {
+    text-decoration: none;
+}
+
+.tags {
+    padding: 2px 4px 2px 4px;
+    background-color: #white;
+    color: var(--umber);
+    font-style: italic;
+    font-weight: bold;

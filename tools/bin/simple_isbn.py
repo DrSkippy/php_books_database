@@ -1,6 +1,6 @@
 import json
 from isbn_com.api import Endpoint as isbn
- 
+
 isbn_com = isbn()
 
 print("Enter s to stop")

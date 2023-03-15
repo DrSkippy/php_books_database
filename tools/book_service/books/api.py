@@ -7,7 +7,7 @@ import pandas as pd
 from matplotlib import pylab as plt
 from flask_cors import CORS
 
-from books_util import *
+from api_util import *
 
 conf = get_configuration()
 # server configuration

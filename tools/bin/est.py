@@ -31,8 +31,8 @@ else:
     filename = sys.argv[1]
     data, header = reading_data(filename)
     est_date, est_date_min, est_date_max = estimate_dates(data, header)
-    print("*"*80)
+    print("*" * 80)
     print(f"              Book: {header[0]}")
     print("Estimated Complete: {}  Earliest: {}  Latest: {}".format(est_date.strftime(FMT), est_date_min.strftime(FMT),
-                                                                   est_date_max.strftime(FMT)))
-    print("*"*80)
+                                                                    est_date_max.strftime(FMT)))
+    print("*" * 80)
