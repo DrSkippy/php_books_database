@@ -7,9 +7,9 @@ var bookCollectionID = 102;
 function topnavbar() {
     document.getElementById("insertTopNavBar").innerHTML = '<div class="topnav">' +
         '<a href="/php_books_database/index.php">Browse Collection Home</a>' +
-        '<a href="/php_books_database/library/index.html">Reports Home</a>' +
-        '<a href="/php_books_database/library/progress.html">Yearly Progress</a>' +
-        '<a href="/php_books_database/library/books_read_by_year.html">Books Read - All</a>' +
+        '<a href="/php_books_database/js_reports/index.html">Reports Home</a>' +
+        '<a href="/php_books_database/js_reports/progress.html">Yearly Progress</a>' +
+        '<a href="/php_books_database/js_reports/books_read_by_year.html">Books Read - All</a>' +
         '<a href="/php_books_database/year_rank.php">Years Ranked</a>' +
         '</div>';
 }
