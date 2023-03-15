@@ -352,7 +352,7 @@ if ($_REQUEST['searchtype'] <> "Title")
 	<td align="center"><input type="checkbox" name="chk_copyrightdate" value="CopyrightDate"></td>
 	<td align="center"><input type="radio" name="search_order" value="CopyrightDate, Author"></td>
 	<td></td>
-	<td><input type="radio" name="search_type" value="Author">Author &nbsp;&nbsp;<input type="radio" name="search_type" value="Title" checked>Title &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber">ISBN # &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber13">ISBN13 # &nbsp;&nbsp;<input type="radio" name="search_type" value="Tag">Tag</td>
+	<td><input type="radio" name="search_type" value="Author">Author &nbsp;&nbsp;<input type="radio" name="search_type" value="Title" checked>Title &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber">ISBN # &nbsp;&nbsp;<input type="radio" name="search_type" value="ISBNNumber13">ISBN13 # &nbsp;&nbsp;</td>
 </tr><tr>
 	<td align=right>Date Last Read</td>
 	<td align="center"><input type="checkbox" name="chk_readdate" value="ReadDate"></td>
