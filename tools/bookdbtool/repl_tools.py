@@ -1,4 +1,4 @@
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 import datetime
 import logging
@@ -86,7 +86,7 @@ class BC_Tool:
         proto = self.COLLECTION_DB_DICT.copy()
         return self._inputer(proto)
 
-    def _populate_add_read_dates(self, book_collection_id, today=True):
+    def _populate_add_read_date(self, book_collection_id, today=True):
         proto = {
             "BookCollectionID": book_collection_id,
             "ReadDate": datetime.date.today().strftime("%Y-%m-%d"),
@@ -207,7 +207,7 @@ class BC_Tool:
 
     bs = books_search
 
-    def tags_search(self, match_str, pagination=True):
+    def tags_search(self, match_str, pagination=True, output=True):
         """
         Arguments
             match_str is string that partially aor fully matches a tag in the database.
@@ -223,7 +223,8 @@ class BC_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
-            self._show_table(res["data"], res["header"], [0, 1, 2], pagination)
+            if output:
+                self._show_table(res["data"], res["header"], [0, 1, 2], pagination)
             self.result = set([x[0] for x in res["data"]])
 
     ts = tags_search
@@ -238,7 +239,7 @@ class BC_Tool:
             Book records for books with tags matching match_str.
             bc.result is a list of book collection ids for books with matching tag.
         """
-        self.tags_search(match_str)
+        self.tags_search(match_str, output=False)
         for i in self.result:
             self.book(int(i), pagination)
 
@@ -448,7 +449,7 @@ class BC_Tool:
     def add_read_books(self, book_collection_id_list):
         """ Takes 1 argument.
         Update records for BookCollectionIds in list provided. """
-        records = [self._populate_add_read_dates(id) for id in book_collection_id_list]
+        records = [self._populate_add_read_date(id) for id in book_collection_id_list]
         q = self.ENDPOINT + "/add_read_dates"
         try:
             tr = requests.post(q, json=records)
