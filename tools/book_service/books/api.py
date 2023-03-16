@@ -5,6 +5,7 @@ from io import BytesIO
 import pandas as pd
 from matplotlib import pylab as plt
 from flask_cors import CORS
+import pymysql
 
 from api_util import *
 
