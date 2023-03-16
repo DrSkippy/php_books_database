@@ -125,7 +125,7 @@ class BC_Tool:
             proto["PublisherName"] = "unknown"
         proto["Pages"] = isbn_dict["book"]["pages"]
         try:
-            _pub  = str(isbn_dict["book"]["date_published"])[:10]  # yyyy-mm-dd
+            _pub = str(isbn_dict["book"]["date_published"])[:10]  # yyyy-mm-dd
             if len(_pub) == 4:
                 _pub += "-01-01"
             proto["CopyrightDate"] = _pub
@@ -133,6 +133,22 @@ class BC_Tool:
             proto["CopyrightDate"] = "0000-01-01"
 
         return proto
+
+    def _add_books(self, records):
+        result_message = "Added."
+        q = self.ENDPOINT + "/add_books"
+        try:
+            tr = requests.post(q, json=records)
+            tres = tr.json()
+        except requests.RequestException as e:
+            logging.error(e)
+            result_message = {"errors": [str(e)]}
+        else:
+            book_collection_id_list = []
+            for rec in tres["add_books"]:
+                book_collection_id_list.append(rec["BookCollectionID"])
+            self.result = book_collection_id_list
+        return result_message
 
     def version(self):
         """ Retrieve the back end version. """
@@ -153,6 +169,14 @@ class BC_Tool:
 
     ver = version
 
+    def columns(self):
+        """
+        Show the book collection database columns.
+        """
+        print("\n".join(list(self.COLUMN_INDEX.keys())))
+
+    col = columns
+
     def tag_counts(self, tag=None, pagination=True):
         """
         Arguments
@@ -172,12 +196,6 @@ class BC_Tool:
             self.result = pd.DataFrame(res['data'], columns=res["header"])
 
     tc = tag_counts
-
-    def columns(self):
-        """
-        Show the book collection database columns.
-        """
-        print("\n".join(list(self.COLUMN_INDEX.keys())))
 
     def books_search(self, **query):
         """
@@ -413,7 +431,7 @@ class BC_Tool:
             None or error
             bc.result is list of ids added.
         """
-        assert(isinstance(book_isbn_list, list))
+        assert (isinstance(book_isbn_list, list))
         res = []
         a = isbn()
         for book_isbn in book_isbn_list:
@@ -429,22 +447,6 @@ class BC_Tool:
         return res
 
     abi = add_books_by_isbn
-
-    def _add_books(self, records):
-        res = "Added."
-        q = self.ENDPOINT + "/add_books"
-        try:
-            tr = requests.post(q, json=records)
-            tres = tr.json()
-        except requests.RequestException as e:
-            logging.error(e)
-            res = {"errors": [str(e)]}
-        else:
-            book_collection_id_list = []
-            for rec in tres["add_books"]:
-                book_collection_id_list.append(rec["BookCollectionID"])
-            self.result = book_collection_id_list
-        return res
 
     def add_read_books(self, book_collection_id_list):
         """ Takes 1 argument.
