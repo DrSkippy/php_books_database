@@ -7,7 +7,7 @@ $(document).ready(function () {
         url += "author=" + urlParams.get("author");
     } else if (urlParams.has("title")) {
         url += "title=" + urlParams.get("title");
-    } else if (urlParams.has("tag")) {
+    } else if (urlParams.has("tags")) {
         url += "Tags=" + urlParams.get("tags");
         console.log(url)
     }
