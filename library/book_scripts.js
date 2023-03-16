@@ -9,6 +9,7 @@ $(document).ready(function () {
         url += "title=" + urlParams.get("title");
     } else if (urlParams.has("tag")) {
         url += "Tags=" + urlParams.get("tags");
+        console.log(url)
     }
     $.getJSON(url, function (data) {
         var obj = data['data'];
