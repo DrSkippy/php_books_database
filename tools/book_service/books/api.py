@@ -423,7 +423,7 @@ def update_tag_value(current, updated):
 
 @app.route('/tags_search/<match_str>')
 def tags_search(match_str):
-    rdata, s, header = _tags_search(match_Str)
+    rdata, s, header = _tags_search(match_str)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
