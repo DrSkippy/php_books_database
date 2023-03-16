@@ -7,6 +7,8 @@ $(document).ready(function () {
         url += "author=" + urlParams.get("author");
     } else if (urlParams.has("title")) {
         url += "title=" + urlParams.get("title");
+    } else if (urlParams.has("tag")) {
+        url += "Tags=" + urlParams.get("tags");
     }
     $.getJSON(url, function (data) {
         var obj = data['data'];

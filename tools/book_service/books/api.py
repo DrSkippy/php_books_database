@@ -1,6 +1,5 @@
-__version__ = '0.7.3'
+__version__ = '0.7.4'
 
-import pymysql
 from flask import Flask, Response, request, send_file
 from io import BytesIO
 import pandas as pd
@@ -9,8 +8,8 @@ from flask_cors import CORS
 
 from api_util import *
 
-conf = get_configuration()
 # server configuration
+conf = get_configuration()
 from logging.config import dictConfig
 
 dictConfig({
@@ -296,6 +295,10 @@ def books_search():
             where.append(f"a.{key} = \"{args.get(key)}\"")
         elif key == "ReadDate":
             where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
+        elif key == "Tags":
+            _, s, _ = _tags_search(args.get(key))
+            id_list = str(tuple(s))
+            where.append(f"a.{key} in \"{id_list}\"")
         else:
             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
     where_str = " AND ".join(where)
@@ -419,6 +422,13 @@ def update_tag_value(current, updated):
 
 @app.route('/tags_search/<match_str>')
 def tags_search(match_str):
+    rdata, s, header = _tags_search(match_Str)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+
+def _tags_search(match_str):
     db = pymysql.connect(**conf)
     search_str = ("SELECT * FROM `tags` "
                   f"WHERE Tag LIKE \"%{match_str}%\" "
@@ -434,8 +444,8 @@ def tags_search(match_str):
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    return rdata, s, header
+
 
 
 @app.route('/tag_maintenance')
