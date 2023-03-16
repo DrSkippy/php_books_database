@@ -300,7 +300,7 @@ def books_search():
             _, s, _ = _tags_search(args.get(key))
             id_list = str(tuple([int(x[0]) for x in s]))
             app.logger.debug(id_list)
-            where.append(f"a.{key} in \"{id_list}\"")
+            where.append(f"a.{key} in {id_list}")
         else:
             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
     where_str = " AND ".join(where)
