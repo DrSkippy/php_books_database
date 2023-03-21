@@ -247,22 +247,6 @@ class BC_Tool:
 
     ts = tags_search
 
-    def books_matching_tags(self, match_str, pagination=True):
-        """
-        Arguments
-            match_str is string that partially aor fully matches a tag in the database.
-            pagination: True or False. Default is True to paginate the results according to the screen size.Takes 1 argument.
-        Returns
-            List of matching tags followed by
-            Book records for books with tags matching match_str.
-            bc.result is a list of book collection ids for books with matching tag.
-        """
-        self.tags_search(match_str, output=False)
-        for i in self.result:
-            self.book(int(i), pagination)
-
-    bmt = books_matching_tags
-
     def book(self, book_collection_id, pagination=True):
         """
         Argument

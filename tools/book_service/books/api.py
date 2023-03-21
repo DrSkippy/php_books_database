@@ -153,7 +153,7 @@ def update_edit_read_note():
     # records should be a single dictionaries including all fields
     db = pymysql.connect(**conf)
     record = request.get_json()
-    search_str  = "UPDATE `books read` SET "
+    search_str = "UPDATE `books read` SET "
     search_str += "ReadNote=\"{ReadNote}\" "
     search_str += "WHERE BookCollectionID = \"{BookCollectionID}\" AND ReadDate = \"{ReadDate}\";"
     app.logger.debug(search_str.format(**record))
@@ -429,7 +429,6 @@ def tags_search(match_str):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-
 def _tags_search(match_str):
     db = pymysql.connect(**conf)
     search_str = ("SELECT * FROM `tags` "
@@ -447,7 +446,6 @@ def _tags_search(match_str):
         s = c.fetchall()
         rdata = serialize_rows(s, header)
     return rdata, s, header
-
 
 
 @app.route('/tag_maintenance')
@@ -534,7 +532,7 @@ def all_years(year=None):
     df.reset_index()
     now = df.loc[df.year == year]
     app.logger.debug(now)
-    fig, axs = plt.subplots(3, 1, figsize = [10, 18])
+    fig, axs = plt.subplots(3, 1, figsize=[10, 18])
     df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
     axs[0].axvline(x=int(now["pages read"]), color="red")
     df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", ax=axs[1])
