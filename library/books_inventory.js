@@ -14,7 +14,6 @@ $(document).ready(function () {
                 $("#mytable").append(tr);
             }
         });
-    }
     var idArray;
     $.getJSON(url, function (data) {
         var obj = data['data'];
