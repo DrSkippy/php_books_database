@@ -4,16 +4,6 @@ $(document).ready(function () {
     const urlParams = new URLSearchParams(queryString);
     var url = baseApiUrl + "/books_search?Recycled=0&CoverType=Hard&CoverType=Soft";
     $.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
-        $.getJSON(url1, function (data) {
-            var obj = data['data'];
-            for (var i = 0; i < obj.length; i++) {
-                var tr = "<tr class='summary-row'>" +
-                    "<td>" + obj[i][0] + "</td><td></td><td></td><td></td>" +
-                    "<td>" + obj[i][1] + "</td>" +
-                    "<td>" + obj[i][2] + "</td></tr>";
-                $("#mytable").append(tr);
-            }
-        });
     var idArray;
     $.getJSON(url, function (data) {
         var obj = data['data'];
