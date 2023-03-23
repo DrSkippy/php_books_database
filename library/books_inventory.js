@@ -16,7 +16,7 @@ $(document).ready(function () {
                 "<td>" + obj[i][1] + "</td>" +
                 "<td>" + obj[i][2] + "</td>" +
                 "<td>" + obj[i][3] + "</td>" +
-                "<td>" + obj[i][7] + "</td>" +
+                "<td>" + obj[i][6] + "</td>" +
                 "<td>" + obj[i][13] + "</td></tr>";
             $("#mytable").append(tr);
         }
