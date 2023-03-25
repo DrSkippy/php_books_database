@@ -1,4 +1,4 @@
-__version__ = '0.7.4'
+__version__ = '0.7.5'
 
 from flask import Flask, Response, request, send_file
 from io import BytesIO
@@ -369,8 +369,8 @@ def add_tag(book_id, tag):
     with db:
         with db.cursor() as c:
             try:
-                c.execute(f'INSERT IGNORE INTO `tags labels` SET Label="{tag}";')
-                c.execute(f'SELECT * from `tags labels` WHERE Label="{tag}";')
+                c.execute(f'INSERT IGNORE INTO `tag labels` SET Label="{tag}";')
+                c.execute(f'SELECT * from `tag labels` WHERE Label="{tag}";')
                 tag_id = c.fetchall()[0][0]
                 c.execute('INSERT INTO `books tags` (BookID, TagID) VALUES (%s, %s)', (book_id, tag_id))
                 rdata = json.dumps({"BookID": f"{book_id}", "Tag": f"{tag}", "TagID": f"{tag_id}"})
