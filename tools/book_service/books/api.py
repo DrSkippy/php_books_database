@@ -42,6 +42,10 @@ def configuration():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+##########################################################################
+# ADDS
+##########################################################################
+
 @app.route('/add_books', methods=['POST'])
 def add_books():
     """
@@ -134,6 +138,9 @@ def add_read_dates():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+##########################################################################
+# UPDATES
+##########################################################################
 @app.route('/update_edit_read_note', methods=['POST'])
 def update_edit_read_note():
     """
@@ -208,7 +215,7 @@ def update_book_note_status():
         with db.cursor() as c:
             try:
                 c.execute(search_str.format(**record))
-                print(search_str.format(**record))
+                app.logger.debug(search_str.format(**record))
                 rdata.append(record)
             except pymysql.Error as e:
                 app.logger.error(e)
@@ -219,6 +226,9 @@ def update_book_note_status():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+##########################################################################
+# REPORTS
+##########################################################################
 def _summary_books_read_by_year(target_year=None):
     db = pymysql.connect(**conf)
     search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
@@ -285,6 +295,29 @@ def books_read(target_year=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+@app.route('/status_read/<book_id>')
+def status_read(book_id=None):
+    db = pymysql.connect(**conf)
+    search_str = f"SELECT * FROM `books read` WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;"
+    app.logger.debug(search_str)
+    c = db.cursor()
+    header = ["BookCollectionID", "ReadDate", "ReadNote"]
+    try:
+        c.execute(search_str)
+    except pymysql.Error as e:
+        app.logger.error(e)
+        rdata = {"error": str(e)}
+    else:
+        s = c.fetchall()
+        rdata = serialize_rows(s, header)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+##########################################################################
+# SEARCH
+##########################################################################
+
 @app.route('/books_search')
 def books_search():
     # process any query parameters
@@ -325,6 +358,10 @@ def books_search():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+##########################################################################
+# TAGS
+##########################################################################
+
 @app.route('/add_tag/<book_id>/<tag>', methods=["put"])
 def add_tag(book_id, tag):
     db = pymysql.connect(**conf)
@@ -332,8 +369,11 @@ def add_tag(book_id, tag):
     with db:
         with db.cursor() as c:
             try:
-                c.execute("INSERT IGNORE INTO tags (BookID, Tag) VALUES (%s, %s)", (book_id, tag))
-                rdata = json.dumps({"BookID": f"{id}", "Tag": f"{tag}"})
+                c.execute(f'INSERT IGNORE INTO `tags labels` SET Label="{tag}";')
+                c.execute(f'SELECT * from `tags labels` WHERE Label="{tag}";')
+                tag_id = c.fetchall()[0][0]
+                c.execute('INSERT INTO `books tags` (BookID, TagID) VALUES (%s, %s)', (book_id, tag_id))
+                rdata = json.dumps({"BookID": f"{book_id}", "Tag": f"{tag}", "TagID": f"{tag_id}"})
             except pymysql.Error as e:
                 app.logger.error(e)
                 rdata = json.dumps({"error": str(e)})
@@ -346,10 +386,11 @@ def add_tag(book_id, tag):
 @app.route('/tag_counts/<tag>')
 def tag_counts(tag=None):
     db = pymysql.connect(**conf)
-    search_str = "SELECT Tag, COUNT(Tag) as Count FROM tags"
+    search_str = "SELECT a.Label as Tag, COUNT(b.TagID) as Count"
+    search_str += " FROM `tag labels` a JOIN `books tags` b ON a.TagID =b.TagID"
     if tag is not None:
-        search_str += f" WHERE Tag LIKE \"{tag}%\""
-    search_str += " GROUP BY Tag ORDER BY count DESC, Tag ASC"
+        search_str += f" WHERE Label LIKE \"{tag}%\""
+    search_str += " GROUP BY Label ORDER BY count DESC, Label ASC"
     app.logger.debug(search_str)
     header = ["Tag", "Count"]
     c = db.cursor()
@@ -368,7 +409,9 @@ def tag_counts(tag=None):
 @app.route('/tags/<book_id>')
 def tags(book_id=None):
     db = pymysql.connect(**conf)
-    search_str = f"SELECT Tag FROM tags WHERE BookID = {book_id} ORDER BY Tag"
+    search_str = "SELECT a.Label as Tag"
+    search_str += " FROM `tag labels` a JOIN `books tags` b ON a.TagID =b.TagID"
+    search_str += f" WHERE b.BookID = {book_id} ORDER BY Tag"
     app.logger.debug(search_str)
     c = db.cursor()
     try:
@@ -385,25 +428,6 @@ def tags(book_id=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/status_read/<book_id>')
-def status_read(book_id=None):
-    db = pymysql.connect(**conf)
-    search_str = f"SELECT * FROM `books read` WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;"
-    app.logger.debug(search_str)
-    c = db.cursor()
-    header = ["BookCollectionID", "ReadDate", "ReadNote"]
-    try:
-        c.execute(search_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = {"error": str(e)}
-    else:
-        s = c.fetchall()
-        rdata = serialize_rows(s, header)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
-
-
 @app.route('/update_tag_value/<current>/<updated>')
 def update_tag_value(current, updated):
     db = pymysql.connect(**conf)
@@ -411,7 +435,7 @@ def update_tag_value(current, updated):
         with db.cursor() as c:
             try:
                 _updated = updated.lower().strip(" ")
-                records = c.execute("UPDATE `tags` SET Tag = '{}' WHERE Tag = '{}'".format(
+                records = c.execute("UPDATE `tags labels` SET Label = '{}' WHERE Label = '{}'".format(
                     _updated, current))
                 rdata = json.dumps({"data": {"tag_update": f"{current} >> {updated}", "updated_tags": records}})
             except pymysql.Error as e:
@@ -422,18 +446,12 @@ def update_tag_value(current, updated):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/tags_search/<match_str>')
-def tags_search(match_str):
-    rdata, s, header = _tags_search(match_str)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
-
-
 def _tags_search(match_str):
     db = pymysql.connect(**conf)
-    search_str = ("SELECT * FROM `tags` "
-                  f"WHERE Tag LIKE \"%{match_str}%\" "
-                  "ORDER BY Tag ASC")
+    search_str = ("SELECT a.BookID, b.TagID, b.Label as Tag"
+                  "FROM `books tags` a JOIN `tags labels` b ON a.TagID=b.TagID"
+                  f"WHERE b.Label LIKE \"%{match_str}%\" "
+                  "ORDER BY b.Label ASC")
     header = ["BookCollectionID", "TagID", "Tag"]
     app.logger.debug(search_str)
     c = db.cursor()
@@ -448,45 +466,55 @@ def _tags_search(match_str):
     return rdata, s, header
 
 
-@app.route('/tag_maintenance')
-def tag_maintenance():
-    db = pymysql.connect(**conf)
-    rdata = {"tag_maintenance": {}}
-    with db:
-        with db.cursor() as c:
-            try:
-                # lower case
-                c.execute("UPDATE `tags` SET Tag = TRIM(LOWER(Tag))")
-                db.commit()
-            except pymysql.Error as e:
-                rdata = {"error": [str(e)]}
-                app.logger.error(e)
-            try:
-                # duplicates
-                c.execute("SELECT COUNT(*) FROM tags")
-                a = c.fetchall()
-                rdata["tag_maintenance"]["tags_before"] = a[0][0]
-                c.execute("truncate temp")
-                c.execute("insert into temp (BookID, Tag) select distinct BookID, Tag from tags")
-                c.execute("truncate tags")
-                c.execute("insert into tags (BookID, Tag) select BookID, Tag from temp")
-                c.execute("truncate temp")
-                c.execute("delete from tags where Tag=''")
-                db.commit()
-                c.execute("SELECT COUNT(*) FROM tags")
-                a = c.fetchall()
-                rdata["tag_maintenance"]["tags_after"] = a[0][0]
-            except pymysql.Error as e:
-                app.logger.error(e)
-                if "error" in rdata:
-                    rdata["error"].append(e)
-                else:
-                    rdata = {"error": [str(e)]}
-    rdata = json.dumps(rdata)
+@app.route('/tags_search/<match_str>')
+def tags_search(match_str):
+    rdata, s, header = _tags_search(match_str)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
+# @app.route('/tag_maintenance')
+# def tag_maintenance():
+#     db = pymysql.connect(**conf)
+#     rdata = {"tag_maintenance": {}}
+#     with db:
+#         with db.cursor() as c:
+#             try:
+#                 # lower case
+#                 c.execute("UPDATE `tags` SET Tag = TRIM(LOWER(Tag))")
+#                 db.commit()
+#             except pymysql.Error as e:
+#                 rdata = {"error": [str(e)]}
+#                 app.logger.error(e)
+#             try:
+#                 # duplicates
+#                 c.execute("SELECT COUNT(*) FROM tags")
+#                 a = c.fetchall()
+#                 rdata["tag_maintenance"]["tags_before"] = a[0][0]
+#                 c.execute("truncate temp")
+#                 c.execute("insert into temp (BookID, Tag) select distinct BookID, Tag from tags")
+#                 c.execute("truncate tags")
+#                 c.execute("insert into tags (BookID, Tag) select BookID, Tag from temp")
+#                 c.execute("truncate temp")
+#                 c.execute("delete from tags where Tag=''")
+#                 db.commit()
+#                 c.execute("SELECT COUNT(*) FROM tags")
+#                 a = c.fetchall()
+#                 rdata["tag_maintenance"]["tags_after"] = a[0][0]
+#             except pymysql.Error as e:
+#                 app.logger.error(e)
+#                 if "error" in rdata:
+#                     rdata["error"].append(e)
+#                 else:
+#                     rdata = {"error": [str(e)]}
+#     rdata = json.dumps(rdata)
+#     response_headers = resp_header(rdata)
+#     return Response(response=rdata, status=200, headers=response_headers)
+
+
+##########################################################################
+# IMAGES
+##########################################################################
 @app.route("/image/year_progress_comparison.png")
 @app.route("/image/year_progress_comparison.png/<window>")
 def year_progress_comparison(window=15):
