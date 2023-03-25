@@ -449,9 +449,9 @@ def update_tag_value(current, updated):
 def _tags_search(match_str):
     db = pymysql.connect(**conf)
     search_str = ("SELECT a.BookID, b.TagID, b.Label as Tag"
-                  "FROM `books tags` a JOIN `tags labels` b ON a.TagID=b.TagID"
-                  f"WHERE b.Label LIKE \"%{match_str}%\" "
-                  "ORDER BY b.Label ASC")
+                  " FROM `books tags` a JOIN `tags labels` b ON a.TagID=b.TagID"
+                  f" WHERE b.Label LIKE \"%{match_str}%\" "
+                  " ORDER BY b.Label ASC")
     header = ["BookCollectionID", "TagID", "Tag"]
     app.logger.debug(search_str)
     c = db.cursor()
