@@ -130,7 +130,28 @@ else if ($_REQUEST['submit'] == 'Update Record') {
 }
 # Add new tag to this record
 else if ($_REQUEST['submit'] == 'Add Tag') {
-    $insert_str = 'INSERT into tags (Tag, BookID) VALUES ("' . $_REQUEST['newtag'] . '","' . $_REQUEST['id'] . '")';
+    $insert_str = 'INSERT IGNORE INTO `tag labels` SET Label="' . $_REQUEST['newtag'] . '";';
+    if ($debug)
+        echo $insert_str;
+    if ($_REQUEST['newtag'] != '') {
+        $result = @mysqli_query($dbcnx, $insert_str);
+        if (!$result) {
+            echo ('<p>' . $insert_str . 'Error performing query: ' . mysqli_error($dbcnx) . '</p>');
+            exit();
+        }
+    }
+    $insert_str = 'SELECT TagID from `tag labels` WHERE Label="' . $_REQUEST['newtag'] . '";';
+    if ($debug)
+        echo $insert_str;
+    if ($_REQUEST['newtag'] != '') {
+        $result = @mysqli_query($dbcnx, $insert_str);
+        if (!$result) {
+            echo ('<p>' . $insert_str . 'Error performing query: ' . mysqli_error($dbcnx) . '</p>');
+            exit();
+        }
+    }
+    $row = mysqli_fetch_array($result);
+    $insert_str = 'INSERT INTO `books tags` (BookID, TagID) VALUES (' . $_REQUEST['id'] . ',' . $row["TagID"] . ');';
     if ($debug)
         echo $insert_str;
     if ($_REQUEST['newtag'] != '') {
@@ -168,8 +189,8 @@ while ($no_record) {
     }
 }
 # Once we have found a valid record, populate the tags string for display
-#$tagsearch_str = 'SELECT DISTINCT Tag FROM tags WHERE BookID = ' . $row['BookCollectionID'];
-$tagsearch_str = 'SELECT DISTINCT a.Label FROM `tags labels` a JOIN `books tags` b ON a.TagID = b.TagID WHERE b.BookID = ' . $row['BookCollectionID'];
+$tagsearch_str = 'SELECT a.Label as Tag FROM `tag labels` a JOIN `books tags` b ON a.TagID = b.TagID WHERE b.BookID = ';
+$tagsearch_str .=  $row['BookCollectionID'] . ';';
 if ($debug)
     echo $tagsearch_str;
 $tagresult = @mysqli_query($dbcnx, $tagsearch_str);
