@@ -21,6 +21,14 @@ p {
     color: var(--deep-taupe);
 }
 
+input[type=text] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+
 .styled-table {
     border-collapse: collapse;
     margin: 25px 20px;
