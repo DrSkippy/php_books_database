@@ -168,7 +168,8 @@ while ($no_record) {
     }
 }
 # Once we have found a valid record, populate the tags string for display
-$tagsearch_str = 'SELECT DISTINCT Tag FROM tags WHERE BookID = ' . $row['BookCollectionID'];
+#$tagsearch_str = 'SELECT DISTINCT Tag FROM tags WHERE BookID = ' . $row['BookCollectionID'];
+$tagsearch_str = 'SELECT DISTINCT a.Label FROM `tags labels` a JOIN `books tags` b ON a.TagID = b.TagID WHERE b.BookID = ' . $row['BookCollectionID'];
 if ($debug)
     echo $tagsearch_str;
 $tagresult = @mysqli_query($dbcnx, $tagsearch_str);
