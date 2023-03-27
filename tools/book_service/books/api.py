@@ -166,7 +166,7 @@ def add_books_by_isbn(self, book_isbn_list):
     rdata = json.dumps({"book_records": res})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
-    
+
 
 ##########################################################################
 # UPDATES

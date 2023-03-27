@@ -11,7 +11,7 @@ import pandas as pd
 import requests
 from columnar import columnar
 
-from isbn_com.api import Endpoint as isbn
+from isbn_com import Endpoint as isbn
 
 
 class BC_Tool:
