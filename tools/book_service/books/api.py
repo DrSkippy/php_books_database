@@ -140,7 +140,7 @@ def add_read_dates():
 
 
 @app.route('/add_books_by_isbn', methods=['POST'])
-def add_books_by_isbn(self, book_isbn_list):
+def add_books_by_isbn():
     """
     Creates records from isbn lookup and adds to the collection.
     Arguments
