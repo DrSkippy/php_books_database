@@ -139,8 +139,8 @@ def add_read_dates():
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/add_books_by_isbn', methods=['POST'])
-def add_books_by_isbn():
+@app.route('/books_by_isbn', methods=['POST'])
+def books_by_isbn():
     """
     Creates records from isbn lookup and adds to the collection.
     Arguments
@@ -157,10 +157,7 @@ def add_books_by_isbn():
         res_json = a.get_book_by_isbn(book_isbn)
         if res_json is not None:
             proto = self._endpoint_to_collection_db(res_json)
-            proto = self._inputer(proto)
-            records = [proto]
-            self.result = proto
-            res.append(self._add_books(records))
+            res.append(proto)
         else:
             app.logger.error(f"No records found for isbn {book_isbn}.")
     rdata = json.dumps({"book_records": res})
