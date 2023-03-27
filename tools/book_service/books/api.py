@@ -8,6 +8,7 @@ from flask_cors import CORS
 import pymysql
 
 from api_util import *
+from isbn_com.api import Endpoint as isbn
 
 # server configuration
 conf = get_configuration()
@@ -137,6 +138,35 @@ def add_read_dates():
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+
+@app.route('/add_books_by_isbn', methods=['POST'])
+def add_books_by_isbn(self, book_isbn_list):
+    """
+    Creates records from isbn lookup and adds to the collection.
+    Arguments
+        List of isbns (strings) of the books you wish to add to the collection. Required.
+    Returns
+        None or error
+        bc.result is list of ids added.
+    """
+    db = pymysql.connect(**conf)
+    book_isbn_list = request.get_json()["isbn_list"]
+    res = []
+    a = isbn()
+    for book_isbn in book_isbn_list:
+        res_json = a.get_book_by_isbn(book_isbn)
+        if res_json is not None:
+            proto = self._endpoint_to_collection_db(res_json)
+            proto = self._inputer(proto)
+            records = [proto]
+            self.result = proto
+            res.append(self._add_books(records))
+        else:
+            app.logger.error(f"No records found for isbn {book_isbn}.")
+    rdata = json.dumps({"book_records": res})
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+    
 
 ##########################################################################
 # UPDATES

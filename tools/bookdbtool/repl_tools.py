@@ -131,7 +131,6 @@ class BC_Tool:
             proto["CopyrightDate"] = _pub
         except KeyError:
             proto["CopyrightDate"] = "0000-01-01"
-
         return proto
 
     def _add_books(self, records):
