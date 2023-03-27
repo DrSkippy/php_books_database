@@ -8,7 +8,7 @@ from flask_cors import CORS
 import pymysql
 
 from api_util import *
-from isbn_com.api import Endpoint as isbn
+from isbn_com import Endpoint as isbn
 
 # server configuration
 conf = get_configuration()
