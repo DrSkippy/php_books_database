@@ -18,7 +18,7 @@ class Endpoint:
     }
 
     def __init__(self, conf):
-        self.config = conf["isbn_com"]
+        self.config = conf
 
     def get_book_by_isbn(self, isbn=None):
         headers = {'Authorization': self.config["key"]}

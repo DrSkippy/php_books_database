@@ -11,7 +11,7 @@ from api_util import *
 from isbn_com import Endpoint as isbn
 
 # server configuration
-conf = get_configuration()
+conf, isbn_conf = get_configuration()
 from logging.config import dictConfig
 
 dictConfig({
@@ -149,10 +149,9 @@ def books_by_isbn():
         None or error
         bc.result is list of ids added.
     """
-    db = pymysql.connect(**conf)
     book_isbn_list = request.get_json()["isbn_list"]
     res = []
-    a = isbn()
+    a = isbn(isbn_conf)
     for book_isbn in book_isbn_list:
         res_json = a.get_book_by_isbn(book_isbn)
         if res_json is not None:

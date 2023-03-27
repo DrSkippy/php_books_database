@@ -21,16 +21,16 @@ def get_configuration():
                 "passwd": c["password"].strip(),
                 "db": c["database"].strip(),
                 "host": c["host"].strip(),
-                "port": int(c["port"]),
-                "isbn_com": {
-                    "url_isbn": c["isbn_com"]["url_isbn"].strip(),
-                    "key": c["isbn_com"]["key"].strip()
-                }
+                "port": int(c["port"])
+            }
+            res1 = {
+                "url_isbn": c["isbn_com"]["url_isbn"].strip(),
+                "key": c["isbn_com"]["key"].strip()
             }
         except KeyError as e:
             print(e)
             sys.exit()
-        return res
+        return res, res1
 
 
 def serialize_rows(cursor, header=None):
