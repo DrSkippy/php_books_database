@@ -155,7 +155,7 @@ def books_by_isbn():
     for book_isbn in book_isbn_list:
         res_json = a.get_book_by_isbn(book_isbn)
         if res_json is not None:
-            proto = self._endpoint_to_collection_db(res_json)
+            proto = a._endpoint_to_collection_db(res_json)
             res.append(proto)
         else:
             app.logger.error(f"No records found for isbn {book_isbn}.")
