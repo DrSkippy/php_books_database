@@ -143,8 +143,11 @@ def add_read_dates():
 def books_by_isbn():
     """
     Creates records from isbn lookup and adds to the collection.
+
+    curl -X POST http://192.168.127.7/books/books_by_isbn -H 'Content-type:application/json' -d '{"isbn_list":["0060929480"]}'
+
     Arguments
-        List of isbns (strings) of the books you wish to add to the collection. Required.
+        List of isbns in isbn_list (strings) of the books you wish to get info
     Returns
         None or error
         bc.result is list of ids added.

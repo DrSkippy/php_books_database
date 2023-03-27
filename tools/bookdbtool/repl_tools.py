@@ -1,4 +1,4 @@
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 
 import datetime
 import logging
@@ -11,7 +11,6 @@ import pandas as pd
 import requests
 from columnar import columnar
 
-from isbn_com.api import Endpoint as isbn
 
 
 class BC_Tool:
@@ -113,25 +112,25 @@ class BC_Tool:
                 verified = True
         return proto
 
-    def _endpoint_to_collection_db(self, isbn_dict):
-        proto = self.COLLECTION_DB_DICT.copy()
-        proto["Title"] = isbn_dict["book"]["title"]
-        proto["Author"] = isbn_dict["book"]["authors"][0]
-        proto["ISBNNumber"] = isbn_dict["book"]["isbn"]
-        proto["ISBNNumber13"] = isbn_dict["book"]["isbn13"]
-        try:
-            proto["PublisherName"] = isbn_dict["book"]["publisher"]
-        except KeyError:
-            proto["PublisherName"] = "unknown"
-        proto["Pages"] = isbn_dict["book"]["pages"]
-        try:
-            _pub = str(isbn_dict["book"]["date_published"])[:10]  # yyyy-mm-dd
-            if len(_pub) == 4:
-                _pub += "-01-01"
-            proto["CopyrightDate"] = _pub
-        except KeyError:
-            proto["CopyrightDate"] = "0000-01-01"
-        return proto
+#     def _endpoint_to_collection_db(self, isbn_dict):
+#         proto = self.COLLECTION_DB_DICT.copy()
+#         proto["Title"] = isbn_dict["book"]["title"]
+#         proto["Author"] = isbn_dict["book"]["authors"][0]
+#         proto["ISBNNumber"] = isbn_dict["book"]["isbn"]
+#         proto["ISBNNumber13"] = isbn_dict["book"]["isbn13"]
+#         try:
+#             proto["PublisherName"] = isbn_dict["book"]["publisher"]
+#         except KeyError:
+#             proto["PublisherName"] = "unknown"
+#         proto["Pages"] = isbn_dict["book"]["pages"]
+#         try:
+#             _pub = str(isbn_dict["book"]["date_published"])[:10]  # yyyy-mm-dd
+#             if len(_pub) == 4:
+#                 _pub += "-01-01"
+#             proto["CopyrightDate"] = _pub
+#         except KeyError:
+#             proto["CopyrightDate"] = "0000-01-01"
+#         return proto
 
     def _add_books(self, records):
         result_message = "Added."
@@ -414,14 +413,17 @@ class BC_Tool:
             None or error
             bc.result is list of ids added.
         """
-        assert (isinstance(book_isbn_list, list))
+        q = self.ENDPOINT + "/books_by_isbn"
+        payload = {"isbn_list": book_isbn_list}
+        try:
+            tr = requests.post(q, json=payload)
+            book_record_list = tr.json()["book_records"]
+        except requests.RequestException as e:
+            logging.error(e)
         res = []
-        a = isbn()
-        for book_isbn in book_isbn_list:
-            res_json = a.get_book_by_isbn(book_isbn)
-            if res_json is not None:
-                proto = self._endpoint_to_collection_db(res_json)
-                proto = self._inputer(proto)
+        for book_json, book_isbn in zip(book_record_list, book_isbn_list):
+            if book_json is not None:
+                proto = self._inputer(book_json)
                 records = [proto]
                 self.result = proto
                 res.append(self._add_books(records))
