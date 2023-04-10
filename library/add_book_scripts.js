@@ -62,4 +62,4 @@ window.addEventListener('DOMContentLoaded', function() {
         return false;
       }
     })
-}
+})
