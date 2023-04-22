@@ -10,8 +10,9 @@ RUN apt install make curl -y
 RUN pip install --upgrade pip
 
 # get and install poetry package manager
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-ENV PATH /root/.poetry/bin:$PATH
+RUN curl -sSL https://install.python-poetry.org | python3 -
+# RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+ENV PATH /root/.local/bin:$PATH
 # set poetry so it does not use a virtual environment in deployment container
 RUN poetry config virtualenvs.create false
 
