@@ -49,9 +49,18 @@ class BC_Tool:
     terminal_width = 180
     LINES_TO_ROWS = 1.3
     DIVIDER_WIDTH = 50
+    CONFIG_PATH = "/book_service/config/configuration.json"  # root is "tools"
 
     def __init__(self):
-        with open("./book_service/config/configuration.json") as cfile:
+        # File path contortions so notebook uses the same config as REPL command line
+        try:
+            cfile = open(f".{self.CONFIG_PATH}", "r")
+        except OSError:
+            try:
+                cfile = open(f"..{self.CONFIG_PATH}", "r")
+            except OSError:
+                print("Configuration file not found!")
+        with cfile:
             config = json.load(cfile)
             self.ENDPOINT = config["endpoint"]
         self.result = None
@@ -63,7 +72,10 @@ class BC_Tool:
         return [self._row_column_selector(i, indexes) for i in data]
 
     def _show_table(self, data, header, indexes, pagination=True):
-        [self.terminal_width, page_size] = os.get_terminal_size()
+        try:
+            [self.terminal_width, page_size] = os.get_terminal_size()
+        except OSError:
+            [self.terminal_width, page_size] = [80, 60]
         if pagination:
             self.page_size = int(page_size / self.LINES_TO_ROWS)
         else:
