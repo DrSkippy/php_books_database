@@ -2,10 +2,45 @@ import csv
 import datetime
 
 import numpy as np
+import os
 
 FMT = "%Y-%m-%d"
+ESTIMATES_PATH = "./book_estimates"
+result = None
 
-def day_number(data):
+def new(title):
+    fn = title.strip().lower().replace(" ", "_").replace(":","")
+    filename = f"{ESTIMATES_PATH}/{fn}.txt"
+    start_date_str = input("Enter start date (YYYY-MM-DD): ")
+    start_date = datetime.datetime.strptime(start_date_str, FMT)
+    pages = int(input("Number of pages: "))
+    print(f"Book Title={title}")
+    print(f"File Name={filename}")
+    print(f"Start Date={start_date}")
+    with open(filename, "w") as of:
+        of.write(f"\"{title}\", {pages}\n")
+        for i in range(30):
+            dt = start_date + datetime.timedelta(days=i)
+            of.write("{},\n".format(dt.strftime(FMT)))
+def make(filename):
+    filename = ESTIMATES_PATH + "/" + filename
+    data, header = _reading_data(filename)
+    est_date, est_date_min, est_date_max = _estimate_dates(data, header)
+    print("*" * 80)
+    print(f"              Book: {header[0]}")
+    print("Estimated Complete: {}  Earliest: {}  Latest: {}".format(est_date.strftime(FMT), est_date_min.strftime(FMT),
+                                                                    est_date_max.strftime(FMT)))
+    print("*" * 80)
+
+def list(path=ESTIMATES_PATH):
+    files = os.listdir(path)
+    print("Existing files: ")
+    for i, file in enumerate(files):
+        print(f"    {i} - {file}")
+    global result
+    result = files
+
+def _day_number(data):
     # title, total pages to read
     # date, page
     # ...
@@ -16,7 +51,7 @@ def day_number(data):
     return data, start_date
 
 
-def estimate_range(x, y, p):
+def _estimate_range(x, y, p):
     res = [0, 10000]
     for i in range(len(x) - 1):
         m = (y[i + 1] - y[i]) / (x[i + 1] - x[i])
@@ -28,17 +63,17 @@ def estimate_range(x, y, p):
     return res
 
 
-def line_fit_and_estimate(data, total_pages):
+def _line_fit_and_estimate(data, total_pages):
     d = np.array(data)
-    x = np.array(d[:, 1], dtype=np.float)
-    y = np.array(d[:, 3], dtype=np.float)
+    x = np.array(d[:, 1], dtype=np.float64)
+    y = np.array(d[:, 3], dtype=np.float64)
     m, b = np.polyfit(x, y, 1)
     est = m * float(total_pages) + b
-    est_range = estimate_range(x, y, total_pages)
+    est_range = _estimate_range(x, y, total_pages)
     return int(est), est_range
 
 
-def reading_data(filename):
+def _reading_data(filename):
     header = None
     data = []
     with open(filename, "r") as book_file:
@@ -55,9 +90,9 @@ def reading_data(filename):
     return data, header
 
 
-def estimate_dates(data, header):
-    data, start_date = day_number(data)
-    est, range = line_fit_and_estimate(data, float(header[1]))
+def _estimate_dates(data, header):
+    data, start_date = _day_number(data)
+    est, range = _line_fit_and_estimate(data, float(header[1]))
     est_date = start_date + datetime.timedelta(days=est)
     est_date_max = start_date + datetime.timedelta(days=range[0])
     est_date_min = start_date + datetime.timedelta(days=range[1])

@@ -1,0 +1,12 @@
+{
+  "username": "<db user name>",
+  "password": "<db password>",
+  "database": "<db database>",
+  "host": "192.168.127.3",
+  "port": 3306,
+  "isbn_com": {
+    "url_isbn": "https://api2.isbndb.com/book/{}",
+    "key": "<your key>"
+  },
+  "endpoint": "http://192.168.127.13:8083"
+}

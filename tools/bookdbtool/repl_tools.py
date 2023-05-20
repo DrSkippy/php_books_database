@@ -4,6 +4,7 @@ import datetime
 import logging
 import os
 import pprint
+import json
 
 pp = pprint.PrettyPrinter(indent=3)
 
@@ -14,9 +15,7 @@ from columnar import columnar
 
 
 class BC_Tool:
-    ENDPOINT = "http://192.168.127.8/books"
-    # ENDPOINT = "http://192.168.127.6:83"
-    # ENDPOINT = "http://172.17.0.2:8083"
+    ENDPOINT = "URL HERE"
     COLUMN_INDEX = {
         "BookCollectionID": 0,
         "Title": 1,
@@ -52,6 +51,9 @@ class BC_Tool:
     DIVIDER_WIDTH = 50
 
     def __init__(self):
+        with open("./book_service/config/configuration.json") as cfile:
+            config = json.load(cfile)
+            self.ENDPOINT = config["endpoint"]
         self.result = None
 
     def _row_column_selector(self, row, indexes):

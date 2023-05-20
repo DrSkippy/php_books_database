@@ -1,27 +1,26 @@
 window.addEventListener('DOMContentLoaded', function() {
-	// Populate location dropdown with data from web API
-	fetch('./locations.php')
-		.then(response => response.json())
-		.then(data => {
-			let locationDropdown = document.querySelector('select[name="location"]');
-			for (let location of data) {
-				let option = document.createElement('option');
-				option.value = location.Location;
-				option.textContent = location.Location;
-				locationDropdown.appendChild(option);
-			}
-		})
-		.catch(error => {
-			console.error('Error fetching locations:', error);
-		});
+    // Populate location dropdown with data from web API
+    fetch('./locations.php')
+        .then(response => response.json())
+        .then(data => {
+            let locationDropdown = document.querySelector('select[name="location"]');
+            for (let location of data) {
+                let option = document.createElement('option');
+                option.value = location.Location;
+                option.textContent = location.Location;
+                locationDropdown.appendChild(option);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching locations:', error);
+        });
 
 	// Handle form submission
 	let form = document.forms.add;
 	form.addEventListener('submit', function(event) {
-      event.preventDefault(); // prevent page reload
+        event.preventDefault(); // prevent page reload
 
-
-      function addEntry() {
+        function addEntry() {
         // get form values
         var author = document.forms["add"]["author"].value;
         var title = document.forms["add"]["title"].value;
