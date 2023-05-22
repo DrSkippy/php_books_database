@@ -1,14 +1,20 @@
-import requests as req
 import json
 
+import requests as req
 
 
 class Endpoint:
-
-    CONFIG_FILENAME = "./configuration.json"
+    CONFIG_PATH = "/book_service/config/configuration.json"
 
     def __init__(self):
-        with open(self.CONFIG_FILENAME, "r") as infile:
+        try:
+            infile = open(f".{self.CONFIG_PATH}", "r")
+        except OSError:
+            try:
+                infile = open(f"..{self.CONFIG_PATH}", "r")
+            except OSError:
+                print("Configuration file not found!")
+        with infile:
             self.config = json.load(infile)["isbn_com"]
 
     def get_book_by_isbn(self, isbn=None):
@@ -22,5 +28,3 @@ class Endpoint:
         for isbn in isbn_list:
             result[isbn] = self.get_book_by_isbn(isbn)
         return result
-
-

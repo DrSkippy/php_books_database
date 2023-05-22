@@ -1,4 +1,5 @@
 import json
+
 from isbn_com.api import Endpoint as isbn
 
 isbn_com = isbn()

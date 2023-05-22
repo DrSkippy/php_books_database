@@ -1,8 +1,8 @@
 import readline
 from code import InteractiveConsole
 
-import bookdbtool.repl_tools as rt
 import bookdbtool.estimate_tools as et
+import bookdbtool.repl_tools as rt
 
 
 def history():
@@ -13,7 +13,7 @@ def history():
 
 scope_vars = {"bc": rt.BC_Tool(), "est": et, "history": history}
 
-header =  "************************************************************************\n"
+header = "************************************************************************\n"
 header += "** Welcome to the Book Collection Database REPL!                      **\n"
 header += "** For help, please use help(bc).                                     **\n"
 header += "**     and help(est).                                                 **\n"

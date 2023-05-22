@@ -2,9 +2,8 @@ import json
 
 import requests
 
-ENDPOINT = "http://172.17.0.2:8083"
-ENDPOINT = "http://10.1.1.14:80"
-# ENDPOINT = "http://192.168.127.8"
+ENDPOINT = "http://192.168.127.8/books"
+EXAMPLES_PATH = "./example_json_payloads"
 
 
 def test_configuration():
@@ -17,7 +16,7 @@ def test_configuration():
 def test_add_books():
     ep = ENDPOINT + "/add_books"
     print(f"QUERY={ep}")
-    with open("./examples/test_add_books.json", "r") as infile:
+    with open(f"{EXAMPLES_PATH}/test_add_books.json", "r") as infile:
         data = json.load(infile)
     r = requests.post(ep, json=data)
     print(r.json())
@@ -25,10 +24,10 @@ def test_add_books():
     return res
 
 
-def test_update_read_dates(book_id_list):
-    ep = ENDPOINT + "/update_read_dates"
+def test_add_read_dates(book_id_list):
+    ep = ENDPOINT + "/add_read_dates"
     print(f"QUERY={ep}")
-    with open("./examples/test_update_read_dates.json", "r") as infile:
+    with open(f"{EXAMPLES_PATH}/test_update_read_dates.json", "r") as infile:
         data = json.load(infile)
     for x, r in zip(data, book_id_list):
         x["BookCollectionID"] = r
@@ -39,7 +38,7 @@ def test_update_read_dates(book_id_list):
 def test_update_book_note_status(id):
     ep = ENDPOINT + "/update_book_note_status"
     print(f"QUERY={ep}")
-    with open("./examples/test_update_book_note_status.json", "r") as infile:
+    with open(f"{EXAMPLES_PATH}/test_update_book_note_status.json", "r") as infile:
         data = json.load(infile)
     data["BookCollectionID"] = int(id)
     res = requests.post(ep, json=data)
@@ -112,10 +111,11 @@ def test_tags_search():
     res2 = requests.get(ep2)
     print(res2.json())
 
-def test_tag_maintenance():
-    ep = ENDPOINT + "/tag_maintenance"
-    res = requests.get(ep)
-    print(res.json())
+# def test_tag_maintenance():
+#     ep = ENDPOINT + "/tag_maintenance"
+#     print(f"QUERY={ep}")
+#     res = requests.get(ep)
+#     print(res.json())
 
 def test_status_read(id):
     ep = ENDPOINT + f"/status_read/{id}"
@@ -126,7 +126,7 @@ def test_status_read(id):
 if __name__ == "__main__":
     test_configuration()
     r = test_add_books()
-    test_update_read_dates(r)
+    test_add_read_dates(r)
     test_update_book_note_status(r[0])
     test_summary_books_read_by_year()
     test_books_read()
@@ -136,12 +136,13 @@ if __name__ == "__main__":
     test_tags(2)
     test_update_tag_value()
     test_tags_search()
-    test_tag_maintenance()
+    # test_tag_maintenance()
     test_status_read(1696)
 
     print("""For DB Cleanup:
     
-    DELETE FROM `tags` where Tag='delete_me';
+    USE scott;
+    DELETE FROM `tag labels` where label='delete_me';
     DELETE FROM `book collection` WHERE PublisherName='Printerman';
     DELETE FROM `books read` WHERE ReadDate='1945-10-19';
     """)

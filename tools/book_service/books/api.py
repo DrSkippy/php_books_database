@@ -1,4 +1,4 @@
-__version__ = '0.7.6'
+__version__ = '0.7.7'
 
 from flask import Flask, Response, request, send_file
 from io import BytesIO
@@ -66,7 +66,7 @@ def add_books():
     }, ...]
 
     E.g.
-    curl -X POST -H "Content-type: application/json" -d @./examples/test_add_books.json \
+    curl -X POST -H "Content-type: application/json" -d @./example_json_payloads/test_add_books.json \
     http://172.17.0.2:5000/add_books
 
     :return:
@@ -113,7 +113,7 @@ def add_read_dates():
     }, ...]
 
     E.g.
-    curl -X POST -H "Content-type: application/json" -d @./examples/test_update_read_dates.json \
+    curl -X POST -H "Content-type: application/json" -d @./example_json_payloads/test_update_read_dates.json \
     http://172.17.0.2:5000/update_read_dates
 
     :return:
@@ -181,7 +181,7 @@ def update_edit_read_note():
     }
 
     E.g.
-    curl -X POST -H "Content-type: application/json" -d @./examples/test_update_edit_read_note.json \
+    curl -X POST -H "Content-type: application/json" -d @./example_json_payloads/test_update_edit_read_note.json \
     http://172.17.0.2:5000/update_update_edit_read_note
 
     :return:
@@ -219,7 +219,7 @@ def update_book_note_status():
     }
 
     E.g.
-    curl -X POST -H "Content-type: application/json" -d @./examples/test_update_book_note_status.json \
+    curl -X POST -H "Content-type: application/json" -d @./example_json_payloads/test_update_book_note_status.json \
     http://172.17.0.2:5000/update_book_note_status
 
     :return:
@@ -464,7 +464,7 @@ def update_tag_value(current, updated):
         with db.cursor() as c:
             try:
                 _updated = updated.lower().strip(" ")
-                records = c.execute("UPDATE `tags labels` SET Label = '{}' WHERE Label = '{}'".format(
+                records = c.execute("UPDATE `tag labels` SET Label = '{}' WHERE Label = '{}'".format(
                     _updated, current))
                 rdata = json.dumps({"data": {"tag_update": f"{current} >> {updated}", "updated_tags": records}})
             except pymysql.Error as e:
