@@ -13,7 +13,6 @@ import requests
 from columnar import columnar
 
 
-
 class BC_Tool:
     ENDPOINT = "URL HERE"
     COLUMN_INDEX = {
@@ -126,25 +125,25 @@ class BC_Tool:
                 verified = True
         return proto
 
-#     def _endpoint_to_collection_db(self, isbn_dict):
-#         proto = self.COLLECTION_DB_DICT.copy()
-#         proto["Title"] = isbn_dict["book"]["title"]
-#         proto["Author"] = isbn_dict["book"]["authors"][0]
-#         proto["ISBNNumber"] = isbn_dict["book"]["isbn"]
-#         proto["ISBNNumber13"] = isbn_dict["book"]["isbn13"]
-#         try:
-#             proto["PublisherName"] = isbn_dict["book"]["publisher"]
-#         except KeyError:
-#             proto["PublisherName"] = "unknown"
-#         proto["Pages"] = isbn_dict["book"]["pages"]
-#         try:
-#             _pub = str(isbn_dict["book"]["date_published"])[:10]  # yyyy-mm-dd
-#             if len(_pub) == 4:
-#                 _pub += "-01-01"
-#             proto["CopyrightDate"] = _pub
-#         except KeyError:
-#             proto["CopyrightDate"] = "0000-01-01"
-#         return proto
+    #     def _endpoint_to_collection_db(self, isbn_dict):
+    #         proto = self.COLLECTION_DB_DICT.copy()
+    #         proto["Title"] = isbn_dict["book"]["title"]
+    #         proto["Author"] = isbn_dict["book"]["authors"][0]
+    #         proto["ISBNNumber"] = isbn_dict["book"]["isbn"]
+    #         proto["ISBNNumber13"] = isbn_dict["book"]["isbn13"]
+    #         try:
+    #             proto["PublisherName"] = isbn_dict["book"]["publisher"]
+    #         except KeyError:
+    #             proto["PublisherName"] = "unknown"
+    #         proto["Pages"] = isbn_dict["book"]["pages"]
+    #         try:
+    #             _pub = str(isbn_dict["book"]["date_published"])[:10]  # yyyy-mm-dd
+    #             if len(_pub) == 4:
+    #                 _pub += "-01-01"
+    #             proto["CopyrightDate"] = _pub
+    #         except KeyError:
+    #             proto["CopyrightDate"] = "0000-01-01"
+    #         return proto
 
     def _add_books(self, records):
         result_message = "Added."

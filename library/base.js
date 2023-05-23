@@ -1,7 +1,5 @@
-//const baseApiUrl = "http://192.168.127.8/books";
-const baseApiUrl = "http://10.1.1.14:89/books";
-//const baseApiUrl = "http://localhost";
-//const baseApiUrl = "http://192.168.127.13:83";
+var CONFIG = require('../tools/book_service/config/configuration.json');
+const baseApiUrl = CONFIG.endpoint;
 var bookCollectionID = 102;
 
 function topnavbar() {

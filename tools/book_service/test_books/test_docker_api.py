@@ -111,11 +111,11 @@ def test_tags_search():
     res2 = requests.get(ep2)
     print(res2.json())
 
-# def test_tag_maintenance():
-#     ep = ENDPOINT + "/tag_maintenance"
-#     print(f"QUERY={ep}")
-#     res = requests.get(ep)
-#     print(res.json())
+def test_tag_maintenance():
+    ep = ENDPOINT + "/tag_maintenance"
+    print(f"QUERY={ep}")
+    res = requests.get(ep)
+    print(res.json())
 
 def test_status_read(id):
     ep = ENDPOINT + f"/status_read/{id}"
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     test_tags(2)
     test_update_tag_value()
     test_tags_search()
-    # test_tag_maintenance()
+    test_tag_maintenance()
     test_status_read(1696)
 
     print("""For DB Cleanup:
