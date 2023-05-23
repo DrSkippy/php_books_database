@@ -1,4 +1,4 @@
-var CONFIG = require('../tools/book_service/config/configuration.json');
+var CONFIG = require('/php_books_database/tools/book_service/config/configuration.json');
 const baseApiUrl = CONFIG.endpoint;
 var bookCollectionID = 102;
 
