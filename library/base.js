@@ -1,5 +1,4 @@
-import CONFIG from '/php_books_database/tools/book_service/config/configuration.json';
-const baseApiUrl = CONFIG.endpoint;
+const baseApiUrl = 'http://192.168.127.13:8083'
 var bookCollectionID = 102;
 
 function topnavbar() {
