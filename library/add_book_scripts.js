@@ -15,6 +15,9 @@ window.addEventListener('DOMContentLoaded', function() {
             console.error('Error fetching locations:', error);
         });
 
+    // Populate fields from isbn
+
+
 	// Handle form submission
 	let form = document.forms.add;
 	form.addEventListener('submit', function(event) {
