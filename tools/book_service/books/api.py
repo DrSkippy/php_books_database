@@ -60,7 +60,7 @@ def valid_locations():
     else:
         s = c.fetchall()
         result = {"header": "Location"}
-        result["data"] = s
+        result["data"] = [x[0] for x in s]
         rdata = json.dumps(result)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
