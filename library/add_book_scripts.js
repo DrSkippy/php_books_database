@@ -5,10 +5,10 @@ window.addEventListener('DOMContentLoaded', function() {
     $.getJSON(url, function (response) {
         var data = response['data'];
         let locationDropdown = document.querySelector('select[name="location"]');
-        for (let location of data) {
+        for (var i = 0; i < data.length; i++) {
             let option = document.createElement('option');
-            option.value = location.Location;
-            option.textContent = location.Location;
+            option.value = data[i];
+            option.textContent = data[i];
             locationDropdown.appendChild(option);
         }
     }).catch(error => {
