@@ -1,4 +1,5 @@
 window.addEventListener('DOMContentLoaded', function() {
+    topnavbar();
     // Populate location dropdown with data from web API
     var url = baseApiUrl + "/valid_locations";
     console.log(url)
