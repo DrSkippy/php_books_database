@@ -1,17 +1,17 @@
 window.addEventListener('DOMContentLoaded', function() {
     // Populate location dropdown with data from web API
-    fetch('./locations.php')
-        .then(response => response.json())
-        .then(data => {
-            let locationDropdown = document.querySelector('select[name="location"]');
-            for (let location of data) {
-                let option = document.createElement('option');
-                option.value = location.Location;
-                option.textContent = location.Location;
-                locationDropdown.appendChild(option);
-            }
-        })
-        .catch(error => {
+    var url = baseApiUrl + "/valid_locations";
+    console.log(url)
+    $.getJSON(url, function (response) {
+        var data = response['data'];
+        let locationDropdown = document.querySelector('select[name="location"]');
+        for (let location of data) {
+            let option = document.createElement('option');
+            option.value = location.Location;
+            option.textContent = location.Location;
+            locationDropdown.appendChild(option);
+        }
+    }).catch(error => {
             console.error('Error fetching locations:', error);
         });
 
