@@ -59,7 +59,7 @@ def valid_locations():
         rdata = {"error": str(e)}
     else:
         s = c.fetchall()
-        result["header"] = "Location"
+        result = {"header": "Location"}
         result["data"] = s
         rdata = json.dumps(result)
     response_headers = resp_header(rdata)
