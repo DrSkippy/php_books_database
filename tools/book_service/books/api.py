@@ -1,4 +1,4 @@
-__version__ = '0.7.8'
+__version__ = '0.8.1'
 
 from flask import Flask, Response, request, send_file
 from io import BytesIO
@@ -39,6 +39,28 @@ def configuration():
         "version": __version__,
         "configuration": conf,
         "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+##########################################################################
+# UI Utilities
+##########################################################################
+@app.route('/valid_locations')
+def valid_locations():
+    db = pymysql.connect(**conf)
+    q_str = "SELECT DISTINCT Location FROM `book collection`;"
+    app.logger.debug(q_str)
+    c = db.cursor()
+    header = ["Location"]
+    try:
+        c.execute(q_str)
+    except pymysql.Error as e:
+        app.logger.error(e)
+        rdata = {"error": str(e)}
+    else:
+        s = c.fetchall()
+        rdata = serialize_rows(s, header)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
