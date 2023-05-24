@@ -52,7 +52,6 @@ def valid_locations():
     q_str = "SELECT DISTINCT Location FROM `book collection`;"
     app.logger.debug(q_str)
     c = db.cursor()
-    header = ["Location"]
     try:
         c.execute(q_str)
     except pymysql.Error as e:
@@ -60,7 +59,9 @@ def valid_locations():
         rdata = {"error": str(e)}
     else:
         s = c.fetchall()
-        rdata = serialize_rows(s, header)
+        result["header"] = "Location"
+        result["data"] = s
+        rdata = json.dumps(result)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
