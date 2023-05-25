@@ -57,10 +57,15 @@ window.addEventListener('DOMContentLoaded', function() {
             window.location.href = "./index.php";
           }
         };
+        message = "author=" + author + "&title=" + title + "&isbnnumber=" + isbnnumber + "&isbnnumber13=" +
+            isbnnumber13 + "&publishername=" + publishername + "&note=" + note + "&covertype=" + covertype +
+            "&recycled=" + recycled + "&location=" + location + "&pages=" + pages + "&copyrightdate=" + copyrightdate;
+
+        console.log(message)
         // xhr.open("POST", "./add_entry.php", true);
         xhr.open("POST", baseAPIUrl + "/add_books", true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.send("author=" + author + "&title=" + title + "&isbnnumber=" + isbnnumber + "&isbnnumber13=" + isbnnumber13 + "&publishername=" + publishername + "&note=" + note + "&covertype=" + covertype + "&recycled=" + recycled + "&location=" + location + "&pages=" + pages + "&copyrightdate=" + copyrightdate);
+        xhr.send(message);
 
         return false;
       }
