@@ -13,18 +13,19 @@ window.addEventListener('DOMContentLoaded', function() {
             locationDropdown.appendChild(option);
         }
     }).catch(error => {
-            console.error('Error fetching locations:', error);
-        });
+        console.error('Error fetching locations:', error);
+    });
 
     // Populate fields from isbn
 
+});
 
-	// Handle form submission
-	let form = document.forms.add;
-	form.addEventListener('submit', function(event) {
+// Handle form submission
+let form = document.forms.add;
+form.addEventListener('submit', function(event) {
         event.preventDefault(); // prevent page reload
 
-        function addEntry() {
+    function addEntry() {
         // get form values
         var author = document.forms["add"]["author"].value;
         var title = document.forms["add"]["title"].value;
@@ -68,6 +69,5 @@ window.addEventListener('DOMContentLoaded', function() {
         xhr.send(message);
 
         return false;
-      }
-    })
+    }
 })
