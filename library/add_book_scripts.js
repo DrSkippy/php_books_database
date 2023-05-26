@@ -28,10 +28,12 @@ window.addEventListener('DOMContentLoaded', function() {
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            alert("Entry found!\n" + xhr.responseText);
+            alert("Entry found!\n");
         }
     };
     xhr.send(params);
+    console.log(xhr.responseText);
+    console.log(xhr.responseXML)
     var isbn = JSON.parse(xhr.responseText).book_records[0];
     // Set values
     document.forms["add"]["author"].value = isbn.Author;
