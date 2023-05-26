@@ -1,5 +1,8 @@
 // Handle form submission
 let form = document.forms.add;
+const urlParams = new URLSearchParams(queryString);
+var isbn_target = null;
+isbn_target = urlParams.getAll("isbn");
 window.addEventListener('DOMContentLoaded', function() {
     topnavbar();
     // Populate location dropdown with data from web API
@@ -18,31 +21,33 @@ window.addEventListener('DOMContentLoaded', function() {
         console.error('Error fetching locations:', error);
     });
 
-    // Populate fields from isbn.com
-    var url = baseApiUrl + "/books_by_isbn";
-    console.log(url);
-    params = '{"isbn_list":["0060929480"]}';
-    console.log(params);
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            console.log(xhr.responseText);
-            console.log(xhr.responseXML)
-            var isbn = JSON.parse(xhr.responseText).book_records[0];
-            // Set values
-            document.forms["add"]["author"].value = isbn.Author;
-            document.forms["add"]["title"].value = isbn.Title;
-            document.forms["add"]["isbnnumber"].value = isbn.ISBNNumber;
-            document.forms["add"]["isbnnumber13"].value = isbn.ISBNNumber13;
-            document.forms["add"]["publishername"].value = isbn.PublisherName;
-            document.forms["add"]["note"].value = isbn.Note;
-            document.forms["add"]["pages"].value = isbn.Pages;
-            document.forms["add"]["copyrightdate"].value = isbn.CopyrightDate;
-        }
-    };
-    xhr.send(params);
+    if (isbn_target != null) {
+        // Populate fields from isbn.com
+        var url = baseApiUrl + "/books_by_isbn";
+        console.log(url);
+        params = '{"isbn_list":["' + isbn_target + '"]}';
+        console.log(params);
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(xhr.responseText);
+                console.log(xhr.responseXML)
+                var isbn = JSON.parse(xhr.responseText).book_records[0];
+                // Set values
+                document.forms["add"]["author"].value = isbn.Author;
+                document.forms["add"]["title"].value = isbn.Title;
+                document.forms["add"]["isbnnumber"].value = isbn.ISBNNumber;
+                document.forms["add"]["isbnnumber13"].value = isbn.ISBNNumber13;
+                document.forms["add"]["publishername"].value = isbn.PublisherName;
+                document.forms["add"]["note"].value = isbn.Note;
+                document.forms["add"]["pages"].value = isbn.Pages;
+                document.forms["add"]["copyrightdate"].value = isbn.CopyrightDate;
+            }
+        };
+        xhr.send(params);
+    }
 
 });
 
