@@ -27,7 +27,7 @@ window.addEventListener('DOMContentLoaded', function() {
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
-        if (this.readyState == 4 && tthis.status == 200) {
+        if (this.readyState == 4 && this.status == 200) {
             console.log(xhr.responseText);
             console.log(xhr.responseXML)
             var isbn = JSON.parse(xhr.responseText).book_records[0];
