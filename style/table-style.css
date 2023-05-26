@@ -115,6 +115,7 @@ input[type=button], input[type=submit], input[type=reset] {
 .styled-table th,
 .styled-table td {
     padding: 12px 15px;
+    vertical-align: top;
 }
 
 .styled-table tbody tr {
