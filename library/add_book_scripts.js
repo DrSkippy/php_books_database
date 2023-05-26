@@ -16,7 +16,20 @@ window.addEventListener('DOMContentLoaded', function() {
         console.error('Error fetching locations:', error);
     });
 
-    // Populate fields from isbn
+    // Populate fields from isbn.com
+    var url = baseApiUrl + "/books_by_isbn";
+    console.log(url);
+    params = '{"isbn_list":["0060929480"]}';
+    console.log(params);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            alert("Entry found!\n" + xhr.responseText);
+        }
+    };
+    xhr.send(params);
 
 });
 
@@ -64,7 +77,7 @@ form.addEventListener('submit', function(event) {
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             alert("Entry added successfully!\n" + xhr.responseText);
-            window.location.href = "./index.php";
+            window.location.href = "../index.php";
         }
     };
     xhr.send(params);
