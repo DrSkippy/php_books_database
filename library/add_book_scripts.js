@@ -38,8 +38,6 @@ window.addEventListener('DOMContentLoaded', function() {
             document.forms["add"]["isbnnumber13"].value = isbn.ISBNNumber13;
             document.forms["add"]["publishername"].value = isbn.PublisherName;
             document.forms["add"]["note"].value = isbn.Note;
-            document.querySelector('input[name="covertype"]:checked').value = isbn.CoverType;
-            document.forms["add"]["recycled"].checked = False;
             document.forms["add"]["pages"].value = isbn.Pages;
             document.forms["add"]["copyrightdate"].value = isbn.CopyrightDate;
         }
