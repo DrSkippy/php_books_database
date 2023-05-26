@@ -1,5 +1,6 @@
 // Handle form submission
 let form = document.forms.add;
+const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 var isbn_target = null;
 isbn_target = urlParams.getAll("isbn");
