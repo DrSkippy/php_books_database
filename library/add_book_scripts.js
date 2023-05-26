@@ -56,7 +56,7 @@ form.addEventListener('submit', function(event) {
     params = '[{"author":"' + author + '","title":"'  + title + '","isbnnumber":"'  + isbnnumber + '","isbnnumber13":"'  +
         isbnnumber13 + '","publishername":"'  + publishername + '","note":"'  + note + '","covertype":"'  + covertype +
         '","recycled":"'  + recycled + '","location":"'  + location + '","pages":"'  + pages + '","copyrightdate":"'  +
-        copyrightdate + '}]';
+        copyrightdate + '"}]';
     console.log(params);
     // xhr.open("POST", "./add_entry.php", true);
     xhr.open("POST", url, true);
