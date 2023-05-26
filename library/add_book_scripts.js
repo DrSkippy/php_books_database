@@ -2,8 +2,7 @@
 let form = document.forms.add;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-var isbn_target = null;
-isbn_target = urlParams.getAll("isbn");
+var isbn_target = urlParams.get("isbn");
 window.addEventListener('DOMContentLoaded', function() {
     topnavbar();
     // Populate location dropdown with data from web API
