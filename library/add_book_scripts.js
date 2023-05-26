@@ -33,7 +33,6 @@ window.addEventListener('DOMContentLoaded', function() {
         xhr.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 console.log(xhr.responseText);
-                console.log(xhr.responseXML)
                 var isbn = JSON.parse(xhr.responseText).book_records[0];
                 // Set values
                 document.forms["add"]["author"].value = isbn.Author;
@@ -64,8 +63,8 @@ form.addEventListener('submit', function(event) {
     var covertype = document.querySelector('input[name="covertype"]:checked').value;
     var recycled = document.forms["add"]["recycled"].checked ? "yes" : "no";
     var location = document.forms["add"]["location"].value;
-    var pages = document.forms["add"]["pages"].value;
-    var copyrightdate = document.forms["add"]["copyrightdate"].value;
+    var pages = parseInt(document.forms["add"]["pages"].value);
+    var copyrightdate = parseInt(document.forms["add"]["copyrightdate"].value.slice(0,4));
 
     // validate form values
     if (author == "" || title == "" || isbnnumber == "" || publishername == "" || location == "" || pages == "" || copyrightdate == "") {
@@ -92,7 +91,9 @@ form.addEventListener('submit', function(event) {
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            alert("Entry added successfully!\n" + xhr.responseText);
+            console.log(xhr.responseText);
+            var book_id = JSON.parse(xhr.responseText).add_books[0].BookCollectionID;
+            alert("Entry added successfully!\n ID=" + book_id;
             window.location.href = "../index.php";
         }
     };
