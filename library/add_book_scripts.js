@@ -51,22 +51,23 @@ form.addEventListener('submit', function(event) {
 
     // submit form data
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        alert("Entry added successfully!");
-        window.location.href = "./index.php";
-      }
-    };
     var url = baseApiUrl + "/add_books";
-    message = "author=" + author + "&title=" + title + "&isbnnumber=" + isbnnumber + "&isbnnumber13=" +
-        isbnnumber13 + "&publishername=" + publishername + "&note=" + note + "&covertype=" + covertype +
-        "&recycled=" + recycled + "&location=" + location + "&pages=" + pages + "&copyrightdate=" + copyrightdate;
-
-    console.log(message)
+    console.log(url);
+    params = '[{ "author":' + author + ',"title":'  + title + ',"isbnnumber":'  + isbnnumber + ',"isbnnumber13":'  +
+        isbnnumber13 + ',"publishername":'  + publishername + ',"note":'  + note + ',"covertype":'  + covertype +
+        ',"recycled":'  + recycled + ',"location":'  + location + ',"pages":'  + pages + ',"copyrightdate":'  +
+        copyrightdate + '}]';
+    console.log(params);
     // xhr.open("POST", "./add_entry.php", true);
     xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.send(message);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            alert("Entry added successfully!\n" + xhr.responseText);
+            window.location.href = "./index.php";
+        }
+    };
+    xhr.send(params);
 
     return false;
 })
