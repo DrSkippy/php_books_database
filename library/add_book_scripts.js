@@ -53,9 +53,9 @@ form.addEventListener('submit', function(event) {
     var xhr = new XMLHttpRequest();
     var url = baseApiUrl + "/add_books";
     console.log(url);
-    params = '[{"author":"' + author + '","title":"'  + title + '","isbnnumber":"'  + isbnnumber + '","isbnnumber13":"'  +
-        isbnnumber13 + '","publishername":"'  + publishername + '","note":"'  + note + '","covertype":"'  + covertype +
-        '","recycled":"'  + recycled + '","location":"'  + location + '","pages":"'  + pages + '","copyrightdate":"'  +
+    params = '[{"Author":"' + author + '","Title":"'  + title + '","ISBNNumber":"'  + isbnnumber + '","ISBNNumber13":"'  +
+        isbnnumber13 + '","PublisherName":"'  + publishername + '","Note":"'  + note + '","CoverType":"'  + covertype +
+        '","Recycled":"'  + recycled + '","Location":"'  + location + '","Pages":"'  + pages + '","CopyrightDate":"'  +
         copyrightdate + '"}]';
     console.log(params);
     // xhr.open("POST", "./add_entry.php", true);
