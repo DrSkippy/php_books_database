@@ -1,3 +1,5 @@
+// Handle form submission
+let form = document.forms.add;
 window.addEventListener('DOMContentLoaded', function() {
     topnavbar();
     // Populate location dropdown with data from web API
@@ -30,11 +32,22 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     };
     xhr.send(params);
+    var isbn = JSON.parse(xhr.responseText).book_records[0];
+    // Set values
+    document.forms["add"]["author"].value = isbn.Author;
+    document.forms["add"]["title"].value = isbn.Title;
+    document.forms["add"]["isbnnumber"].value = isbn.ISBNNumber;
+    document.forms["add"]["isbnnumber13"].value = isbn.ISBNNumber13;
+    document.forms["add"]["publishername"].value = isbn.PublisherName;
+    document.forms["add"]["note"].value = isbn.Note;
+    document.querySelector('input[name="covertype"]:checked').value = isbn.CoverType;
+    document.forms["add"]["recycled"].checked = False;
+    document.forms["add"]["pages"].value = isbn.Pages;
+    document.forms["add"]["copyrightdate"].value = isbn.CopyrightDate;
+
 
 });
 
-// Handle form submission
-let form = document.forms.add;
 form.addEventListener('submit', function(event) {
     event.preventDefault(); // prevent page reload
     console.log("submit called...");
