@@ -98,6 +98,7 @@ input[type=button], input[type=submit], input[type=reset] {
 }
 
 .styled-table {
+    width: 100%;
     border-collapse: collapse;
     margin: 25px 20px;
     font-size: 0.9em;
@@ -116,9 +117,7 @@ input[type=button], input[type=submit], input[type=reset] {
 .styled-table td {
     padding: 12px 15px;
     vertical-align: top;
-    width: 35%;
     word-wrap: break-word;
-    max-width: 300px;
 }
 
 .styled-table tbody tr {
@@ -144,6 +143,7 @@ input[type=button], input[type=submit], input[type=reset] {
     margin: 25px 20px;
     font-size: 0.9em;
     font-family: sans-serif;
+    width: 100%;
     min-width: 400px;
     /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); */
 }
@@ -157,9 +157,7 @@ input[type=button], input[type=submit], input[type=reset] {
 .styled-inner-table th,
 .styled-inner-table td {
     padding: 12px 15px;
-    width: 35%;
     word-wrap: break-word;
-    max-width: 300px;
 }
 
 .styled-inner-table tbody tr {
