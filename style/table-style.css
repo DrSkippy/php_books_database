@@ -98,9 +98,9 @@ input[type=button], input[type=submit], input[type=reset] {
 }
 
 .styled-table {
-    width: 100%;
+    width: 95%;
     border-collapse: collapse;
-    margin: 25px 20px 25px 20px;
+    margin: 25px 20px;
     font-size: 0.9em;
     font-family: sans-serif;
     min-width: 400px;
