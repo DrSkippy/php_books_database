@@ -11,6 +11,7 @@ function topnavbar() {
         '<a href="/php_books_database/year_rank.php">Years Ranked</a>' +
         '</div>';
 }
+var book_detail_id = null;
 
 function setval(bcid) {
     bookCollectionID = bcid;
@@ -19,6 +20,7 @@ function setval(bcid) {
     var urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
     $.getJSON(urlId, function (data) {
         var obj = data['data'];
+        book_detail_id = obj[0][0];
         var trOne = "<tr id='replace-me-one'>" +
             "<td>" + obj[0][0] + "</td>" +
             "<td>" + obj[0][1] + "</td>" +
@@ -52,8 +54,8 @@ function setval(bcid) {
             "<table id='readtable' class=\"styled-inner-table\">\n" +
             "<thead>\n" +
             "<tr>\n" +
-            "<th>Read Date</th>\n" +
-            "<th>Raad Notes</th>\n" +
+            "<th>Date</th>\n" +
+            "<th>Notes</th>\n" +
             "</tr>\n" +
             "</thead>\n" +
             "<tbody>\n";
@@ -72,7 +74,13 @@ function createDetailTableRows() {
         "</tr>";
     $("#sumtable").append(trOne);
     var trTwo = "<tr id='replace-me-two'>" +
-        "<td>Tags:</td><td colspan=12></td></tr>";
+        "<td>Tags:</td><td colspan=12></td></tr>"+
+        "<tr><form action=\"/php_books_database/js_reports/add_book.html\">\n" +
+        "   <label for=\"lname\">Add Tag:&nbsp; </label>" +
+        "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + book_detail_id + "\">" +
+        "   <input type=\"text\" id=\"tag_string\" name=\"tag_string\">&nbsp;" +
+        "   <input type=\"submit\" value=\"Submit\">\n" +
+        "   </form></tr>";
     $("#sumtable").append(trTwo);
     var trThree = "<tr id='replace-me-three'>" +
         "<td>Read:</td><td colspan=12></td></tr>";
