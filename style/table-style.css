@@ -21,6 +21,17 @@ p {
     color: var(--deep-taupe);
 }
 
+.column {
+    float: left;
+    width: 50%;
+}
+
+.two-column-row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
 h1 {
     background: var(--slate-gray);
     /* box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5); */
@@ -98,7 +109,7 @@ input[type=button], input[type=submit], input[type=reset] {
 }
 
 .styled-table {
-    width: 95%;
+    width: 97%;
     border-collapse: collapse;
     margin: 25px 20px;
     font-size: 0.9em;
