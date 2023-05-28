@@ -83,6 +83,7 @@ function createDetailTableRows() {
     $("#sumtable").append(trThree);
 }
 
+let form = document.forms.add_tag;
 form.addEventListener('submit', function(event) {
     event.preventDefault(); // prevent page reload
     console.log("submit called...");
