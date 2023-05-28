@@ -40,13 +40,13 @@ function setval(bcid) {
     $.getJSON(urlTag, function (data) {
         var obj = data['tag_list'];
         var trTwo = "<tr id='replace-me-two'>" +
-            "<td>Tags:</td><td colspan=12>" + obj.join(", ") + "</td></tr>" +
-            "<tr><form action=\"/php_books_database/js_reports/add_tags.html\">" +
+            "<td>Tags:</td><td colspan=12>" + obj.join(", ") + "</td>" +
+            "   <td></td><form action=\"/php_books_database/js_reports/add_tags.html\">" +
             "   <label for=\"lname\">Add Tag:&nbsp; </label>" +
             "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data['BookCollectionId'] + "\">" +
             "   <input type=\"text\" id=\"tag_string\" name=\"tag_string\">&nbsp;" +
             "   <input type=\"submit\" value=\"Submit\">\n" +
-            "   </form></tr>";
+            "   </form></td></tr>";
         $("#replace-me-two").replaceWith(trTwo);
     });
     $.getJSON(urlRead, function (data) {
