@@ -384,6 +384,9 @@ def books_search():
         elif key == "Tags":
             _, s, _ = _tags_search(args.get(key))
             id_list = str(tuple([int(x[0]) for x in s]))
+            if len(s) == 1:
+                # remove trailing comma
+                id_list = id_list.replace(",", "")
             app.logger.debug(id_list)
             where.append(f"a.BookCollectionID in {id_list}")
         else:
