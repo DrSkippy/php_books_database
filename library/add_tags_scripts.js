@@ -12,9 +12,10 @@ $(document).ready(function () {
         $.ajax({
             url: url,
             type: "PUT",
-            sucess function(data) {
+            success: function(data) {
                 console.log(url);
-            })
+            }
+        })
     }
     alert("Tags (" + tag_array + ")added successfully to ID=" + book_id);
     window.location.href = "../index.php";
