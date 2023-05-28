@@ -43,10 +43,10 @@ function setval(bcid) {
             "<td>Tags:</td><td colspan=6>" + obj.join(", ") + "</td>" +
             "   <td colspan=6><form action=\"/php_books_database/js_reports/add_tags.html\">" +
             "   <label for=\"lname\">Add Tag List:&nbsp; </label>" +
-            "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data['BookID"] + "\">" +
-            "   <input type=\"text\" id=\"tag_string\" name=\"tag_string\">&nbsp;" +
-            "   <input type=\"submit\" value=\"Submit\">\n" +
-            "   </form></td></tr>";
+            "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data["BookID"] + "\">" +
+        "   <input type=\"text\" id=\"tag_string\" name=\"tag_string\">&nbsp;" +
+        "   <input type=\"submit\" value=\"Submit\">\n" +
+        "   </form></td></tr>";
         $("#replace-me-two").replaceWith(trTwo);
     });
     $.getJSON(urlRead, function (data) {
