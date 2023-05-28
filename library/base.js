@@ -89,14 +89,16 @@ form.addEventListener('submit', function(event) {
     event.preventDefault(); // prevent page reload
     console.log("submit called...");
     // get form values
-    var BookCollectionId = document.forms["add_tag"]["book_id"].value;
+    var book_id = document.forms["add_tag"]["book_id"].value;
     const tag_array = document.forms["add_tag"]["tag_string"].value.split(",");
 
     tag_array.forEach(function (arrayItem) {
         console.log(arrayItem);
-        var url = baseApiUrl + "/add_tag/" + BookCollectionId + "/" + arrayItem;
+        var url = baseApiUrl + "/add_tag/" + book_id + "/" + arrayItem;
         console.log(url);
     });
+
+    alert("Entry added successfully!\n ID=" + book_id);
 
     return false;
 })
