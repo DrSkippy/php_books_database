@@ -4,11 +4,11 @@ $(document).ready(function () {
     const urlParams = new URLSearchParams(queryString);
     var url = baseApiUrl + "/books_search?";
     if (urlParams.has("author")) {
-        url += "author=" + urlParams.get("author");
+        url += "author=" + urlParams.get("author").trim();
     } else if (urlParams.has("title")) {
-        url += "title=" + urlParams.get("title");
+        url += "title=" + urlParams.get("title").trim();
     } else if (urlParams.has("tags")) {
-        url += "Tags=" + urlParams.get("tags");
+        url += "Tags=" + urlParams.get("tags").trim();
         console.log(url)
     }
     $.getJSON(url, function (data) {

@@ -1,4 +1,4 @@
-__version__ = '0.8.1'
+__version__ = '0.8.2'
 
 from flask import Flask, Response, request, send_file
 from io import BytesIO
@@ -499,6 +499,7 @@ def update_tag_value(current, updated):
 
 
 def _tags_search(match_str):
+    match_str = match_str.lower().strip()
     db = pymysql.connect(**conf)
     search_str = ("SELECT a.BookID, b.TagID, b.Label as Tag"
                   " FROM `books tags` a JOIN `tag labels` b ON a.TagID=b.TagID"
