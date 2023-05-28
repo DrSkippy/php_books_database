@@ -39,7 +39,7 @@ function setval(bcid) {
         var obj = data['tag_list'];
         var trTwo = "<tr id='replace-me-two'>" +
             "<td>Tags:</td><td colspan=6>" + obj.join(", ") + "</td>" +
-            "   <td colspan=6><form name=\"add_tag\" action=\"/php_books_database/js_reports/add_tags.html>" +
+            "   <td colspan=6><form name=\"add_tag\" action=\"/php_books_database/js_reports/add_tags.html\">" +
             "   <label for=\"lname\">Add Tag List:&nbsp; </label>" +
             "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data["BookID"] + "\">" +
             "   <input type=\"text\" id=\"tag_string\" name=\"tag_string\">" +
