@@ -83,13 +83,14 @@ function createDetailTableRows() {
     $("#sumtable").append(trThree);
 }
 
+
 let form = document.forms.add_tag;
 form.addEventListener('submit', function(event) {
     event.preventDefault(); // prevent page reload
     console.log("submit called...");
     // get form values
-    var BookCollectionId = document.forms["add_tag"]["BookID"].value;
-    const tag_array = document.forms["add_tag"]["tag_list"].value.split(",");
+    var BookCollectionId = document.forms["add_tag"]["book_id"].value;
+    const tag_array = document.forms["add_tag"]["tag_string"].value.split(",");
 
     tag_array.forEach(function (arrayItem) {
         console.log(arrayItem);
