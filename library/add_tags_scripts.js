@@ -7,11 +7,17 @@ $(document).ready(function () {
 
     tag_array.forEach(function (arrayItem) {
         console.log(arrayItem);
-        var url = baseApiUrl + "/add_tag/" + book_id + "/" + arrayItem;
+        var url = baseApiUrl + "/add_tag/" + book_id + "/" + arrayItem.trim().toLowerCase();
         console.log(url);
-    });
-
-    alert("Entry added successfully!\n ID=" + book_id);
+        $.ajax({
+            url: url,
+            type: "PUT",
+            sucess function(data) {
+                console.log(url);
+            })
+    }
+    alert("Tags (" + tag_array + ")added successfully to ID=" + book_id);
+    window.location.href = "../index.php";
 
     return false;
 })

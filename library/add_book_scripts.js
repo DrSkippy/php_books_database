@@ -86,7 +86,6 @@ form.addEventListener('submit', function(event) {
         '","Recycled":"'  + recycled + '","Location":"'  + location + '","Pages":"'  + pages + '","CopyrightDate":"'  +
         copyrightdate + '"}]';
     console.log(params);
-    // xhr.open("POST", "./add_entry.php", true);
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
