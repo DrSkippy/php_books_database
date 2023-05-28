@@ -39,7 +39,7 @@ function setval(bcid) {
         var obj = data['tag_list'];
         var trTwo = "<tr id='replace-me-two'>" +
             "<td>Tags:</td><td colspan=6>" + obj.join(", ") + "</td>" +
-            "   <td colspan=6><form name=\"add_tag\">" +
+            "   <td colspan=6><form name=\"add_tag\" action=\"/php_books_database/js_reports/add_tags.html>" +
             "   <label for=\"lname\">Add Tag List:&nbsp; </label>" +
             "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data["BookID"] + "\">" +
             "   <input type=\"text\" id=\"tag_string\" name=\"tag_string\">" +
@@ -83,22 +83,3 @@ function createDetailTableRows() {
     $("#sumtable").append(trThree);
 }
 
-
-let form = document.forms.add_tag;
-form.addEventListener('submit', function(event) {
-    event.preventDefault(); // prevent page reload
-    console.log("submit called...");
-    // get form values
-    var book_id = document.forms["add_tag"]["book_id"].value;
-    const tag_array = document.forms["add_tag"]["tag_string"].value.split(",");
-
-    tag_array.forEach(function (arrayItem) {
-        console.log(arrayItem);
-        var url = baseApiUrl + "/add_tag/" + book_id + "/" + arrayItem;
-        console.log(url);
-    });
-
-    alert("Entry added successfully!\n ID=" + book_id);
-
-    return false;
-})
