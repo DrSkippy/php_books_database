@@ -327,7 +327,8 @@ echo $row['BookCollectionID'];
 	<input type="hidden" name="id" value="<?php
 echo $row['BookCollectionID'];
 ?>">
-	&nbsp;&nbsp;&nbsp;&nbsp;<a href="./add.php">Add Entry</a></td>
+<!--	&nbsp;&nbsp;&nbsp;&nbsp;<a href="./add.php">Add Entry</a> -->
+	</td>
 </tr><tr>
 	<td align="center">
 		<input type="text" name="searchterm" size="25" value="<?php
