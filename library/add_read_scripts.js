@@ -8,8 +8,10 @@ $(document).ready(function () {
     topnavbar();
     createDetailTableRows();
     setval(book_id);
-    let now = new Date()
-    document.forms["read_date"].value = now.toISOString().split('T')[0];
+    let now = new Date();
+    console.log(now.toISOString().split('T')[0]);
+    console.log(document.forms.length);
+    document.forms["add_read"]["read_date"].value = now.toISOString().split('T')[0];
 });
 
 form.addEventListener('submit', function(event) {
