@@ -6,6 +6,7 @@ var book_id = urlParams.get("book_id");
 
 window.addEventListener('DOMContentLoaded', function() {
     topnavbar();
+    setval(book_id);
     // Populate location dropdown with data from web API
 //    var url = baseApiUrl + "/books_search?BookCollectionId=" + book_id;
 //    console.log(url)
