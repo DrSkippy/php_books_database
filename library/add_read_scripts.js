@@ -9,7 +9,7 @@ $(document).ready(function () {
     createDetailTableRows();
     setval(book_id);
     let now = new Date()
-    document.forms["add_read"]["read_date"].value = now.toISOString().split('T')[0];
+    document.forms["read_date"].value = now.toISOString().split('T')[0];
 });
 
 form.addEventListener('submit', function(event) {
@@ -23,7 +23,7 @@ form.addEventListener('submit', function(event) {
     var xhr = new XMLHttpRequest();
     var url = baseApiUrl + "/add_read_dates";
     console.log(url);
-    params = '[{"BookCollectionId":"' + book_id + '","DateREad":"'  + date + '","ReadNote":"'  + note + '"}]';
+    params = '[{"BookCollectionId":"' + book_id + '","ReadDate":"'  + date + '","ReadNote":"'  + note + '"}]';
     console.log(params);
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
