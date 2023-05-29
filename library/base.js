@@ -51,7 +51,8 @@ function setval(bcid) {
         var obj = data['data'];
         console.log(obj);
         var trThree = "<tr id='replace-me-three'>" +
-            "<td>Read:</td>" +
+            "<td>Read:  <a href=\"/php_books_database/js_reports/add_read.html?book_id=" +
+            bookCollectionID + "\">Add</a></td>" +
             "<td colspan=12>" +
             "<table id='readtable' class=\"styled-inner-table\">\n" +
             "<thead>\n" +
