@@ -4,7 +4,7 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 var book_id = urlParams.get("book_id");
 
-window.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function () {
     topnavbar();
     createDetailTableRows();
     setval(book_id);
