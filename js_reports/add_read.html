@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Add Entry</title>
+    <link href="/php_books_database/style/table-style.css" rel="stylesheet" type="text/css">
+    <link href="/php_books_database/style/colors.css" rel="stylesheet" type="text/css"/>
+    <script src="/php_books_database/library/base.js"></script>
+    <link rel="shortcut icon" href="/php_books_database/favicon.ico" mce_href="./favicon.ico"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+<div id="insertTopNavBar"></div>
+
+<h1>Record Detail</h1>
+<table id='sumtable' class="styled-table">
+    <thead>
+    <tr>
+        <th>BookID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Copyright</th>
+        <th>Publisher</th>
+        <th>Type</th>
+        <th>Pages</th>
+        <th>Recyl'd</th>
+        <th>Location</th>
+        <th>ISBN</th>
+        <th>ISBN13</th>
+        <th>Read</th>
+        <th>Note</th>
+    </tr>
+    </thead>
+    <tbody>
+    <div>
+    </div>
+    </tbody>
+</table>
+<h1>Add Read Date and Notes</h1>
+<form name="add_read">
+    <table>
+        <tr>
+            <td align="right">Date Read:</td>
+            <td><input type="text" size="25" name="date_read"></td>
+        </tr>
+        <tr>
+            <td align="right">Note:</td>
+            <td colspan="2"><textarea name="read_note" cols="28" rows="3"></textarea></td>
+        </tr>
+        <td></td>
+        <td align="right"><input type="submit" value="submit"></td>
+        </tr>
+    </table>
+</form>
+<script src="/php_books_database/library/add_read_scripts.js"></script>
+</body>
+</html>
