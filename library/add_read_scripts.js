@@ -1,5 +1,5 @@
 // Handle form submission
-let form = document.forms.add;
+let form = document.forms.add_read;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 var book_id = urlParams.get("book_id");
@@ -42,7 +42,6 @@ window.addEventListener('DOMContentLoaded', function() {
 //        };
 //        xhr.send(params);
 //    }
-
 });
 
 form.addEventListener('submit', function(event) {
@@ -50,7 +49,7 @@ form.addEventListener('submit', function(event) {
     console.log("submit called...");
     // get form values
     var note = document.forms["add_read"]["read_note"].value;
-    var date = parseInt(document.forms["add_read"]["read_date"].value);
+    var date = document.forms["add_read"]["read_date"].value;
 
     // submit form data
     var xhr = new XMLHttpRequest();
@@ -68,6 +67,5 @@ form.addEventListener('submit', function(event) {
         }
     };
     xhr.send(params);
-
     return false;
 })
