@@ -9,12 +9,10 @@
 <?php
 include('./header.php');
 ?>
-
 <h1>Ranked Years by Pages Read</h1>
 <?php
 $debug = 0;
 include './db_header.php';
-
 ##########################################
 # count pages read by year, omitting 1966
 // 2022-03-21 $search_str = 'select year(LastRead) as year, sum(Pages) as total from `book collection` where LastRead
@@ -31,6 +29,8 @@ if (!$result) {
 }
 ?>
 <table class="styled-table">
+div class="two-column-row">
+<div class="column">
 <tr><thead><th>Rank</th><th>Year</th><th>Pages Read</th></thead></tr>
 <?php
 $count = 0;
@@ -42,6 +42,9 @@ while ($row = mysqli_fetch_array($result)) {
 }
 ?>
 </table>
+</div>
+<div class="column"></div>
+</div>
 <?php
 include('./footer.php');
 ?>

@@ -1,4 +1,4 @@
-import requests as req
+import requests
 import json
 
 
@@ -21,15 +21,25 @@ class Endpoint:
         self.config = conf
 
     def get_book_by_isbn(self, isbn=None):
-        headers = {'Authorization': self.config["key"]}
-        url = self.config["url_isbn"].format(isbn)
-        resp = req.get(url, headers=headers)
-        return resp.json()
+        url = self.config.get("url_isbn").format(isbn)
+        headers = {'Authorization': self.config.get("key")}
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            error_message = str(e)
+            return {
+                'error': error_message
+            }
 
     def get_books_by_isbn_list(self, isbn_list=[]):
         result = {}
         for isbn in isbn_list:
-            result[isbn] = self.get_book_by_isbn(isbn)
+            try:
+                result[isbn] = self.get_book_by_isbn(isbn)
+            except Exception as e:
+                result[isbn] = {'error': str(e)}
         return result
 
     def _endpoint_to_collection_db(self, isbn_dict):
