@@ -1,4 +1,14 @@
 /*https://coolors.co/7ae7c7-75bba7-6c809a-795663-645244*/
+
+/*
+ Previously this. Now use named colors from colors.css
+ http://colorschemedesigner.com/0W21Tw0w0w0w0
+ Primary Color:
+ FFA900    BF8F30    A66E00    FFBE40    FFCF73
+ Complementary Color:
+ 1142AA    2A4580    06276F    4573D5    6C8DD5
+*/
+
 :root {
     /* CSS HEX */
     --aquamarine: #7ae7c7ff;
@@ -8,34 +18,7 @@
     --deep-taupe: #795663ff;
     --deep-taupe-light: #79566322;
     --umber: #645244ff;
-
-    /* CSS HSL */
-    --aquamarine: hsla(162, 69%, 69%, 1);
-    --green-sheen: hsla(163, 34%, 60%, 1);
-    --slate-gray: hsla(214, 19%, 51%, 1);
-    --deep-taupe: hsla(338, 17%, 41%, 1);
-    --umber: hsla(26, 19%, 33%, 1);
-
-    /* SCSS HEX */
-    $ aquamarine: #7ae7c7ff;
-    $ green-sheen: #75bba7ff;
-    $ slate-gray: #6c809aff;
-    $ deep-taupe: #795663ff;
-    $ umber: #645244ff;
-
-    /* SCSS HSL */
-    $ aquamarine: hsla(162, 69%, 69%, 1);
-    $ green-sheen: hsla(163, 34%, 60%, 1);
-    $ slate-gray: hsla(214, 19%, 51%, 1);
-    $ deep-taupe: hsla(338, 17%, 41%, 1);
-    $ umber: hsla(26, 19%, 33%, 1);
-
-    /* SCSS RGB */
-    $ aquamarine: rgba(122, 231, 199, 1);
-    $ green-sheen: rgba(117, 187, 167, 1);
-    $ slate-gray: rgba(108, 128, 154, 1);
-    $ deep-taupe: rgba(121, 86, 99, 1);
-    $ umber: rgba(100, 82, 68, 1);
+    --grey-light: #f2f2f2ff;
 
     /* SCSS Gradient */
     $ gradient-top: linear-gradient(0deg, #7ae7c7ff, #75bba7ff, #6c809aff, #795663ff, #645244ff);

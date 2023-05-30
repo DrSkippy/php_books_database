@@ -1,11 +1,4 @@
-/*
- Previously this. Now use named colors from colors.css
- http://colorschemedesigner.com/0W21Tw0w0w0w0
- Primary Color:
- FFA900    BF8F30    A66E00    FFBE40    FFCF73
- Complementary Color:
- 1142AA    2A4580    06276F    4573D5    6C8DD5
-*/
+
 
 
 body {
@@ -35,7 +28,7 @@ p {
 h1 {
     background: var(--slate-gray);
     /* box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5); */
-    color: #FFFFFF;
+    color: var(--grey-light);
     font-family: sans-serif;
     font-size: 1.1em;
     font-weight: bold;
@@ -49,7 +42,7 @@ h1 {
 h2 {
     background: var(--umber);
     /* box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5); */
-    color: #FFFFFF;
+    color: var(--grey-light);
     font-family: sans-serif;
     font-size: 1.0em;
     font-weight: bold;
@@ -75,7 +68,7 @@ textarea {
   box-sizing: border-box;
   border: 2px solid #ccc;
   border-radius: 4px;
-  background-color: #f8f8f8;
+  background-color: var(--grey-light);
   font-family: sans-serif;
   font-size: 1.0em;
   #resize: none;
@@ -104,7 +97,7 @@ input[type=button], input[type=submit], input[type=reset] {
 
 .form {
   border-radius: 5px;
-  background-color: #f2f2f2;
+  background-color: var(--grey-light);
   padding: 40px;
 }
 
