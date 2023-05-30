@@ -1,6 +1,4 @@
 
-
-
 body {
     margin: 1px;
     font-family: sans-serif;
@@ -147,7 +145,7 @@ input[type=button], input[type=submit], input[type=reset] {
     margin: 25px 20px;
     font-size: 0.9em;
     font-family: sans-serif;
-    width: 100%;
+    width: 97%;
     min-width: 400px;
     /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); */
 }
@@ -176,7 +174,6 @@ input[type=button], input[type=submit], input[type=reset] {
     border-bottom: 2px solid var(--deep-taupe);
 }
 
-
 /* Add a black background color to the top navigation */
 .topnav {
     background-color: var(--deep-taupe);
@@ -186,6 +183,7 @@ input[type=button], input[type=submit], input[type=reset] {
 /* Style the links inside the navigation bar */
 .topnav a {
     float: left;
+    color: var(--grey-light);
     text-align: center;
     padding: 14px 22px;
     text-decoration: none;
@@ -194,14 +192,15 @@ input[type=button], input[type=submit], input[type=reset] {
 
 .topnav a:hover {
     background-color: var(--slate-gray);
-    color: var(--aquamarine);
+    color: var(--grey-light);
+    text-decoration: none;
 }
 
 .topnav a:active {
     background-color: var(--green-sheen);
     color: white;
+    text-decoration: none;
 }
-
 .redtext {
     color: #2A4580;
 }
@@ -213,10 +212,6 @@ a {
     padding: 2px 4px 2px 4px;
 }
 
-a:link {
-    color: var(--slate-gray);
-}
-
 a:visited {
     color: var(--slate-gray);
     text-decoration: none;
@@ -225,6 +220,7 @@ a:visited {
 a:hover {
     text-decoration: none;
     background-color: var(--umber);
+    color: var(--grey-light);
 }
 
 a:active {
@@ -237,3 +233,4 @@ a:active {
     color: var(--umber);
     font-style: italic;
     font-weight: bold;
+
