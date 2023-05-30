@@ -28,9 +28,9 @@ if (!$result) {
     exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
 }
 ?>
-<table class="styled-table">
-div class="two-column-row">
+<div class="two-column-row">
 <div class="column">
+<table class="styled-table">
 <tr><thead><th>Rank</th><th>Year</th><th>Pages Read</th></thead></tr>
 <?php
 $count = 0;
@@ -43,7 +43,9 @@ while ($row = mysqli_fetch_array($result)) {
 ?>
 </table>
 </div>
-<div class="column"></div>
+<div class="column">
+(Ranked by Pages Read)
+</div>
 </div>
 <?php
 include('./footer.php');
