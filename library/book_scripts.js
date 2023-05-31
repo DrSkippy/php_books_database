@@ -5,18 +5,18 @@ $(document).ready(function () {
     var url = baseApiUrl + "/books_search?";
     var continue_flag = false;
     if (urlParams.has("author") && urlParams.get("author").trim() != "") {
-        url += "author=" + urlParams.get("author").trim();
+        url += "Author=" + urlParams.get("author").trim();
         continue_flag = true;
     }
     if (urlParams.has("title") && urlParams.get("title").trim() != "") {
-        if continue_flag {
+        if (continue_flag) {
             url += "&";
         }
-        url += "title=" + urlParams.get("title").trim();
+        url += "Title=" + urlParams.get("title").trim();
         continue_flag = true;
     }
     if (urlParams.has("tags") && urlParams.get("tags").trim() != "") {
-        if continue_flag {
+        if (continue_flag) {
             url += "&";
         }
         url += "Tags=" + urlParams.get("tags").trim();
