@@ -3,14 +3,25 @@ $(document).ready(function () {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     var url = baseApiUrl + "/books_search?";
+    var continue_flag = false;
     if (urlParams.has("author")) {
         url += "author=" + urlParams.get("author").trim();
-    } else if (urlParams.has("title")) {
-        url += "title=" + urlParams.get("title").trim();
-    } else if (urlParams.has("tags")) {
-        url += "Tags=" + urlParams.get("tags").trim();
-        console.log(url)
+        continue_flag = true;
     }
+    if (urlParams.has("title")) {
+        if continue_flag {
+            url += "&";
+        }
+        url += "title=" + urlParams.get("title").trim();
+        continue_flag = true;
+    }
+    if (urlParams.has("tags")) {
+        if continue_flag {
+            url += "&";
+        }
+        url += "Tags=" + urlParams.get("tags").trim();
+    }
+    console.log(url)
     $.getJSON(url, function (data) {
         var obj = data['data'];
         for (var i = 0; i < obj.length; i++) {
