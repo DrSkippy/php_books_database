@@ -17,7 +17,7 @@ include './db_header.php';
 # count pages read by year, omitting 1966
 // 2022-03-21 $search_str = 'select year(LastRead) as year, sum(Pages) as total from `book collection` where LastRead
 // is not NULL and LastRead <> "0000-00-00 00:00:00" and year(LastRead) <> "1966" group by year order by total desc';
-$search_str = 'select year(b.ReadDate) as year, sum(a.Pages) as total, count(a.Pages) as books' ;
+$search_str = 'select year(b.ReadDate) as year, sum(a.Pages) as total, count(a.Pages) as books ';
 $search_str .= 'from `book collection` as a JOIN `books read` as b ON a.BookCollectionID=b.BookCollectionID ';
 $search_str .= 'where b.ReadDate is not NULL and b.ReadDate <> "0000-00-00 00:00:00" and year(b.ReadDate) <> "1966" ';
 $search_str .= 'group by year order by total desc';
@@ -38,7 +38,7 @@ while ($row = mysqli_fetch_array($result)) {
     $count += 1;
     echo '<tr><td align=center>' . $count . '</td>';
     echo '<td>' . $row['year'] . '</td>';
-    echo '<td>' . $row['books'] . '</td>';
+    echo '<td align=center>' . $row['books'] . '</td>';
     echo '<td align=center>' . $row['total'] . '</td></tr>';
 }
 ?>
