@@ -8,6 +8,7 @@ $(document).ready(function () {
         url += "Author=" + urlParams.get("author").trim();
         continue_flag = true;
     }
+    console.log(url);
     if (urlParams.has("title") && urlParams.get("title").trim() != "") {
         if (continue_flag) {
             url += "&";
@@ -15,6 +16,7 @@ $(document).ready(function () {
         url += "Title=" + urlParams.get("title").trim();
         continue_flag = true;
     }
+    console.log(url);
     if (urlParams.has("tags") && urlParams.get("tags").trim() != "") {
         if (continue_flag) {
             url += "&";
