@@ -4,18 +4,18 @@ $(document).ready(function () {
     const urlParams = new URLSearchParams(queryString);
     var url = baseApiUrl + "/books_search?";
     var continue_flag = false;
-    if (urlParams.has("author")) {
+    if (urlParams.has("author") && urlParams.get("author").trim() != "") {
         url += "author=" + urlParams.get("author").trim();
         continue_flag = true;
     }
-    if (urlParams.has("title")) {
+    if (urlParams.has("title") && urlParams.get("title").trim() != "") {
         if continue_flag {
             url += "&";
         }
         url += "title=" + urlParams.get("title").trim();
         continue_flag = true;
     }
-    if (urlParams.has("tags")) {
+    if (urlParams.has("tags") && urlParams.get("tags").trim() != "" {
         if continue_flag {
             url += "&";
         }
