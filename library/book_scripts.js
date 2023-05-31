@@ -15,13 +15,13 @@ $(document).ready(function () {
         url += "title=" + urlParams.get("title").trim();
         continue_flag = true;
     }
-    if (urlParams.has("tags") && urlParams.get("tags").trim() != "" {
+    if (urlParams.has("tags") && urlParams.get("tags").trim() != "") {
         if continue_flag {
             url += "&";
         }
         url += "Tags=" + urlParams.get("tags").trim();
     }
-    console.log(url)
+    console.log(url);
     $.getJSON(url, function (data) {
         var obj = data['data'];
         for (var i = 0; i < obj.length; i++) {
