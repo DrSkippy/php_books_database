@@ -1,6 +1,6 @@
-/*https://coolors.co/7ae7c7-75bba7-6c809a-795663-645244*/
-
 /*
+ https://coolors.co/7ae7c7-75bba7-6c809a-795663-645244
+
  Previously this. Now use named colors from colors.css
  http://colorschemedesigner.com/0W21Tw0w0w0w0
  Primary Color:
@@ -18,7 +18,7 @@
     --deep-taupe: #795663ff;
     --deep-taupe-light: #79566322;
     --umber: #645244ff;
-    --grey-light: #f2f2f2ff;
+    --gray-light: #f2f2f2ff;
 
     /* SCSS Gradient */
     $ gradient-top: linear-gradient(0deg, #7ae7c7ff, #75bba7ff, #6c809aff, #795663ff, #645244ff);
