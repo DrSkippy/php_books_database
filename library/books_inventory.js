@@ -17,7 +17,9 @@ $(document).ready(function () {
                 "<td>" + obj[i][2] + "</td>" +
                 "<td>" + obj[i][3] + "</td>" +
                 "<td>" + obj[i][6] + "</td>" +
-                "<td>" + obj[i][13] + "</td></tr>";
+                "<td>" + obj[i][13] + "</td>" +
+                "<td><input type=\"checkbox\" id=\"recycled\" name=\"recycled\"" +
+                        ((parseInt(obj[i][10]) == 1) ? "checked":"") + "></td></tr>";
             $("#mytable").append(tr);
         }
     });

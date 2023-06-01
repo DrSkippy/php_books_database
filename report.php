@@ -146,5 +146,9 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
     echo '</table>';
     ########################################################
 }
-include('./footer.php');
 ?>
+<script>
+$(document).ready(function () {
+    topnavbar();
+});
+</script>
