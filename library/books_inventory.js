@@ -7,11 +7,11 @@ $(document).ready(function () {
     var idArray;
     $.getJSON(url, function (data) {
         var obj = data['data'];
-        idArray = obj.map(function(x) {
+        idArray = obj.map(function (x) {
             return x[0];
         });
         for (var i = 0; i < obj.length; i++) {
-            var checkedString = ((parseInt(obj[i][10]) == 1) ? "checked":"");
+            var checkedString = ((parseInt(obj[i][10]) == 1) ? "checked" : "");
             console.log(checkedString);
             var tr = "<tr>" +
                 "<td><button onclick=\"setval(" + obj[i][0] + ")\">" + obj[i][0].toString() + "</button></td>" +
@@ -20,11 +20,14 @@ $(document).ready(function () {
                 "<td>" + obj[i][3] + "</td>" +
                 "<td>" + obj[i][6] + "</td>" +
                 "<td>" + obj[i][13] + "</td>" +
-                "<td><input type=\"checkbox\" id=\"recycled\" name=\"recycled\"" + checkedString + "></td></tr>";
+                "<td><input onclick=\"changeCheckStatus(this, parseInt(obj[i][0])\" " +
+                "type=\"checkbox\" id=\"recycled\" name=\"recycled\"" + checkedString + "></td></tr>";
             $("#mytable").append(tr);
         }
     });
-    const idArrayURLEnc = idArray.map(function(x) {return "idArray=" + x.toString();}).join("&");
+    const idArrayURLEnc = idArray.map(function (x) {
+        return "idArray=" + x.toString();
+    }).join("&");
     console.log(idArray);
     console.log(idArrayURLEnc);
     document.getElementById("updatereadnotesurl").innerHTML = '<a href=' +
@@ -33,3 +36,16 @@ $(document).ready(function () {
     createDetailTableRows();
     $.ajaxSetup({async: true});  // suppress async so the summary row is always at the bottom
 });
+
+function changeCheckStatus(cb, bookCollectionID) {
+    var url = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
+    var params = {"BookCollectionID": bookCollectionID};
+    params["Recycled"] = (this.checked)?1:0);
+    console.log(params);
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.onreadystatechange = function () {
+        console.log(xhr.responseText);
+    };
+    xhr.send(params);
+}
