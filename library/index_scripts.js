@@ -10,7 +10,7 @@ $(document).ready(function () {
                 "<td><a href=" + url.href + ">" + obj[i][0] + "</a></td>" +
                 "<td>" + obj[i][1] + "</td>" +
                 "<td>" + obj[i][2] + "</td></tr>";
-            $("#mytable").append(tr);
+            $("#mytable-sorted").append(tr);
         }
     });
 })
