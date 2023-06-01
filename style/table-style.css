@@ -28,10 +28,10 @@ h1 {
     /* box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5); */
     color: var(--gray-light);
     font-family: sans-serif;
-    font-size: 1.1em;
+    font-size: 1.0em;
     font-weight: bold;
     height: 25px;
-    line-height: 25px;
+    line-height: 22px;
     margin: 18px 0 !important;
     padding: 12px 0 5px 5px;
 }
@@ -87,7 +87,7 @@ input[type=button], input[type=submit], input[type=reset] {
     color: white;
     font-family: sans-serif;
     font-size: 1.0em;
-    padding: 12px 18px;
+    padding: 11px 18px;
     #text-decoration: none;
     margin: 4px 2px;
     cursor: pointer;

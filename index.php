@@ -436,8 +436,5 @@ include('./location_option.php');
 </tr>
 </table>
 </form>
-<?php
-include './footer.php';
-?>
 </body>
 </html>

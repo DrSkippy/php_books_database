@@ -48,8 +48,5 @@ while ($row = mysqli_fetch_array($result)) {
 (Ranked by Pages Read)
 </div>
 </div>
-<?php
-include('./footer.php');
-?>
 </body>
 </html>
