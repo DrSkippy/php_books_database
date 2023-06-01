@@ -20,8 +20,8 @@ $(document).ready(function () {
                 "<td>" + obj[i][3] + "</td>" +
                 "<td>" + obj[i][6] + "</td>" +
                 "<td>" + obj[i][13] + "</td>" +
-                "<td><input onclick=\"changeCheckStatus(this, parseInt(obj[i][0])\" " +
-                "type=\"checkbox\" id=\"recycled\" name=\"recycled\"" + checkedString + "></td></tr>";
+                "<td><input onclick=\"changeCheckStatus(this, " + parseInt(obj[i][0]) + 
+		")\" type=\"checkbox\" id=\"recycled\" name=\"recycled\"" + checkedString + "></td></tr>";
             $("#mytable").append(tr);
         }
     });
@@ -38,10 +38,11 @@ $(document).ready(function () {
 });
 
 function changeCheckStatus(cb, bookCollectionID) {
-    var url = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
-    var params = {"BookCollectionID": bookCollectionID};
-    params["Recycled"] = (this.checked)?1:0);
+    var url = baseApiUrl + "/update_book_note_status";
+    var status = (cb.checked)? 1 : 0;
+    var params = "{\"BookCollectionID\": " + bookCollectionID.toString() + ",\"Recycled\":" + status.toString() + "}";
     console.log(params);
+    var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
