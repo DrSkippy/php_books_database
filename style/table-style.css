@@ -3,7 +3,6 @@ body {
     margin: 1px;
     font-family: sans-serif;
     color: var(--slate-gray);
-    #background-color: var(--aquamarine-light);
 }
 
 p {
@@ -25,7 +24,6 @@ p {
 
 h1 {
     background: var(--slate-gray);
-    /* box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5); */
     color: var(--gray-light);
     font-family: sans-serif;
     font-size: 1.0em;
@@ -185,7 +183,7 @@ input[type=button], input[type=submit], input[type=reset] {
     float: left;
     color: var(--gray-light);
     text-align: center;
-    padding: 11px 22px;
+    padding: 12px 22px;
     text-decoration: none;
     font-size: 1.0em;
 }
@@ -198,7 +196,7 @@ input[type=button], input[type=submit], input[type=reset] {
 
 .topnav a:active {
     background-color: var(--green-sheen);
-    color: white;
+    color: var(--gray-light);
     text-decoration: none;
 }
 
