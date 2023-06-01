@@ -107,14 +107,13 @@ function sortTable(n) {
             /* Check if the two rows should switch place,
             based on the direction, asc or desc: */
             if (dir == "asc") {
-		console.log(x.innerHTML.match('>\\d<','g'));
-                if (parseInt(x.innerHTML.replace(/^D+/g, '')) > parseInt(y.innerHTML.replace(/^D+/g, ''))) {
+                if (sortNumber(x.innerHTML, n) > sortNumber(y.innerHTML)) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             } else if (dir == "desc") {
-                if (parseInt(x.innerHTML.replace(/^D+/g, '')) < parseInt(y.innerHTML.replace(/^D+/g, ''))) {
+                if (sortNumber(x.innerHTML, n) < sortNumber(y.innerHTML)) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
@@ -136,5 +135,17 @@ function sortTable(n) {
                 switching = true;
             }
         }
+    }
+}
+
+
+function sortNumber(str, index) {
+    if index > 0 {
+        return parseInt(str);
+    } else {
+        const re = /\d+</g;
+        const found = str.match(re);
+        return parseInt(found);
+
     }
 }
