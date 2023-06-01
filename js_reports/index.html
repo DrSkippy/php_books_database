@@ -8,17 +8,16 @@
 </head>
 <body>
 <div id="insertTopNavBar"></div>
-
 <div class="two-column-row">
     <div class="column">
         <h1>Book Search</h1>
         <div class="form">
             <form action="/php_books_database/js_reports/books_detail.html">
-                <label for="fname">Author: </label>
+                <label for="author">Author: </label>
                 <input type="text" id="author" name="author">
-                <label for="lname">Title: </label>
+                <label for="title">Title: </label>
                 <input type="text" id="title" name="title">
-                <label for="lname">Tag Match: </label>
+                <label for="tags">Tag Match: </label>
                 <input type="text" id="tags" name="tags">
                 <input type="submit" value="Submit">
             </form>
@@ -42,14 +41,13 @@
         <h1>Add and Edit Book Records</h1>
         <div class="form">
             <form action="/php_books_database/js_reports/add_book.html">
-                <label for="lname">Add Book with ISBN: </label>
+                <label for="isbn">Add Book with ISBN: </label>
                 <input type="text" id="isbn" name="isbn">
                 <input type="submit" value="Submit">
             </form>
         </div>
     </div>
 </div>
-
 <script src="/php_books_database/library/index_scripts.js"></script>
 </body>
 </html>
