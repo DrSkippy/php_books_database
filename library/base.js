@@ -8,7 +8,6 @@ function topnavbar() {
         '<a href="/php_books_database/js_reports/progress.html">Yearly Progress</a>' +
         '<a href="/php_books_database/js_reports/books_read_by_year.html">Books Read - All</a>' +
         '<a href="/php_books_database/js_reports/inventory.html">Inventory</a>' +
-        '<a href="/php_books_database/year_rank.php">Years Ranked</a>' +
         '</div>';
 }
 
@@ -107,13 +106,13 @@ function sortTable(n) {
             /* Check if the two rows should switch place,
             based on the direction, asc or desc: */
             if (dir == "asc") {
-                if (sortNumber(x.innerHTML, n) > sortNumber(y.innerHTML)) {
+                if (sortNumber(x.innerHTML, n) > sortNumber(y.innerHTML, n)) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             } else if (dir == "desc") {
-                if (sortNumber(x.innerHTML, n) < sortNumber(y.innerHTML)) {
+                if (sortNumber(x.innerHTML, n) < sortNumber(y.innerHTML, n)) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
@@ -139,12 +138,12 @@ function sortTable(n) {
 }
 
 
-function sortNumber(str, index) {
-    if index > 0 {
-        return parseInt(str);
+function sortNumber(columnValue, columnIndex) {
+    if (columnIndex > 0) {
+        return parseInt(columnValue);
     } else {
         const re = /\d+</g;
-        const found = str.match(re);
+        const found = columnValue.match(re);
         return parseInt(found);
 
     }

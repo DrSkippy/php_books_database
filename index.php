@@ -438,3 +438,8 @@ include('./location_option.php');
 </form>
 </body>
 </html>
+<script>
+$(document).ready(function () {
+    topnavbar();
+});
+</script>
