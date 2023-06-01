@@ -11,6 +11,8 @@ $(document).ready(function () {
             return x[0];
         });
         for (var i = 0; i < obj.length; i++) {
+            var checked_string = ((parseInt(obj[i][10]) == 1) ? "checked":"");
+            console.log(checked_string);
             var tr = "<tr>" +
                 "<td><button onclick=\"setval(" + obj[i][0] + ")\">" + obj[i][0].toString() + "</button></td>" +
                 "<td>" + obj[i][1] + "</td>" +
@@ -18,8 +20,7 @@ $(document).ready(function () {
                 "<td>" + obj[i][3] + "</td>" +
                 "<td>" + obj[i][6] + "</td>" +
                 "<td>" + obj[i][13] + "</td>" +
-                "<td><input type=\"checkbox\" id=\"recycled\" name=\"recycled\"" +
-                        ((parseInt(obj[i][10]) == 1) ? "checked":"") + "></td></tr>";
+                "<td><input type=\"checkbox\" id=\"recycled\" name=\"recycled\"" + checked_string + "></td></tr>";
             $("#mytable").append(tr);
         }
     });
