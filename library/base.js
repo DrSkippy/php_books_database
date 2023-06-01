@@ -107,6 +107,7 @@ function sortTable(n) {
             /* Check if the two rows should switch place,
             based on the direction, asc or desc: */
             if (dir == "asc") {
+		console.log(x.innerHTML.match('>\\d<','g'));
                 if (parseInt(x.innerHTML.replace(/^D+/g, '')) > parseInt(y.innerHTML.replace(/^D+/g, ''))) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
