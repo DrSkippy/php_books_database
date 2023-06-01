@@ -185,9 +185,9 @@ input[type=button], input[type=submit], input[type=reset] {
     float: left;
     color: var(--gray-light);
     text-align: center;
-    padding: 14px 22px;
+    padding: 11px 22px;
     text-decoration: none;
-    font-size: 1.2em;
+    font-size: 1.0em;
 }
 
 .topnav a:hover {
