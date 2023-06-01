@@ -260,8 +260,10 @@ if (substr($row['CoverType'], 0, 4) == 'Digi')
 	Recycled: <input type="checkbox" name="recycled"
 <?php
 if ($row['Recycled'])
-    echo 'checked';
-?></input>
+    echo ' checked>';
+else
+    echo '>';
+?>
 	</td>
 </tr><tr>
 	<td align="right">Location:</td>
