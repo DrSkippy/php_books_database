@@ -254,13 +254,14 @@ def update_book_note_status():
     continuation = False
     for key in record:
         if key == "BookCollectionID":
+            BookCollectionID = record[key]
             continue
         if continuation:
             search_str += ", "
         else:
             continuation = True
-        search_str += f" {key} = \"{record[key]}\""
-    search_str += " WHERE BookCollectionID = {BookCollectionID} "
+            search_str += f" {key} = \"{record[key]}\""
+    search_str += f" WHERE BookCollectionID = {BookCollectionID} "
     app.logger.debug(search_str)
     rdata = []
     with db:
