@@ -106,7 +106,7 @@ else if ($_REQUEST['submit'] == 'Update Record') {
     }
     # Update book collection table record
     $dt = mktime(0, 0, 0, 1, 1, substr($_REQUEST['copyrightdate'], 0, 4));
-    if ($_REQUEST['recycled'] == 'on')
+    if isset($_REQUEST['recycled'])
         $recycled = 1;
     else
         $recycled = 0;
