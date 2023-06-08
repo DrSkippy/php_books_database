@@ -73,7 +73,7 @@ function setval(bcid) {
 function tag_links_list(tags_list) {
     var tag_links = "";
     for (var i = 0; i < tags_list.length; i++) {
-        tag_links += "<a href=\"/php_books_database/js_reports/books_detail.html?tag=" +
+        tag_links += "<a href=\"/php_books_database/js_reports/books_detail.html?tags=" +
             tags_list[i] + "\">" + tags_list[i] + "</a> ";
     }
     return tag_links;
