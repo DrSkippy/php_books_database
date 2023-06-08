@@ -37,7 +37,7 @@ function setval(bcid) {
     $.getJSON(urlTag, function (data) {
         var obj = data['tag_list'];
         var trTwo = "<tr id='replace-me-two'>" +
-            "<td>Tags:</td><td colspan=6>" + obj.join(", ") + "</td>" +
+            "<td>Tags:</td><td colspan=6>" + tag_links_list(obj) + "</td>" +
             "   <td colspan=6><form name=\"add_tag\" action=\"/php_books_database/js_reports/add_tags.html\">" +
             "   <label for=\"lname\">Add Tag List:&nbsp; </label>" +
             "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data["BookID"] + "\">" +
@@ -68,6 +68,15 @@ function setval(bcid) {
         trThree += "</tbody></table></tr>";
         $("#replace-me-three").replaceWith(trThree);
     });
+}
+
+function tag_links_list(tags_list) {
+    var tag_links = "";
+    for (var i = 0; i < tags_list.length; i++) {
+        tag_links += "<a href=\"/php_books_database/js_reports/books_detail.html?tag=" +
+            tags_list[i] + "\">" + tags_list[i] + "</a> ";
+    }
+    return tag_links;
 }
 
 function createDetailTableRows() {
