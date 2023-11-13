@@ -477,7 +477,7 @@ def tags(book_id=None):
         rdata = {"error": str(e)}
     else:
         s = c.fetchall()
-        tag_list = [x[0] for x in s]
+        tag_list = [x[0].strip() for x in s]
         s = list(s)
         rdata = json.dumps({"BookID": book_id, "tag_list": tag_list})
     response_headers = resp_header(rdata)
