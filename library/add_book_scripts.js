@@ -94,7 +94,7 @@ form.addEventListener('submit', function(event) {
             var book_id = JSON.parse(xhr.responseText).add_books[0].BookCollectionID;
             alert("Entry added successfully!\n ID=" + book_id);
             // window.location.href = "../index.php";
-            window.location.href = "../books_detail.html?bookid=" + book_id.toString();
+            window.location.href = "./books_detail.html?bookid=" + book_id.toString();
         }
     };
     xhr.send(params);

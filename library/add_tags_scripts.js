@@ -18,6 +18,7 @@ $(document).ready(function () {
         })
     });
     alert("Tags (" + tag_array + ") added successfully to ID=" + book_id);
-    window.location.href = "./index.html";
+    // window.location.href = "./index.html";
+    window.location.href = "./books_detail.html?bookid=" + book_id.toString();
     return false;
 })
