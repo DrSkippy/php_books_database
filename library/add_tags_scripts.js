@@ -17,7 +17,7 @@ $(document).ready(function () {
             }
         })
     });
-    alert("Tags (" + tag_array + ")added successfully to ID=" + book_id);
+    alert("Tags (" + tag_array + ") added successfully to ID=" + book_id);
     window.location.href = "./index.html";
     return false;
 })

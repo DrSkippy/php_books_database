@@ -12,6 +12,11 @@ $(document).ready(function () {
         params_continue_flag = true;
     }
 
+    if (urlParams.has("bookid") && urlParams.get("bookid").trim() != "") {
+        url += "BookCollectionID=" + urlParams.get("bookid").trim();
+        params_continue_flag = true;
+    }
+
     if (urlParams.has("title") && urlParams.get("title").trim() != "") {
         if (params_continue_flag) {
             url += "&";
