@@ -42,3 +42,15 @@ curl -kL https://192.168.127.7/books/tags/2
 curl -kL https://192.168.127.7/books/books?Recycled=0
 ```
 
+FAILED TO OPEN COLLECTION ERROR
+
+```angular2html
+The currently activated Python version 3.9.10 is not supported by the project (3.8.12).
+Trying to find and use a compatible version. 
+Using python3 (3.8.12)
+Updating dependencies
+Resolving dependencies... (0.4s)
+
+Failed to unlock the collection!
+scott@scott-pi-desktop:~/Working/php_books_database/tools/book_service$ export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
+```

@@ -287,8 +287,8 @@ def _summary_books_read_by_year(target_year=None):
     search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
                   "FROM `book collection` as a JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID "
-                  "WHERE b.ReadDate is not NULL "
-                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
+                  "WHERE b.ReadDate is not NULL ")
+#                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "GROUP BY Year ORDER BY Year ASC"
@@ -320,8 +320,8 @@ def _books_read(target_year=None):
     search_str = ("SELECT a.*, b.ReadDate "
                   "FROM `book collection` as a JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID "
-                  "WHERE b.ReadDate is not NULL "
-                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
+                  "WHERE b.ReadDate is not NULL ")
+#                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "ORDER BY b.ReadDate"
@@ -598,9 +598,9 @@ def all_years(year=None):
     app.logger.debug(now)
     fig, axs = plt.subplots(3, 1, figsize=[10, 18])
     df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
-    axs[0].axvline(x=int(now["pages read"]), color="red")
+    axs[0].axvline(x=int(now["pages read"].iloc[0]), color="red")
     df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", ax=axs[1])
-    axs[1].axvline(x=int(now["rank"]) - 1, color="red")
+    axs[1].axvline(x=int(now["rank"].iloc[0]) - 1, color="red")
     df.sort_values("year").plot.bar(x="year", y="pages read", width=.95, color="darkblue", ax=axs[2])
     fig.savefig(img, format='png')
     img.seek(0)
