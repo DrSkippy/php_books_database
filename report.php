@@ -111,8 +111,8 @@ if ($_REQUEST['search_numbyyear'] <> 'yes') {
     echo '<table class="styled-table">';
     
     foreach (range($year_min, $year_max) as $year) {
-        $where_str  = 'b.ReadDate BETWEEN "' . $year . '-01-00 00:00:00" AND "' . ($year + 1);
-        $where_str .= '-01-00 00:00:00" ORDER BY ' . $_REQUEST['search_order'];
+        $where_str  = 'b.ReadDate BETWEEN "' . $year . '-01-01 00:00:00" AND "' . ($year + 1);
+        $where_str .= '-01-01 00:00:00" ORDER BY ' . $_REQUEST['search_order'];
         $search_str = 'SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, a.ISBNNumber, a.PublisherName, ';
         $search_str .= ' a.CoverType, a.Pages, b.ReadDate, a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 ';
         $search_str .= ' FROM `book collection` a JOIN `books read` b ';
