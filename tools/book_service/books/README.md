@@ -18,7 +18,7 @@ docker build . -t book_service
 docker run -p 127.0.0.1:80:8083 book_service
 http://localhost/configuration
 ```
-## BUILD and DEPLOY
+## BUILD and DEPLOY to K8s
 
 ```angular2html
 docker build -t localhost:32000/book-service .
@@ -38,19 +38,33 @@ kubectl expose deployment book-service --type=LoadBalancer --port=8083
 kubectl rollout restart deployment/book-service
 ```
 
-### Deploy to Linux Desktop
+## Deploy to Linux Desktop
 
 In base.js, set
 
 ```
-const baseApiUrl = "http://192.168.127.6:83";
+const baseApiUrl = "http://192.168.127.166:8083";
 ```
 
-On Ubuntu Desktop at this IP address, run
+Edit configuration.json to point to the MySQL server
+
+## On Ubuntu Desktop, using docker-compose
+
+2023-11-24 moved from Raspberry Pi to Ubuntu Desktop.
 
 ```
-scott@scott-ubuntu:~/Working/php_books_database/tools/book_service$ docker run -d -p83:8083 book_service
-361d8b22a39880abddebe142899256eb7e394a7ce2e017844a083e9afe0b4c1d
-```
+scott@lambda-dual:/opt/joplin$ cat joplin-docker-compose.yaml 
+version: '3'
 
+services:
+
+    books:
+        restart: unless-stopped
+        image: book-service:latest
+        ports:
+            - "8083:8083"
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+
+...
 
