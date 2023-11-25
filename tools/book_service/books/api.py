@@ -1,4 +1,4 @@
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 
 from flask import Flask, Response, request, send_file
 from io import BytesIO
@@ -38,6 +38,7 @@ def configuration():
     rdata = json.dumps({
         "version": __version__,
         "configuration": conf,
+        "isbn_configuration": isbn_conf,
         "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)

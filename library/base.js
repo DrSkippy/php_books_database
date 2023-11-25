@@ -1,4 +1,5 @@
-const baseApiUrl = 'http://192.168.127.166:8083'
+// const baseApiUrl = 'http://192.168.127.166:8083'
+const baseApiUrl = 'https://192.168.127.166/book_service'
 var bookCollectionID = 102;
 
 function topnavbar() {
