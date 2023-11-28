@@ -8,7 +8,7 @@
 <html>
 <head>
 <link rel="shortcut icon" href="./favicon.ico" mce_href="php_books_database/favicon.ico"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="/php_books_database/library/jquery/3.3.1/jquery.min.js"></script>
 <link rel="stylesheet" href="./style/table-style.css">
 <link href="/php_books_database/style/colors.css" rel="stylesheet" type="text/css"/>
 <script src="/php_books_database/library/base.js"></script>

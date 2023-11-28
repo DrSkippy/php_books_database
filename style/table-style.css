@@ -52,7 +52,7 @@ input[type=text] {
     font-family: sans-serif;
     font-size: 1.0em;
     width: 100%;
-    padding: 7px 12px;
+    padding: 7px 7px;
     margin: 12px 0;
     box-sizing: border-box;
 }
