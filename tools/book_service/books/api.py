@@ -1,11 +1,12 @@
 __version__ = '0.9.1'
 
-from flask import Flask, Response, request, send_file
 from io import BytesIO
+
 import pandas as pd
-from matplotlib import pylab as plt
-from flask_cors import CORS
 import pymysql
+from flask import Flask, Response, request, send_file
+from flask_cors import CORS
+from matplotlib import pylab as plt
 
 from api_util import *
 from isbn_com import Endpoint as isbn
@@ -42,6 +43,21 @@ def configuration():
         "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
+
+
+# def require_appkey(view_function):
+#     @wraps(view_function)
+#     # the new, post-decoration function. Note *args and **kwargs here.
+#     def decorated_function(*args, **kwargs):
+#         with open('api.key', 'r') as apikey:
+#             key = apikey.read().replace('\n', '')
+#         # if request.args.get('key') and request.args.get('key') == key:
+#         if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
+#             return view_function(*args, **kwargs)
+#         else:
+#             abort(401)
+#
+#     return decorated_function
 
 
 ##########################################################################
@@ -289,7 +305,7 @@ def _summary_books_read_by_year(target_year=None):
                   "FROM `book collection` as a JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID "
                   "WHERE b.ReadDate is not NULL ")
-#                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
+    #                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "GROUP BY Year ORDER BY Year ASC"
@@ -322,7 +338,7 @@ def _books_read(target_year=None):
                   "FROM `book collection` as a JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID "
                   "WHERE b.ReadDate is not NULL ")
-#                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
+    #                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "ORDER BY b.ReadDate"

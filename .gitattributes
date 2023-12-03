@@ -1,2 +1,3 @@
 db_header.php  filter=crypt diff=crypt merge=crypt
 configuration.json  filter=crypt diff=crypt merge=crypt
+api.key  filter=crypt diff=crypt merge=crypt
