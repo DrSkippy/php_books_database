@@ -61,7 +61,7 @@ form.addEventListener('submit', function(event) {
     var publishername = document.forms["add"]["publishername"].value;
     var note = document.forms["add"]["note"].value;
     var covertype = document.querySelector('input[name="covertype"]:checked').value;
-    var recycled = document.forms["add"]["recycled"].checked ? "yes" : "no";
+    var recycled = document.forms["add"]["recycled"].checked ? "1" : "0";
     var location = document.forms["add"]["location"].value;
     var pages = parseInt(document.forms["add"]["pages"].value);
     var copyrightdate = parseInt(document.forms["add"]["copyrightdate"].value.slice(0,4));
