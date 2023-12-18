@@ -63,6 +63,38 @@ def configuration():
 ##########################################################################
 # UI Utilities
 ##########################################################################
+
+@app.route('/valid_locations')
+def valid_locations():
+    """
+    Endpoint to retrieve distinct locations from the 'book collection' table.
+    Returns a JSON response containing the locations.
+    """
+    try:
+        db = pymysql.connect(**conf)
+        cursor = db.cursor()
+
+        # Execute the query
+        query = "SELECT DISTINCT Location FROM `book collection`;"
+        app.logger.debug(query)
+        cursor.execute(query)
+
+        # Fetch and process the results
+        locations = cursor.fetchall()
+        result = {"header": "Location", "data": [loc[0] for loc in locations]}
+
+    except pymysql.Error as e:
+        # Log and handle database errors
+        app.logger.error(e)
+        result = {"error": str(e)}
+    finally:
+        # Ensure the database connection is closed
+        db.close()
+
+    # Return the successful response
+    return Response(response=result, status=200, headers=resp_header(result))
+
+"""CHATGPT refactor 12/9/2023
 @app.route('/valid_locations')
 def valid_locations():
     db = pymysql.connect(**conf)
@@ -81,7 +113,7 @@ def valid_locations():
         rdata = json.dumps(result)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
-
+"""
 
 ##########################################################################
 # ADDS
@@ -299,6 +331,53 @@ def update_book_note_status():
 ##########################################################################
 # REPORTS
 ##########################################################################
+
+def _summary_books_read_by_year(target_year=None):
+    """
+    Summarizes the number of pages read and books read each year.
+    Can be filtered for a specific year.
+
+    Parameters:
+    target_year (int, optional): The year for which the summary is required. Defaults to None.
+
+    Returns:
+    tuple: A tuple containing the serialized result, raw data, and header.
+    """
+    # Initialize database connection
+    db = pymysql.connect(**conf)
+    cursor = db.cursor()
+
+    # Building the SQL query string
+    query = (
+        "SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
+        "FROM `book collection` as a JOIN `books read` as b "
+        "ON a.BookCollectionID = b.BookCollectionID "
+        "WHERE b.ReadDate is not NULL "
+    )
+    if target_year is not None:
+        query += f" AND YEAR(b.ReadDate) = {pymysql.escape_string(str(target_year))} "
+    query += "GROUP BY Year ORDER BY Year ASC"
+
+    # Prepare response data
+    headers = ["year", "pages read", "books read"]
+    app.logger.debug(query)
+
+    # Execute query and handle exceptions
+    try:
+        cursor.execute(query)
+        results = cursor.fetchall()
+        serialized_data = serialize_rows(results, headers)
+    except pymysql.Error as e:
+        app.logger.error(e)
+        serialized_data = json.dumps({"error": str(e)})
+        results = None
+    finally:
+        # Close the database connection
+        db.close()
+
+    return serialized_data, results, headers
+
+""" CHATGPT refactor 12/9/2023
 def _summary_books_read_by_year(target_year=None):
     db = pymysql.connect(**conf)
     search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
@@ -322,6 +401,7 @@ def _summary_books_read_by_year(target_year=None):
         s = c.fetchall()
         rdata = serialize_rows(s, header)
     return rdata, s, header
+"""
 
 
 @app.route('/summary_books_read_by_year')

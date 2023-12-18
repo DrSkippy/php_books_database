@@ -33,7 +33,7 @@ def make(index=0, filename=None):
     data, header = _reading_data(filename)
     est_date, est_date_min, est_date_max = _estimate_dates(data, header)
     print("*" * 80)
-    print(f"              Book: {header[0]}")
+    print(f"Book: {header[0]}")
     print("Estimated Complete: {}  Earliest: {}  Latest: {}".format(est_date.strftime(FMT),
                                                                     est_date_min.strftime(FMT),
                                                                     est_date_max.strftime(FMT)))
@@ -47,6 +47,7 @@ def add_date_pages(pages, index, date=None, filename=None):
     filename = ESTIMATES_PATH + "/" + filename
     with open(filename, "a") as of:
         of.write("{}, {}\n".format(date, pages))
+    make(filename=filename)
 
 
 def list(path=ESTIMATES_PATH):
