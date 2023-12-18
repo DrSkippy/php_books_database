@@ -1,15 +1,16 @@
 import csv
 import datetime
+import os
 
 import numpy as np
-import os
 
 FMT = "%Y-%m-%d"
 ESTIMATES_PATH = "./book_estimates"
-result = None
+file_list = []
+
 
 def new(title):
-    fn = title.strip().lower().replace(" ", "_").replace(":","")
+    fn = title.strip().lower().replace(" ", "_").replace(":", "")
     filename = f"{ESTIMATES_PATH}/{fn}.txt"
     start_date_str = input("Enter start date (YYYY-MM-DD): ")
     start_date = datetime.datetime.strptime(start_date_str, FMT)
@@ -22,23 +23,38 @@ def new(title):
         for i in range(30):
             dt = start_date + datetime.timedelta(days=i)
             of.write("{},\n".format(dt.strftime(FMT)))
-def make(filename):
+
+
+def make(index=0, filename=None):
+    global records_file_list
+    if filename is None:
+        filename = records_file_list[index]
     filename = ESTIMATES_PATH + "/" + filename
     data, header = _reading_data(filename)
     est_date, est_date_min, est_date_max = _estimate_dates(data, header)
     print("*" * 80)
     print(f"              Book: {header[0]}")
-    print("Estimated Complete: {}  Earliest: {}  Latest: {}".format(est_date.strftime(FMT), est_date_min.strftime(FMT),
+    print("Estimated Complete: {}  Earliest: {}  Latest: {}".format(est_date.strftime(FMT),
+                                                                    est_date_min.strftime(FMT),
                                                                     est_date_max.strftime(FMT)))
     print("*" * 80)
 
+def add_date_pages(pages, index, date=None, filename=None):
+    if date is None:
+        date = datetime.datetime.now().strftime(FMT)
+    if filename is None:
+        filename = records_file_list[index]
+    filename = ESTIMATES_PATH + "/" + filename
+    with open(filename, "a") as of:
+        of.write("{}, {}\n".format(date, pages))
+
+
 def list(path=ESTIMATES_PATH):
-    files = os.listdir(path)
+    global records_file_list
+    records_file_list = os.listdir(path)
     print("Existing files: ")
-    for i, file in enumerate(files):
+    for i, file in enumerate(records_file_list):
         print(f"    {i} - {file}")
-    global result
-    result = files
 
 def _day_number(data):
     # title, total pages to read
