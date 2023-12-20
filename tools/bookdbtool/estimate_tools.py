@@ -44,8 +44,8 @@ def add_date_pages(pages, index, date=None, filename=None):
         date = datetime.datetime.now().strftime(FMT)
     if filename is None:
         filename = records_file_list[index]
-    filename = ESTIMATES_PATH + "/" + filename
-    with open(filename, "a") as of:
+    filepath = ESTIMATES_PATH + "/" + filename
+    with open(filepath, "a") as of:
         of.write("{}, {}\n".format(date, pages))
     make(filename=filename)
 
