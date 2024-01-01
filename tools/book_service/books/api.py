@@ -642,6 +642,7 @@ def all_years(year=None):
     df.sort_values(by=["rank"], inplace=True)
     df.reset_index()
     app.logger.debug(df)
+    app.logger.debug(df.dtypes)
     now = df.loc[df["year"] == year]
     app.logger.debug(now)
     fig, axs = plt.subplots(3, 1, figsize=[10, 18])
