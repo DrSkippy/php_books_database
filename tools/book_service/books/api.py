@@ -641,8 +641,9 @@ def all_years(year=None):
     df["rank"] = df["pages read"].rank(ascending=False)
     df.sort_values(by=["rank"], inplace=True)
     df.reset_index()
-    now = df.loc[df.year == year]
     app.logger.debug(s)
+    app.logger.debug(df)
+    now = df.loc[df.year == year]
     app.logger.debug(now)
     fig, axs = plt.subplots(3, 1, figsize=[10, 18])
     df.hist("pages read", bins=14, color="darkblue", ax=axs[0])
