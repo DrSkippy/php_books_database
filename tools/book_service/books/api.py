@@ -329,7 +329,7 @@ def _summary_books_read_by_year(target_year=None):
         "WHERE b.ReadDate is not NULL "
     )
     if target_year is not None:
-        query += f" AND YEAR(b.ReadDate) = {str(target_year)} "
+        query += f" AND YEAR(b.ReadDate) = {target_year} "
     query += "GROUP BY Year ORDER BY Year ASC"
 
     # Prepare response data
