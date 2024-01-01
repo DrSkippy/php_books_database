@@ -6,7 +6,7 @@
 Example:
 
 ```
-s.hendrickson@BLD-ML-00027935 isbndb.com % poetry run python bin/simple.py
+s.hendrickson@BLD-ML-00027935 isbndb.com % poetry run python bin/simple_isbn.py
 Enter s to stop
 Enter isbn13: 9780316016414
 {

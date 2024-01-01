@@ -1,5 +1,13 @@
+## Test Book Service
 
-Basic API usage:
+### Test Script
+
+```
+poetry run python test_books/test_docker_api.py 
+```
+
+Basic API Endpoints:
+
 ```
 http://172.17.0.2:8083/configuration
 http://172.17.0.2:8083/tag_counts
@@ -14,14 +22,18 @@ http://172.17.0.2:8083/books?Author=john
 http://172.17.0.2:8083/books?Recycled=0
 ```
 
+### Curl Examples
+
 List of Authors of unrecycled books in alphabetical order:
 ```angular2html
-curl http://172.17.0.2:8083/books?Recycled=0 | jq .data[][1]
+curl -H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
+http://172.17.0.2:8083/books?Recycled=0 | jq .data[][1]
 ```
 
 Add books:
 ```angular2html
 curl -X POST -H "Content-type: application/json" \
+-H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
 -d @./examples/test_add_book.json \
 http://172.17.0.2:8083/add_books
 ```
@@ -29,17 +41,32 @@ http://172.17.0.2:8083/add_books
 Update a book:
 ```angular2html
 curl -X POST -H "Content-type: application/json" \
+-H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
 -d @./examples/test_update_book.json \
 http://172.17.0.2:8083/update_book
 ```
 
 API in K8s:
 ```
-curl -kL https://192.168.127.7/books/configuration
-curl -kL https://192.168.127.7/books/books-read-by-year
-curl -kL https://192.168.127.7/books/tag_count
-curl -kL https://192.168.127.7/books/tags/2
-curl -kL https://192.168.127.7/books/books?Recycled=0
+curl -kL -H "Content-type: application/json" \
+-H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
+https://192.168.127.166/books/configuration
+
+curl -kL -H "Content-type: application/json" \
+-H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
+https://192.168.127.7/books/books-read-by-year
+
+curl -kL -H "Content-type: application/json" \
+-H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
+https://192.168.127.7/books/tag_count
+
+curl -kL -H "Content-type: application/json" \
+-H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
+https://192.168.127.7/books/tags/2
+
+curl -kL -H "Content-type: application/json" \
+-H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
+https://192.168.127.7/books/books?Recycled=0
 ```
 
 FAILED TO OPEN COLLECTION ERROR

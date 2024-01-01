@@ -1,10 +1,15 @@
 import datetime
+import functools
 import json
 from decimal import Decimal
+
+from flask import request, abort
 
 table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNumber", "PublisherName",
                 "CoverType", "Pages", "Category", "Note", "Recycled",
                 "Location", "ISBNNumber13"]
+
+locations_sort_order = [3, 4, 2, 1, 7, 6, 5]
 
 
 def get_configuration():
@@ -27,6 +32,36 @@ def get_configuration():
             print(e)
             sys.exit()
         return res, res1
+
+
+def sort_by_indexes(lst, indexes, reverse=False):
+    return [val for (_, val) in sorted(zip(indexes, lst), key=lambda x: \
+        x[0], reverse=reverse)]
+
+
+def require_appkey(view_function):
+    """
+    Decorator to require API key for access
+    :param view_function: any method that requires API key
+    :return: endpoint method
+    """
+
+    @functools.wraps(view_function)
+    # the new, post-decoration function. Note *args and **kwargs here.
+    def decorated_function(*args, **kwargs):
+        with open('./config/api.key', 'r') as apikey:
+            key = apikey.read().replace('\n', '')
+        # NO CONDITIONAL CHECK FOR KEY
+        return view_function(*args, **kwargs)
+        """
+        # Select one of these:
+        # if request.args.get('key') and request.args.get('key') == key:
+        if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
+            return view_function(*args, **kwargs)
+        else:
+            abort(401)
+        """
+    return decorated_function
 
 
 def serialize_rows(cursor, header=None):

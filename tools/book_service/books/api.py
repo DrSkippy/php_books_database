@@ -1,4 +1,4 @@
-__version__ = '0.9.1'
+__version__ = '0.9.2'
 
 from io import BytesIO
 
@@ -35,6 +35,7 @@ cors = CORS(app)
 
 
 @app.route('/configuration')
+@require_appkey
 def configuration():
     rdata = json.dumps({
         "version": __version__,
@@ -43,21 +44,6 @@ def configuration():
         "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
-
-
-# def require_appkey(view_function):
-#     @wraps(view_function)
-#     # the new, post-decoration function. Note *args and **kwargs here.
-#     def decorated_function(*args, **kwargs):
-#         with open('api.key', 'r') as apikey:
-#             key = apikey.read().replace('\n', '')
-#         # if request.args.get('key') and request.args.get('key') == key:
-#         if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
-#             return view_function(*args, **kwargs)
-#         else:
-#             abort(401)
-#
-#     return decorated_function
 
 
 ##########################################################################
@@ -75,13 +61,15 @@ def valid_locations():
         cursor = db.cursor()
 
         # Execute the query
-        query = "SELECT DISTINCT Location FROM `book collection`;"
+        query = "SELECT DISTINCT Location FROM `book collection` ORDER by Location ASC;"
         app.logger.debug(query)
         cursor.execute(query)
 
         # Fetch and process the results
         locations = cursor.fetchall()
-        result = {"header": "Location", "data": [loc[0] for loc in locations]}
+        locations_list = [loc[0] for loc in locations]
+        sorted_locations_list = sort_by_indexes(locations_list, locations_sort_order)
+        result = json.dumps({"header": "Location", "data": sorted_locations_list})
 
     except pymysql.Error as e:
         # Log and handle database errors
@@ -89,37 +77,19 @@ def valid_locations():
         result = {"error": str(e)}
     finally:
         # Ensure the database connection is closed
-        db.close()
+        if db:
+            db.close()
 
     # Return the successful response
     return Response(response=result, status=200, headers=resp_header(result))
 
-"""CHATGPT refactor 12/9/2023
-@app.route('/valid_locations')
-def valid_locations():
-    db = pymysql.connect(**conf)
-    q_str = "SELECT DISTINCT Location FROM `book collection`;"
-    app.logger.debug(q_str)
-    c = db.cursor()
-    try:
-        c.execute(q_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = {"error": str(e)}
-    else:
-        s = c.fetchall()
-        result = {"header": "Location"}
-        result["data"] = [x[0] for x in s]
-        rdata = json.dumps(result)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
-"""
 
 ##########################################################################
 # ADDS
 ##########################################################################
 
 @app.route('/add_books', methods=['POST'])
+@require_appkey
 def add_books():
     """
     JSON Post Payload:
@@ -175,6 +145,7 @@ def add_books():
 
 
 @app.route('/add_read_dates', methods=['POST'])
+@require_appkey
 def add_read_dates():
     """
     Post Payload:
@@ -212,6 +183,7 @@ def add_read_dates():
 
 
 @app.route('/books_by_isbn', methods=['POST'])
+@require_appkey
 def books_by_isbn():
     """
     Creates records from isbn lookup and adds to the collection.
@@ -243,6 +215,7 @@ def books_by_isbn():
 # UPDATES
 ##########################################################################
 @app.route('/update_edit_read_note', methods=['POST'])
+@require_appkey
 def update_edit_read_note():
     """
     Post Payload:
@@ -281,6 +254,7 @@ def update_edit_read_note():
 
 
 @app.route('/update_book_note_status', methods=['POST'])
+@require_appkey
 def update_book_note_status():
     """
     Post Payload:
@@ -355,7 +329,7 @@ def _summary_books_read_by_year(target_year=None):
         "WHERE b.ReadDate is not NULL "
     )
     if target_year is not None:
-        query += f" AND YEAR(b.ReadDate) = {pymysql.escape_string(str(target_year))} "
+        query += f" AND YEAR(b.ReadDate) = {str(target_year)} "
     query += "GROUP BY Year ORDER BY Year ASC"
 
     # Prepare response data
@@ -376,32 +350,6 @@ def _summary_books_read_by_year(target_year=None):
         db.close()
 
     return serialized_data, results, headers
-
-""" CHATGPT refactor 12/9/2023
-def _summary_books_read_by_year(target_year=None):
-    db = pymysql.connect(**conf)
-    search_str = ("SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
-                  "FROM `book collection` as a JOIN `books read` as b "
-                  "ON a.BookCollectionID = b.BookCollectionID "
-                  "WHERE b.ReadDate is not NULL ")
-    #                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
-    if target_year is not None:
-        search_str += f" AND YEAR(b.ReadDate) = {target_year} "
-    search_str += "GROUP BY Year ORDER BY Year ASC"
-    header = ["year", "pages read", "books read"]
-    app.logger.debug(search_str)
-    s = None
-    c = db.cursor()
-    try:
-        c.execute(search_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = json.dumps({"error": str(e)})
-    else:
-        s = c.fetchall()
-        rdata = serialize_rows(s, header)
-    return rdata, s, header
-"""
 
 
 @app.route('/summary_books_read_by_year')
@@ -516,6 +464,7 @@ def books_search():
 ##########################################################################
 
 @app.route('/add_tag/<book_id>/<tag>', methods=["put"])
+@require_appkey
 def add_tag(book_id, tag):
     db = pymysql.connect(**conf)
     tag = tag.lower()
@@ -582,6 +531,7 @@ def tags(book_id=None):
 
 
 @app.route('/update_tag_value/<current>/<updated>')
+@require_appkey
 def update_tag_value(current, updated):
     db = pymysql.connect(**conf)
     with db:
