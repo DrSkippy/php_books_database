@@ -641,8 +641,9 @@ def all_years(year=None):
     df["rank"] = df["pages read"].rank(ascending=False)
     df.sort_values(by=["rank"], inplace=True)
     df.reset_index()
-    app.logger.debug(df["year"])
-    app.logger.debug(year)
+    # When we are in a new year, but no read books yet, we need to add the year
+    if year not in df.year.unique():
+        year = df.year.unique().max()
     now_df = df.loc[df["year"] == year]
     app.logger.debug(now_df)
     fig, axs = plt.subplots(3, 1, figsize=[10, 18])
