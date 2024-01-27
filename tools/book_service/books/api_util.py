@@ -3,13 +3,17 @@ import functools
 import json
 from decimal import Decimal
 
-from flask import request, abort
+import numpy as np
+import pymysql
+
 
 table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNumber", "PublisherName",
                 "CoverType", "Pages", "Category", "Note", "Recycled",
                 "Location", "ISBNNumber13"]
 
 locations_sort_order = [3, 4, 2, 1, 7, 6, 5]
+
+FMT = "%Y-%m-%d"
 
 
 def get_configuration():
@@ -33,6 +37,8 @@ def get_configuration():
             sys.exit()
         return res, res1
 
+# server configuration
+conf, isbn_conf = get_configuration()
 
 def sort_by_indexes(lst, indexes, reverse=False):
     return [val for (_, val) in sorted(zip(indexes, lst), key=lambda x: \
@@ -61,6 +67,7 @@ def require_appkey(view_function):
         else:
             abort(401)
         """
+
     return decorated_function
 
 
@@ -97,3 +104,72 @@ def resp_header(rdata):
         ('Content-Length', str(len(rdata)))
     ]
     return response_header
+
+
+def _estimate_range(x, y, p):
+    res = [0, 10000]
+    for i in range(len(x) - 1):
+        m = (y[i + 1] - y[i]) / (x[i + 1] - x[i])
+        est = int(m * (p - np.max(x)) + np.max(y))
+        if est > res[0]:
+            res[0] = est
+        if est < res[1]:
+            res[1] = est
+    return res
+
+
+def _line_fit_and_estimate(data, total_pages):
+    d = np.array(data)
+    x = np.array(d[:, 1], dtype=np.float64)
+    y = np.array(d[:, 2], dtype=np.float64)
+    m, b = np.polyfit(x, y, 1)
+    est = m * float(total_pages) + b
+    est_range = _estimate_range(x, y, total_pages)
+    return int(est), est_range
+
+
+def daily_page_record_from_db(BookID):
+    data = []
+    db = pymysql.connect(**conf)
+    with db:
+        with db.cursor() as cur:
+            cur.execute("SELECT * FROM `daily page records` WHERE BookCollectionID = %s", BookID)
+            rows = cur.fetchall()
+            if len(rows) > 0:
+                start_date = rows[0][1]
+                for row in rows:
+                    data.append(list(row[1:]) + [(row[1] - start_date).days])
+    return data, BookID
+
+
+def reading_book_data_from_db(BookID):
+    data = []
+    db = pymysql.connect(**conf)
+    with db:
+        with db.cursor() as cur:
+            cur.execute("SELECT * FROM `complete date estimates` WHERE BookCollectionID = %s", BookID)
+            rows = cur.fetchall()
+            for row in rows:
+                data.append(list(row[1:]))
+    return data, BookID
+
+
+def update_reading_book_data(book_id, range):
+    db = pymysql.connect(**conf)
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(
+                    "UPDATE `complete date estimates` SET EstimateDate = %s, EstimatedFinishDate = %s WHERE BookCollectionID = %s",
+                    (datetime.datetime.now(), range[0], book_id))
+            except pymysql.Error as e:
+                app.logger.error(e)
+        db.commit()
+
+
+def estimate_dates(data, start_date, total_readable_pages):
+    est, range = _line_fit_and_estimate(data, float(total_readable_pages))
+    est_date = start_date + datetime.timedelta(days=est)
+    est_date_max = start_date + datetime.timedelta(days=range[0])
+    est_date_min = start_date + datetime.timedelta(days=range[1])
+    return est_date, est_date_min, est_date_max

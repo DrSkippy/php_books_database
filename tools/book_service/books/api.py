@@ -11,8 +11,6 @@ from matplotlib import pylab as plt
 from api_util import *
 from isbn_com import Endpoint as isbn
 
-# server configuration
-conf, isbn_conf = get_configuration()
 from logging.config import dictConfig
 
 dictConfig({
@@ -56,6 +54,7 @@ def valid_locations():
     Endpoint to retrieve distinct locations from the 'book collection' table.
     Returns a JSON response containing the locations.
     """
+    db = None
     try:
         db = pymysql.connect(**conf)
         cursor = db.cursor()
@@ -594,6 +593,88 @@ def tag_maintenance():
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
+
+##########################################################################
+# READING ESTIMATES
+##########################################################################
+
+@app.route('/estimate/<book_id>')
+def estimate(book_id=None):
+    reading_data, _ = daily_page_record_from_db(book_id)
+    if len(reading_data) < 2:
+        rdata = json.dumps({"BookID": book_id, "error": ["Inadequate reading data found"]})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=404, headers=response_headers)
+    book_data, _ = reading_book_data_from_db(book_id)
+    range = estimate_dates(reading_data, book_data[0][0], book_data[0][1])
+    update_reading_book_data(book_id, range)
+    rdata = json.dumps({"BookID": book_id, "estimate": [x.strftime(FMT) for x in range]})
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/add_date_page', methods=['POST'])
+@require_appkey
+def add_date_page():
+    """
+    Post Payload:
+    {
+      "BookCollectionID": 1606,
+      "RecordDate": "0000-00-00"
+      "Page": 123
+    }
+
+    E.g.
+    curl -X POST -H "Content-type: application/json" -d @./example_json_payloads/test_add_date_page.json \
+    http://172.17.0.2:5000/add_date_page
+
+    :return:
+    """
+    # records should be a single dictionaries including all fields
+    record = request.get_json()
+    search_str = "INSERT INTO `daily page records` SET "
+    search_str += "BookCollectionID=\"{BookCollectionID}\" "
+    search_str += "RecordDate=\"{RecordDate}\" "
+    search_str += "page=\"{Page}\";"
+    app.logger.debug(search_str.format(**record))
+    rdata = []
+    db = pymysql.connect(**conf)
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(search_str.format(**record))
+                rdata.append(record)
+            except pymysql.Error as e:
+                app.logger.error(e)
+                rdata.append({"error": str(e)})
+        db.commit()
+    rdata = json.dumps({"add_date_page": rdata})
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/add_book_estimate/<book_id>/<last_readable_page>', methods=["PUT"])
+@require_appkey
+def add_book_estimate(book_id, last_readable_page):
+    db = pymysql.connect(**conf)
+    last_readable_page = int(last_readable_page)
+    start_date = datetime.datetime.now().strftime(FMT)
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(f'INSERT INTO `complete date estimates` SET BookCollectionID="{book_id}",'
+                          + f'StartDate="{start_date}", LastReadablePage={last_readable_page};')
+                rdata = json.dumps({"BookID": f"{book_id}", "LastReadablePage":
+                    f"{last_readable_page}", "StartDate": f"{start_date}"})
+            except pymysql.Error as e:
+                app.logger.error(e)
+                rdata = json.dumps({"BookID": book_id, "LastReadablePage": last_readable_page, "error": str(e)})
+        db.commit()
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+# list existing records
+# fix all of this for a second reading of a given book?
 
 ##########################################################################
 # IMAGES
