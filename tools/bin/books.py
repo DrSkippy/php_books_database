@@ -1,8 +1,29 @@
+import json
 import readline
 from code import InteractiveConsole
 
 import bookdbtool.estimate_tools as et
 import bookdbtool.repl_tools as rt
+
+CONFIG_PATH = "/book_service/config/configuration.json"  # root is "tools"
+
+
+def get_endpoint():
+    try:
+        cfile = open(f".{CONFIG_PATH}", "r")
+    except OSError:
+        try:
+            cfile = open(f"..{CONFIG_PATH}", "r")
+        except OSError:
+            print("Configuration file not found!")
+    with cfile:
+        config = json.load(cfile)
+        end_point = config["endpoint"]
+        api_key = config["api_key"]
+    return end_point, api_key
+
+
+conf = get_endpoint()
 
 
 def history():
@@ -11,7 +32,7 @@ def history():
     print("-" * 50)
 
 
-scope_vars = {"bc": rt.BC_Tool(), "est": et, "history": history}
+scope_vars = {"bc": rt.BC_Tool(*conf), "est": et.EST_Tool(*conf), "history": history}
 
 header = "************************************************************************\n"
 header += "** Welcome to the Book Collection Database REPL!                      **\n"

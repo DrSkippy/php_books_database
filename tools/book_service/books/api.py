@@ -1,4 +1,4 @@
-__version__ = '0.9.2'
+__version__ = '0.9.3'
 
 from io import BytesIO
 
@@ -602,13 +602,13 @@ def tag_maintenance():
 def estimate(book_id=None):
     reading_data, _ = daily_page_record_from_db(book_id)
     if len(reading_data) < 2:
-        rdata = json.dumps({"BookID": book_id, "error": ["Inadequate reading data found"]})
+        rdata = json.dumps({"BookCollectionID": book_id, "error": ["Inadequate reading data found"]})
         response_headers = resp_header(rdata)
         return Response(response=rdata, status=404, headers=response_headers)
     book_data, _ = reading_book_data_from_db(book_id)
     range = estimate_dates(reading_data, book_data[0][0], book_data[0][1])
     update_reading_book_data(book_id, range)
-    rdata = json.dumps({"BookID": book_id, "estimate": [x.strftime(FMT) for x in range]})
+    rdata = json.dumps({"BookCollectionID": book_id, "estimate": [x.strftime(FMT) for x in range]})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -668,12 +668,13 @@ def add_book_estimate(book_id, last_readable_page):
                     f"{last_readable_page}", "StartDate": f"{start_date}"})
             except pymysql.Error as e:
                 app.logger.error(e)
-                rdata = json.dumps({"BookID": book_id, "LastReadablePage": last_readable_page, "error": str(e)})
+                rdata = json.dumps({"BookCollectionID": book_id, "LastReadablePage": last_readable_page, "error": str(e)})
         db.commit()
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 # list existing records
+# last estimate for given book
 # fix all of this for a second reading of a given book?
 
 ##########################################################################

@@ -55,19 +55,16 @@ def require_appkey(view_function):
     @functools.wraps(view_function)
     # the new, post-decoration function. Note *args and **kwargs here.
     def decorated_function(*args, **kwargs):
-        with open('./config/api.key', 'r') as apikey:
-            key = apikey.read().replace('\n', '')
-        # NO CONDITIONAL CHECK FOR KEY
-        return view_function(*args, **kwargs)
-        """
+        config_filename = "./config/configuration.json"
+        with open(config_filename, "r") as config_file:
+            c = json.load(config_file)
+            key = c["api_key"].replace('\n', '')
         # Select one of these:
         # if request.args.get('key') and request.args.get('key') == key:
         if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
             return view_function(*args, **kwargs)
         else:
             abort(401)
-        """
-
     return decorated_function
 
 

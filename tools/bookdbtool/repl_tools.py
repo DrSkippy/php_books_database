@@ -1,10 +1,9 @@
-__version__ = '0.5.4'
+__version__ = '0.5.5'
 
 import datetime
 import logging
 import os
 import pprint
-import json
 
 pp = pprint.PrettyPrinter(indent=3)
 
@@ -14,7 +13,6 @@ from columnar import columnar
 
 
 class BC_Tool:
-    ENDPOINT = "URL HERE"
     COLUMN_INDEX = {
         "BookCollectionID": 0,
         "Title": 1,
@@ -48,20 +46,11 @@ class BC_Tool:
     terminal_width = 180
     LINES_TO_ROWS = 1.3
     DIVIDER_WIDTH = 50
-    CONFIG_PATH = "/book_service/config/configuration.json"  # root is "tools"
 
-    def __init__(self):
+    def __init__(self, endpoint, api_key):
         # File path contortions so notebook uses the same config as REPL command line
-        try:
-            cfile = open(f".{self.CONFIG_PATH}", "r")
-        except OSError:
-            try:
-                cfile = open(f"..{self.CONFIG_PATH}", "r")
-            except OSError:
-                print("Configuration file not found!")
-        with cfile:
-            config = json.load(cfile)
-            self.ENDPOINT = config["endpoint"]
+        self.end_point = endpoint
+        self.header = {"x-api-key": f"{api_key}"}
         self.result = None
 
     def _row_column_selector(self, row, indexes):
@@ -147,9 +136,9 @@ class BC_Tool:
 
     def _add_books(self, records):
         result_message = "Added."
-        q = self.ENDPOINT + "/add_books"
+        q = self.end_point + "/add_books"
         try:
-            tr = requests.post(q, json=records)
+            tr = requests.post(q, json=records, headers=self.header)
             tres = tr.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -163,9 +152,9 @@ class BC_Tool:
 
     def version(self):
         """ Retrieve the back end version. """
-        q = self.ENDPOINT + "/configuration"
+        q = self.end_point + "/configuration"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -173,7 +162,7 @@ class BC_Tool:
             print("*" * self.DIVIDER_WIDTH)
             print("        Book Records and Reading Database")
             print("*" * self.DIVIDER_WIDTH)
-            print("Endpoint:         {}".format(self.ENDPOINT))
+            print("Endpoint:         {}".format(self.end_point))
             print("Endpoint Version: {}".format(res["version"]))
             print("Client Version:   {}".format(__version__))
             print("*" * self.DIVIDER_WIDTH)
@@ -194,11 +183,11 @@ class BC_Tool:
             tag: String for which you want a tag count. Required.
             pagination: True or False. Default is True to paginate the results according to the screen size.
         """
-        q = self.ENDPOINT + "/tag_counts"
+        q = self.end_point + "/tag_counts"
         if tag is not None:
             q += f"/{tag}"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -217,7 +206,7 @@ class BC_Tool:
         Use bc.columns() to see a list of columns.
         bc.result is a Pandas DataFrame.
         """
-        q = self.ENDPOINT + "/books_search?"
+        q = self.end_point + "/books_search?"
         first = True
         for k, v in query.items():
             if first:
@@ -226,7 +215,7 @@ class BC_Tool:
                 q += "&"
             q += f"{k}={v}"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -245,9 +234,9 @@ class BC_Tool:
             List of tags matching match_str.
             bc.result is a list of book collection ids for books with matching tag.
         """
-        q = self.ENDPOINT + f"/tags_search/{match_str}"
+        q = self.end_point + f"/tags_search/{match_str}"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -268,14 +257,14 @@ class BC_Tool:
             bc.result is a book collection id.
         """
         assert isinstance(book_collection_id, int), "Requires in integer Book ID"
-        q = self.ENDPOINT + f"/books_search?BookCollectionID={book_collection_id}"
+        q = self.end_point + f"/books_search?BookCollectionID={book_collection_id}"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
         else:
-            q = self.ENDPOINT + f"/tags/{book_collection_id}"
+            q = self.end_point + f"/tags/{book_collection_id}"
             try:
                 tr = requests.get(q)
                 tres = tr.json()
@@ -303,18 +292,18 @@ class BC_Tool:
             bc.result is a list of Pandas DataFrames.
         """
         self.result = []
-        q = self.ENDPOINT + "/summary_books_read_by_year"
+        q = self.end_point + "/summary_books_read_by_year"
         if year is not None:
             q += f"/{year}"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
         else:
             _data = []
             for year, pages, books in res["data"]:
-                q = self.ENDPOINT + f"/books_read/{year}"
+                q = self.end_point + f"/books_read/{year}"
                 try:
                     tr = requests.get(q)
                     tres = tr.json()
@@ -343,11 +332,11 @@ class BC_Tool:
             table of books for years.
             bc.result is a Pandas DataFrame.
         """
-        q = self.ENDPOINT + "/books_read"
+        q = self.end_point + "/books_read"
         if year is not None:
             q += f"/{year}"
         try:
-            tr = requests.get(q)
+            tr = requests.get(q, headers=self.header)
             tres = tr.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -367,11 +356,11 @@ class BC_Tool:
             table of books for years.
             bc.result is a Pandas DataFrame.
         """
-        q = self.ENDPOINT + "/summary_books_read_by_year"
+        q = self.end_point + "/summary_books_read_by_year"
         if year is not None:
             q += f"/{year}"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -426,10 +415,10 @@ class BC_Tool:
             None or error
             bc.result is list of ids added.
         """
-        q = self.ENDPOINT + "/books_by_isbn"
+        q = self.end_point + "/books_by_isbn"
         payload = {"isbn_list": book_isbn_list}
         try:
-            tr = requests.post(q, json=payload)
+            tr = requests.post(q, json=payload, headers=self.header)
             book_record_list = tr.json()["book_records"]
         except requests.RequestException as e:
             logging.error(e)
@@ -450,9 +439,9 @@ class BC_Tool:
         """ Takes 1 argument.
         Update records for BookCollectionIds in list provided. """
         records = [self._populate_add_read_date(id) for id in book_collection_id_list]
-        q = self.ENDPOINT + "/add_read_dates"
+        q = self.end_point + "/add_read_dates"
         try:
-            tr = requests.post(q, json=records)
+            tr = requests.post(q, json=records, headers=self.header)
             tres = tr.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -467,9 +456,9 @@ class BC_Tool:
     def update_tag_value(self, tag_value, new_tag_value, pagination=True):
         """ Takes 2 arguments,
         current value of tag and new value of tag """
-        q = self.ENDPOINT + f"/update_tag_value/{tag_value}/{new_tag_value}"
+        q = self.end_point + f"/update_tag_value/{tag_value}/{new_tag_value}"
         try:
-            r = requests.get(q)
+            r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
@@ -486,11 +475,11 @@ class BC_Tool:
             bc.result is the book_collection_id
         """
         assert isinstance(book_collection_id, int), "Requires in integer Book ID"
-        q = self.ENDPOINT + f"/add_tag/{book_collection_id}/" + "{}"
+        q = self.end_point + f"/add_tag/{book_collection_id}/" + "{}"
         result = {"data": [], "error": []}
         for t in tags:
             try:
-                r = requests.put(q.format(t))
+                r = requests.put(q.format(t), headers=self.header)
                 res = r.json()
                 if "error" in res:
                     result["error"].append(res["error"])
