@@ -11,13 +11,19 @@ $.ajaxSetup({
 });
 
 function topnavbar() {
-    document.getElementById("insertTopNavBar").innerHTML = '<div class="topnav">' +
-        '<a href="/php_books_database/index.php">Browse Collection</a>' +
-        '<a href="/php_books_database/js_reports/index.html">Search & Reports</a>' +
-        '<a href="/php_books_database/js_reports/progress.html">Yearly Progress</a>' +
-        '<a href="/php_books_database/js_reports/books_read_by_year.html">Books Read - All</a>' +
-        '<a href="/php_books_database/js_reports/inventory.html">Inventory</a>' +
-        '</div>';
+    var urlVersion = baseApiUrl + "/configuration";
+    $.getJSON(urlVersion, function (data) {
+        var obj = data['version'];
+        console.log(obj.toString());
+        document.getElementById("insertTopNavBar").innerHTML = '<div class="topnav">' +
+            '<a href="/php_books_database/index.php">Browse Collection</a>' +
+            '<a href="/php_books_database/js_reports/index.html">Search & Reports</a>' +
+            '<a href="/php_books_database/js_reports/progress.html">Yearly Progress</a>' +
+            '<a href="/php_books_database/js_reports/books_read_by_year.html">Books Read - All</a>' +
+            '<a href="/php_books_database/js_reports/inventory.html">Inventory</a>' +
+            '<div class="version">(API v' + obj.toString() + ')</div>' +
+            '</div>';
+    });
 }
 
 function setval(bcid) {
@@ -77,6 +83,7 @@ function setval(bcid) {
         trThree += "</tbody></table></tr>";
         $("#replace-me-three").replaceWith(trThree);
     });
+
 }
 
 function tag_links_list(tags_list) {
