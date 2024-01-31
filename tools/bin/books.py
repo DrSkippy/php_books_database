@@ -39,6 +39,7 @@ header += "** Welcome to the Book Collection Database REPL!                     
 header += "** For help, please use help(bc).                                     **\n"
 header += "**     and help(est).                                                 **\n"
 header += "** Use exit() to leave the REPL.                                      **\n"
+header += "** Use history() to see the command history. Up arrow for previous.   **\n"
 header += "************************************************************************\n"
 footer = "Thanks for visiting the Book Collection REPL today!"
 

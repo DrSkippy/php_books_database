@@ -1,4 +1,4 @@
-__version__ = '0.5.5'
+__version__ = '0.5.6'
 
 import datetime
 import logging
@@ -164,7 +164,7 @@ class BC_Tool:
             print("*" * self.DIVIDER_WIDTH)
             print("Endpoint:         {}".format(self.end_point))
             print("Endpoint Version: {}".format(res["version"]))
-            print("Client Version:   {}".format(__version__))
+            print("Repl Version:     {}".format(__version__))
             print("*" * self.DIVIDER_WIDTH)
 
     ver = version
