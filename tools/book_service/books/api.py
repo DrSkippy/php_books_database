@@ -1,6 +1,7 @@
 __version__ = '0.9.3'
 
 from io import BytesIO
+from logging.config import dictConfig
 
 import pandas as pd
 import pymysql
@@ -10,8 +11,6 @@ from matplotlib import pylab as plt
 
 from api_util import *
 from isbn_com import Endpoint as isbn
-
-from logging.config import dictConfig
 
 dictConfig({
     'version': 1,
@@ -598,17 +597,68 @@ def tag_maintenance():
 # READING ESTIMATES
 ##########################################################################
 
-@app.route('/estimate/<book_id>')
-def estimate(book_id=None):
-    reading_data, _ = daily_page_record_from_db(book_id)
+@app.route('/book_id_from_record_id/<record_id>')
+def book_id_from_record_id(record_id=None):
+    db = pymysql.connect(**conf)
+    rdata = {}
+    q = f"SELECT BookCollectionID FROM `complete date estimates` WHERE RecordID = {record_id}"
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(q)
+                res = c.fetchall()
+            except pymysql.Error as e:
+                rdata["error"] = str(e)
+                app.logger.error(e)
+        db.commit()
+    app.logger.debug(res)
+    if len(res) > 0:
+        rdata["BookCollectionID"] = res[0][0]
+    rdata = json.dumps(rdata)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+@app.route('/record_set/<book_id>')
+@app.route('/record_set/<book_id>/<n_index>')
+def record_set(book_id=None, n_index=None):
+    db = pymysql.connect(**conf)
+    rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": []}}
+    q = ("SELECT StartDate, RecordID FROM `complete date estimates` "
+         f"WHERE BookCollectionID = {book_id} ORDER BY StartDate ASC")
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(q)
+                res = c.fetchall()
+            except pymysql.Error as e:
+                rdata["record_set"]["error"].append(str(e))
+                app.logger.error(e)
+        db.commit()
+    res = [(str(x[0]), int(x[1])) for x in res]
+    if n_index is None:
+        rdata["record_set"]["RecordID"] = [res[-1]]
+    elif int(n_index) < 0:
+        rdata["record_set"]["RecordID"] = res
+    elif int(n_index) < len(res):
+        rdata["record_set"]["RecordID"] = [res[int(n_index)]]
+    else:
+        rdata["error"].append(f"Index {n_index} out of range.")
+    rdata = json.dumps(rdata)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/estimate/<record_id>')
+def estimate(record_id=None):
+    reading_data, _ = daily_page_record_from_db(record_id)
     if len(reading_data) < 2:
-        rdata = json.dumps({"BookCollectionID": book_id, "error": ["Inadequate reading data found"]})
+        rdata = json.dumps({"RecordID": record_id, "error": ["Inadequate reading data found"]})
         response_headers = resp_header(rdata)
         return Response(response=rdata, status=404, headers=response_headers)
-    book_data, _ = reading_book_data_from_db(book_id)
+    book_data, _ = reading_book_data_from_db(record_id)
     range = estimate_dates(reading_data, book_data[0][0], book_data[0][1])
-    update_reading_book_data(book_id, range)
-    rdata = json.dumps({"BookCollectionID": book_id, "estimate": [x.strftime(FMT) for x in range]})
+    update_reading_book_data(record_id, range)
+    rdata = json.dumps({"RecordID": record_id, "estimate": [x.strftime(FMT) for x in range]})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -619,7 +669,7 @@ def add_date_page():
     """
     Post Payload:
     {
-      "BookCollectionID": 1606,
+      "RecordID": 123,
       "RecordDate": "0000-00-00"
       "Page": 123
     }
@@ -633,22 +683,21 @@ def add_date_page():
     # records should be a single dictionaries including all fields
     record = request.get_json()
     search_str = "INSERT INTO `daily page records` SET "
-    search_str += "BookCollectionID=\"{BookCollectionID}\" "
-    search_str += "RecordDate=\"{RecordDate}\" "
-    search_str += "page=\"{Page}\";"
+    search_str += 'RecordID={RecordID}, '
+    search_str += 'RecordDate="{RecordDate}", '
+    search_str += 'page={Page};'
     app.logger.debug(search_str.format(**record))
-    rdata = []
     db = pymysql.connect(**conf)
+    rdata = None
     with db:
         with db.cursor() as c:
             try:
                 c.execute(search_str.format(**record))
-                rdata.append(record)
+                rdata = json.dumps({"add_date_page": record})
             except pymysql.Error as e:
                 app.logger.error(e)
-                rdata.append({"error": str(e)})
+                rdata = json.dumps({"error": str(e)})
         db.commit()
-    rdata = json.dumps({"add_date_page": rdata})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -656,22 +705,27 @@ def add_date_page():
 @app.route('/add_book_estimate/<book_id>/<last_readable_page>', methods=["PUT"])
 @require_appkey
 def add_book_estimate(book_id, last_readable_page):
+    # TODO: if you call it again, you get a new record_id for a second reading of the same book
     db = pymysql.connect(**conf)
     last_readable_page = int(last_readable_page)
     start_date = datetime.datetime.now().strftime(FMT)
+    q = (f'INSERT INTO `complete date estimates` SET BookCollectionID={book_id},'
+         f' StartDate="{start_date}", LastReadablePage={last_readable_page};')
+    app.logger.debug(q)
     with db:
         with db.cursor() as c:
             try:
-                c.execute(f'INSERT INTO `complete date estimates` SET BookCollectionID="{book_id}",'
-                          + f'StartDate="{start_date}", LastReadablePage={last_readable_page};')
-                rdata = json.dumps({"BookID": f"{book_id}", "LastReadablePage":
+                c.execute(q)
+                rdata = json.dumps({"BookCollectionID": f"{book_id}", "LastReadablePage":
                     f"{last_readable_page}", "StartDate": f"{start_date}"})
             except pymysql.Error as e:
                 app.logger.error(e)
-                rdata = json.dumps({"BookCollectionID": book_id, "LastReadablePage": last_readable_page, "error": str(e)})
+                rdata = json.dumps(
+                    {"BookCollectionID": book_id, "LastReadablePage": last_readable_page, "error": str(e)})
         db.commit()
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
+
 
 # list existing records
 # last estimate for given book

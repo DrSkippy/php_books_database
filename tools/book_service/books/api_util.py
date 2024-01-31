@@ -2,6 +2,7 @@ import datetime
 import functools
 import json
 from decimal import Decimal
+from flask import request, abort
 
 import numpy as np
 import pymysql
@@ -102,6 +103,9 @@ def resp_header(rdata):
     ]
     return response_header
 
+##########################################################################
+# READING ESTIMATES
+#########################################################################
 
 def _estimate_range(x, y, p):
     res = [0, 10000]
@@ -125,40 +129,41 @@ def _line_fit_and_estimate(data, total_pages):
     return int(est), est_range
 
 
-def daily_page_record_from_db(BookID):
+def daily_page_record_from_db(RecordID):
     data = []
     db = pymysql.connect(**conf)
     with db:
         with db.cursor() as cur:
-            cur.execute("SELECT * FROM `daily page records` WHERE BookCollectionID = %s", BookID)
+            cur.execute("SELECT * FROM `daily page records` a "
+                        "WHERE a.RecordID = %s", RecordID)
             rows = cur.fetchall()
             if len(rows) > 0:
-                start_date = rows[0][1]
+                start_date = rows[0][0]
                 for row in rows:
-                    data.append(list(row[1:]) + [(row[1] - start_date).days])
-    return data, BookID
+                    data.append(list(row[0:-1]) + [(row[0] - start_date).days]) # don't include RecordID
+    return data, RecordID
 
 
-def reading_book_data_from_db(BookID):
+def reading_book_data_from_db(RecordID):
     data = []
     db = pymysql.connect(**conf)
     with db:
         with db.cursor() as cur:
-            cur.execute("SELECT * FROM `complete date estimates` WHERE BookCollectionID = %s", BookID)
+            cur.execute("SELECT * FROM `complete date estimates` WHERE RecordID = %s", RecordID)
             rows = cur.fetchall()
             for row in rows:
-                data.append(list(row[1:]))
-    return data, BookID
+                data.append(list(row[1:-1])) # don't include BookCollectionID or RecordID
+    return data, RecordID
 
 
-def update_reading_book_data(book_id, range):
+def update_reading_book_data(record_id, date_range):
     db = pymysql.connect(**conf)
     with db:
         with db.cursor() as c:
             try:
                 c.execute(
-                    "UPDATE `complete date estimates` SET EstimateDate = %s, EstimatedFinishDate = %s WHERE BookCollectionID = %s",
-                    (datetime.datetime.now(), range[0], book_id))
+                    "UPDATE `complete date estimates` SET EstimateDate = %s, EstimatedFinishDate = %s WHERE RecordID = %s",
+                    (datetime.datetime.now(), date_range[0], record_id))
             except pymysql.Error as e:
                 app.logger.error(e)
         db.commit()
