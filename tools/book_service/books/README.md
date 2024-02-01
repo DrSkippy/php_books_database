@@ -47,6 +47,8 @@ kubectl rollout restart deployment/book-service
 
 2023-11-24 moved from Raspberry Pi to Ubuntu Desktop.
 
+Configuration segment of docker-compose.yaml:
+
 ```
 version: '3'
 
@@ -59,4 +61,10 @@ services:
             - "8083:8083"
         extra_hosts:
             - "host.docker.internal:host-gateway"
+```
+
+To deploy:
+
+```angular2html
+scott@lambda-dual:/opt/joplin$ docker-compose -f ./joplin-docker-compose.yaml up -d books
 ```

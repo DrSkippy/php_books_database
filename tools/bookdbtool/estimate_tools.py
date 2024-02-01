@@ -114,4 +114,3 @@ class EST_Tool:
                 print("*" * DIVIDER_WIDTH)
         self.result = record_id
 
-    
