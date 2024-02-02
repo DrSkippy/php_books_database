@@ -1,4 +1,4 @@
-__version__ = '0.9.3'
+__version__ = '0.9.4'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -619,10 +619,9 @@ def book_id_from_record_id(record_id=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 @app.route('/record_set/<book_id>')
-@app.route('/record_set/<book_id>/<n_index>')
 def record_set(book_id=None, n_index=None):
     db = pymysql.connect(**conf)
-    rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": []}}
+    rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": [], "Estimate": []}}
     q = ("SELECT StartDate, RecordID FROM `complete date estimates` "
          f"WHERE BookCollectionID = {book_id} ORDER BY StartDate ASC")
     with db:
@@ -631,34 +630,13 @@ def record_set(book_id=None, n_index=None):
                 c.execute(q)
                 res = c.fetchall()
             except pymysql.Error as e:
-                rdata["record_set"]["error"].append(str(e))
+                rdata["error"].append(str(e))
                 app.logger.error(e)
         db.commit()
-    res = [(str(x[0]), int(x[1])) for x in res]
-    if n_index is None:
-        rdata["record_set"]["RecordID"] = [res[-1]]
-    elif int(n_index) < 0:
-        rdata["record_set"]["RecordID"] = res
-    elif int(n_index) < len(res):
-        rdata["record_set"]["RecordID"] = [res[int(n_index)]]
-    else:
-        rdata["error"].append(f"Index {n_index} out of range.")
+    for record in [(str(x[0]), int(x[1])) for x in res]:
+        rdata["record_set"]["RecordID"].append(record)
+        rdata["record_set"]["Estimate"].append(calculate_estimates(record[0]))
     rdata = json.dumps(rdata)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
-
-
-@app.route('/estimate/<record_id>')
-def estimate(record_id=None):
-    reading_data, _ = daily_page_record_from_db(record_id)
-    if len(reading_data) < 2:
-        rdata = json.dumps({"RecordID": record_id, "error": ["Inadequate reading data found"]})
-        response_headers = resp_header(rdata)
-        return Response(response=rdata, status=404, headers=response_headers)
-    book_data, _ = reading_book_data_from_db(record_id)
-    range = estimate_dates(reading_data, book_data[0][0], book_data[0][1])
-    update_reading_book_data(record_id, range)
-    rdata = json.dumps({"RecordID": record_id, "estimate": [x.strftime(FMT) for x in range]})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 

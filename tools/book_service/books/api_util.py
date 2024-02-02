@@ -175,3 +175,13 @@ def estimate_dates(data, start_date, total_readable_pages):
     est_date_max = start_date + datetime.timedelta(days=range[0])
     est_date_min = start_date + datetime.timedelta(days=range[1])
     return est_date, est_date_min, est_date_max
+
+
+def calculate_estimates(record_id):
+    reading_data, _ = daily_page_record_from_db(record_id)
+    if len(reading_data) < 2:
+        return ["inadequate reading data", None, None]
+    book_data, _ = reading_book_data_from_db(record_id)
+    range = estimate_dates(reading_data, book_data[0][0], book_data[0][1])
+    update_reading_book_data(record_id, range)
+    return [x.strftime(FMT) for x in range]

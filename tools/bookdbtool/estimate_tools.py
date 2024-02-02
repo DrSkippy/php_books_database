@@ -48,10 +48,13 @@ class EST_Tool:
     nbe = new_book_estimate
 
     def list_book_estimates(self, book_id):
-        q = self.end_point + f"/record_set/{book_id}/-1"
+        q = self.end_point + f"/record_set/{book_id}/"
+        q1 = self.end_point + f"/books_search?BookCollectionID={book_id}"
         try:
             tr = requests.get(q, headers=self.header)
             tres = tr.json()["record_set"]
+            br = requests.get(q1, headers=self.header)
+            bres = br.json()["data"][0]
         except requests.RequestException as e:
             logging.error(e)
         else:
@@ -59,9 +62,11 @@ class EST_Tool:
                 print(f'Error: {tres["error"]}')
             elif len(tres) > 0:
                 print("*" * DIVIDER_WIDTH)
-                print(f'BookCollectionID: {book_id}')
-                for [k,v] in tres["RecordID"]:
-                    print(f'  Start date: {k}   Record ID: {v}')
+                print(f'"{bres[1]}" by {bres[2]} has {bres[7]} pages.\n')
+                for i in range(len(tres["RecordID"])):  # print all records
+                    print(f'  Start date: {tres["RecordID"][i][0]}   Record ID: {tres["RecordID"][i][1]}')
+                    print(f'  Estimated Finish: {tres["Estimate"][i][0]}  Earliest: {tres["Estimate"][i][1]}   Latest: {tres["Estimate"][i][2]}')
+                    print(f'  ----------')
                 print("*" * DIVIDER_WIDTH)
         self.result = tres["RecordID"][-1][1]
 
@@ -87,30 +92,4 @@ class EST_Tool:
         self.result = record_id
 
     adp = add_date_pages
-
-    def estimate(self, record_id):
-        try:
-            q0 = self.end_point + f"/book_id_from_record_id/{record_id}"
-            book_id_record = requests.get(q0, headers=self.header)
-            book_id = book_id_record.json()["BookCollectionID"]
-            #
-            q1 = self.end_point + f"/books_search?BookCollectionID={book_id}"
-            br = requests.get(q1, headers=self.header)
-            bres = br.json()["data"][0]
-            #
-            q2 = self.end_point + f"/estimate/{record_id}"
-            tr = requests.get(q2, headers=self.header)
-            tres = tr.json()
-        except requests.RequestException as e:
-            logging.error(e)
-        else:
-            if "error" in tres:
-                logging.error(f'Error: {tres["error"]}')
-            else:
-                print("*" * DIVIDER_WIDTH)
-                print(f'"{bres[1]}" by {bres[2]} has {bres[7]} pages.\n')
-                print(f'"{bres[1]}" estimated finish on {tres["estimate"][0]}.')
-                print(f'  Earliest: {tres["estimate"][1]} Latest: {tres["estimate"][2]}.')
-                print("*" * DIVIDER_WIDTH)
-        self.result = record_id
 
