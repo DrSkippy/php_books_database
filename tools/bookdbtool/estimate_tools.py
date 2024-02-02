@@ -48,11 +48,11 @@ class EST_Tool:
     nbe = new_book_estimate
 
     def list_book_estimates(self, book_id):
-        q = self.end_point + f"/record_set/{book_id}/"
+        q = self.end_point + f"/record_set/{book_id}"
         q1 = self.end_point + f"/books_search?BookCollectionID={book_id}"
         try:
             tr = requests.get(q, headers=self.header)
-            tres = tr.json()["record_set"]
+            tres = tr.json()
             br = requests.get(q1, headers=self.header)
             bres = br.json()["data"][0]
         except requests.RequestException as e:
@@ -60,15 +60,16 @@ class EST_Tool:
         else:
             if "error" in tres:
                 print(f'Error: {tres["error"]}')
-            elif len(tres) > 0:
+            elif len(tres["record_set"]) > 0:
+                tres = tres["record_set"]
                 print("*" * DIVIDER_WIDTH)
                 print(f'"{bres[1]}" by {bres[2]} has {bres[7]} pages.\n')
                 for i in range(len(tres["RecordID"])):  # print all records
                     print(f'  Start date: {tres["RecordID"][i][0]}   Record ID: {tres["RecordID"][i][1]}')
                     print(f'  Estimated Finish: {tres["Estimate"][i][0]}  Earliest: {tres["Estimate"][i][1]}   Latest: {tres["Estimate"][i][2]}')
-                    print(f'  ----------')
+                    print(f'  ----------') if len(tres["RecordID"]) > 1 else None
                 print("*" * DIVIDER_WIDTH)
-        self.result = tres["RecordID"][-1][1]
+            self.result = tres["RecordID"][-1][1]
 
     lbe = list_book_estimates
 

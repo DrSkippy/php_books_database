@@ -87,10 +87,11 @@ function setval(bcid) {
     $.getJSON(urlListRecords, function (data) {
         var obj = data['record_set'];
         var recordList = obj["RecordID"];
+        var estList = obj["Estimate"];
         console.log(recordList);
         var trFour = "<tr id='replace-me-four'>" +
-            "<td>Add Book Estmate:  <a href=\"/php_books_database/js_reports/add_book_estimate.html?book_id=" +
-            bookCollectionID + "\">Add</a></td>" +
+            "<td><a href=\"/php_books_database/js_reports/add_book_estimate.html?book_id=" +
+            bookCollectionID + "\">Add</a> Book Estimate</td>" +
             "<td colspan=12>" +
             "<table id='readtable' class=\"styled-inner-table\">\n" +
             "<thead>\n" +
@@ -105,15 +106,12 @@ function setval(bcid) {
             "<tbody>\n";
         for (var i = 0; i < recordList.length; i++) {
             console.log(recordList[i]);
-            var urlEstimate = baseApiUrl + "/estimate/" + recordList[i][1];
-            trFour += "<tr><td>" + recordList[0][0] + "</td>" +
-                "<td>" + recordList[0][1] + "</td>";
-            trFour += $.getJSON(urlEstimate, function (data) {
-                console.log(data);
-                var obj = data['estimate'];
-                return "<td>" + obj[0] + "</td>" +
-                    "<td>" + obj[2] + "</td><td>" + obj[3] + "</td></tr>";
-            });
+            console.log(estList[i]);
+            trFour += "<tr><td>" + recordList[i][0] + "</td><td>";
+            trFour += "<a href=\"/php_books_database/js_reports/add_date_pages.html?record_id=" +
+                recordList[i][1] + "\">Add pages to " + recordList[i][1] + "</a>";
+            trFour += "</td><td>" + estList[i][0] + "</td>" +
+                "<td>" + estList[i][1] + "</td><td>" + estList[i][2] + "</td></tr>";
         }
         trFour += "</tbody></table></tr>";
         $("#replace-me-four").replaceWith(trFour);

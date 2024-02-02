@@ -619,7 +619,7 @@ def book_id_from_record_id(record_id=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 @app.route('/record_set/<book_id>')
-def record_set(book_id=None, n_index=None):
+def record_set(book_id=None):
     db = pymysql.connect(**conf)
     rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": [], "Estimate": []}}
     q = ("SELECT StartDate, RecordID FROM `complete date estimates` "
@@ -635,7 +635,7 @@ def record_set(book_id=None, n_index=None):
         db.commit()
     for record in [(str(x[0]), int(x[1])) for x in res]:
         rdata["record_set"]["RecordID"].append(record)
-        rdata["record_set"]["Estimate"].append(calculate_estimates(record[0]))
+        rdata["record_set"]["Estimate"].append(calculate_estimates(record[1]))
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
