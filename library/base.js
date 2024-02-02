@@ -31,6 +31,7 @@ function setval(bcid) {
     var urlId = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
     var urlTag = baseApiUrl + "/tags/" + bookCollectionID;
     var urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
+    var urlListRecords = baseApiUrl + "/record_set/" + bookCollectionID;
     $.getJSON(urlId, function (data) {
         var obj = data['data'];
         var trOne = "<tr id='replace-me-one'>" +
@@ -83,7 +84,40 @@ function setval(bcid) {
         trThree += "</tbody></table></tr>";
         $("#replace-me-three").replaceWith(trThree);
     });
-
+    $.getJSON(urlListRecords, function (data) {
+        var obj = data['record_set'];
+        var recordList = obj["RecordID"];
+        console.log(recordList);
+        var trFour = "<tr id='replace-me-four'>" +
+            "<td>Add Book Estmate:  <a href=\"/php_books_database/js_reports/add_book_estimate.html?book_id=" +
+            bookCollectionID + "\">Add</a></td>" +
+            "<td colspan=12>" +
+            "<table id='readtable' class=\"styled-inner-table\">\n" +
+            "<thead>\n" +
+            "<tr>\n" +
+            "<th>Start Date</th>\n" +
+            "<th>RecrodID</th>\n" +
+            "<th>Estimmated Finish</th>\n" +
+            "<th>Shortest Finish</th>\n" +
+            "<th>Longest Finish</th>\n" +
+            "</tr>\n" +
+            "</thead>\n" +
+            "<tbody>\n";
+        for (var i = 0; i < recordList.length; i++) {
+            console.log(recordList[i]);
+            var urlEstimate = baseApiUrl + "/estimate/" + recordList[i][1];
+            trFour += "<tr><td>" + recordList[0][0] + "</td>" +
+                "<td>" + recordList[0][1] + "</td>";
+            trFour += $.getJSON(urlEstimate, function (data) {
+                console.log(data);
+                var obj = data['estimate'];
+                return "<td>" + obj[0] + "</td>" +
+                    "<td>" + obj[2] + "</td><td>" + obj[3] + "</td></tr>";
+            });
+        }
+        trFour += "</tbody></table></tr>";
+        $("#replace-me-four").replaceWith(trFour);
+    });
 }
 
 function tag_links_list(tags_list) {
@@ -106,6 +140,9 @@ function createDetailTableRows() {
     var trThree = "<tr id='replace-me-three'>" +
         "<td>Read:</td><td colspan=12></td></tr>";
     $("#sumtable").append(trThree);
+    var trFour = "<tr id='replace-me-four'>" +
+        "<td>Reading Record:</td><td colspan=12></td></tr>";
+    $("#sumtable").append(trFour);
 }
 
 function sortTable(n) {
