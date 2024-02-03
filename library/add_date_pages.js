@@ -17,7 +17,6 @@ window.addEventListener('DOMContentLoaded', function() {
                 "<td></td>";
             $("#mytable").append(tr);
         }
-
         var lastLine = "<tr><td><input type=\"date\" name=\"date\" id=\"date\" required></td>" +
             "<td><input type=\"number\" name=\"page\" id=\"page\" required></td>" +
             "<td><input type=\"submit\" value=\"submit\"></td></tr>";

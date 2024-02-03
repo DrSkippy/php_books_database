@@ -98,7 +98,7 @@ function setval(bcid) {
             "<tr>\n" +
             "<th>Start Date</th>\n" +
             "<th>RecrodID</th>\n" +
-            "<th>Estimmated Finish</th>\n" +
+            "<th>Estimated Finish</th>\n" +
             "<th>Shortest Finish</th>\n" +
             "<th>Longest Finish</th>\n" +
             "</tr>\n" +

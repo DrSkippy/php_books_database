@@ -1,4 +1,4 @@
-__version__ = '0.9.5'
+__version__ = '0.9.6'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -702,12 +702,14 @@ def add_date_page():
 
 
 @app.route('/add_book_estimate/<book_id>/<last_readable_page>', methods=["PUT"])
+@app.route('/add_book_estimate/<book_id>/<last_readable_page>/<start_date>', methods=["PUT"])
 @require_appkey
-def add_book_estimate(book_id, last_readable_page):
+def add_book_estimate(book_id, last_readable_page, start_date=None):
     # TODO: if you call it again, you get a new record_id for a second reading of the same book
     db = pymysql.connect(**conf)
     last_readable_page = int(last_readable_page)
-    start_date = datetime.datetime.now().strftime(FMT)
+    if start_date is None:
+        start_date = datetime.datetime.now().strftime(FMT)
     q = (f'INSERT INTO `complete date estimates` SET BookCollectionID={book_id},'
          f' StartDate="{start_date}", LastReadablePage={last_readable_page};')
     app.logger.debug(q)
