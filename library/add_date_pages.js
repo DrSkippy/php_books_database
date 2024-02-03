@@ -52,6 +52,6 @@ form.addEventListener('submit', function(event) {
         }
     };
     xhr.send(params);
-    //window.location.href = "./books_detail.html?bookid=" + book_id.toString();
+    window.location.href = "./books_detail.html?bookid=" + book_id.toString();
     return false;
 })
