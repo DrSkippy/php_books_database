@@ -14,7 +14,7 @@ form.addEventListener('submit', function(event) {
     var start_date = document.forms["add_book_estimate"]["start_date"].value;
     var readable_pages = document.forms["add_book_estimate"]["readable_pages"].value;
     // get form values
-    console.log(start_date, readable_pages, record_id);
+    console.log(start_date, readable_pages, book_id);
     // submit form data
     var xhr = new XMLHttpRequest();
     var url = baseApiUrl + "/add_book_estimate/" + book_id;
