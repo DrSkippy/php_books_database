@@ -14,11 +14,11 @@ form.addEventListener('submit', function(event) {
     var start_date = document.forms["add_book_estimate"]["start_date"].value;
     var readable_pages = document.forms["add_book_estimate"]["readable_pages"].value;
     // get form values
-    console.log(start_date, readabe_pages, record_id);
+    console.log(start_date, readable_pages, record_id);
     // submit form data
     var xhr = new XMLHttpRequest();
     var url = baseApiUrl + "/add_book_estimate/" + book_id;
-    baseApiUrl += "/" + readabe_pages + "/" + start_date + "/";
+    baseApiUrl += "/" + readable_pages + "/" + start_date + "/";
     console.log(url);
     xhr.open("PUT", url, true);
     xhr.setRequestHeader('x-api-key', apiKey);
