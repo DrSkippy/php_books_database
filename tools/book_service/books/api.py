@@ -1,4 +1,4 @@
-__version__ = '0.9.4'
+__version__ = '0.9.5'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -596,6 +596,27 @@ def tag_maintenance():
 ##########################################################################
 # READING ESTIMATES
 ##########################################################################
+@app.route('/date_page_records/<record_id>')
+def date_page_records(record_id=None):
+    db = pymysql.connect(**conf)
+    rdata = {"date_page_records": [], "RecordID": record_id}
+    q = ("SELECT RecordDate, page FROM `daily page records` "
+         f"WHERE RecordID = {record_id} ORDER BY RecordDate ASC")
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(q)
+                res = c.fetchall()
+            except pymysql.Error as e:
+                rdata["error"] = str(e)
+                app.logger.error(e)
+        db.commit()
+    app.logger.debug(res)
+    if len(res) > 0:
+        rdata["date_page_records"] = [[x.strftime(FMT), int(y)] for [x,y] in res]
+    rdata = json.dumps(rdata)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
 
 @app.route('/book_id_from_record_id/<record_id>')
 def book_id_from_record_id(record_id=None):
@@ -661,12 +682,12 @@ def add_date_page():
     # records should be a single dictionaries including all fields
     record = request.get_json()
     search_str = "INSERT INTO `daily page records` SET "
-    search_str += 'RecordID={RecordID}, '
+    search_str += 'RecordID="{RecordID}", '
     search_str += 'RecordDate="{RecordDate}", '
-    search_str += 'page={Page};'
+    search_str += 'page="{Page}";'
     app.logger.debug(search_str.format(**record))
     db = pymysql.connect(**conf)
-    rdata = None
+    rdata = json.dumps({"error": "No record added."})
     with db:
         with db.cursor() as c:
             try:

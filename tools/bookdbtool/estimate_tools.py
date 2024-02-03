@@ -73,7 +73,7 @@ class EST_Tool:
 
     lbe = list_book_estimates
 
-    def add_date_pages(self, record_id, page, date=None):
+    def add_page_date(self, record_id, page, date=None):
         if date is None:
             date = datetime.datetime.now().strftime(FMT)
         # find record id
@@ -92,5 +92,5 @@ class EST_Tool:
                 print(f'{res["RecordID"]} read to page {res["Page"]} on {date}.')
         self.result = record_id
 
-    adp = add_date_pages
+    aps = add_page_date
 

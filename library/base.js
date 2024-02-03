@@ -109,7 +109,7 @@ function setval(bcid) {
             console.log(estList[i]);
             trFour += "<tr><td>" + recordList[i][0] + "</td><td>";
             trFour += "<a href=\"/php_books_database/js_reports/add_date_pages.html?record_id=" +
-                recordList[i][1] + "\">Add pages to " + recordList[i][1] + "</a>";
+                recordList[i][1] + "&book_id=" + bookCollectionID + "\">Add pages to " + recordList[i][1] + "</a>";
             trFour += "</td><td>" + estList[i][0] + "</td>" +
                 "<td>" + estList[i][1] + "</td><td>" + estList[i][2] + "</td></tr>";
         }
