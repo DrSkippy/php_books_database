@@ -24,13 +24,20 @@ form.addEventListener('submit', function(event) {
     xhr.setRequestHeader('x-api-key', apiKey);
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            console.log(xhr.responseText);
-            var book_id = JSON.parse(xhr.responseText).add_date_page.BookCollectionID;
-            alert("Entry added successfully!\n ID=" + book_id);
+            var resp = JSON.parse(xhr.responseText);
+            console.log(resp);
+            if ("error" in resp) {
+                alert("Error: " + resp.error);
+            } else {
+                var book_id = resp.add_book_estimate.BookCollectionID;
+                alert("Entry added successfully!\n Book ID=" + book_id);
+            }
             window.location.href = "./books_detail.html?bookid=" + book_id.toString();
         }
-    };
+        // else {
+        //     alert("readyState: " + this.readyState + " status: " + this.status);
+        // }
+    }
     xhr.send();
-    //window.location.href = "./books_detail.html?bookid=" + book_id.toString();
     return false;
 })

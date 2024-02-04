@@ -4,7 +4,6 @@ from io import BytesIO
 from logging.config import dictConfig
 
 import pandas as pd
-import pymysql
 from flask import Flask, Response, request, send_file
 from flask_cors import CORS
 from matplotlib import pylab as plt
@@ -613,31 +612,33 @@ def date_page_records(record_id=None):
         db.commit()
     app.logger.debug(res)
     if len(res) > 0:
-        rdata["date_page_records"] = [[x.strftime(FMT), int(y)] for [x,y] in res]
+        rdata["date_page_records"] = [[x.strftime(FMT), int(y)] for [x, y] in res]
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
-@app.route('/book_id_from_record_id/<record_id>')
-def book_id_from_record_id(record_id=None):
-    db = pymysql.connect(**conf)
-    rdata = {}
-    q = f"SELECT BookCollectionID FROM `complete date estimates` WHERE RecordID = {record_id}"
-    with db:
-        with db.cursor() as c:
-            try:
-                c.execute(q)
-                res = c.fetchall()
-            except pymysql.Error as e:
-                rdata["error"] = str(e)
-                app.logger.error(e)
-        db.commit()
-    app.logger.debug(res)
-    if len(res) > 0:
-        rdata["BookCollectionID"] = res[0][0]
-    rdata = json.dumps(rdata)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+
+# @app.route('/book_id_from_record_id/<record_id>')
+# def book_id_from_record_id(record_id=None):
+#     db = pymysql.connect(**conf)
+#     rdata = {}
+#     q = f"SELECT BookCollectionID FROM `complete date estimates` WHERE RecordID = {record_id}"
+#     with db:
+#         with db.cursor() as c:
+#             try:
+#                 c.execute(q)
+#                 res = c.fetchall()
+#             except pymysql.Error as e:
+#                 rdata["error"] = str(e)
+#                 app.logger.error(e)
+#         db.commit()
+#     app.logger.debug(res)
+#     if len(res) > 0:
+#         rdata["BookCollectionID"] = res[0][0]
+#     rdata = json.dumps(rdata)
+#     response_headers = resp_header(rdata)
+#     return Response(response=rdata, status=200, headers=response_headers)
+#
 
 @app.route('/record_set/<book_id>')
 def record_set(book_id=None):
@@ -695,7 +696,7 @@ def add_date_page():
                 rdata = json.dumps({"add_date_page": record})
             except pymysql.Error as e:
                 app.logger.error(e)
-                rdata = json.dumps({"error": str(e)})
+                rdata = json.dumps({"add_date_page": {}, "error": str(e)})
         db.commit()
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
@@ -717,20 +718,16 @@ def add_book_estimate(book_id, last_readable_page, start_date=None):
         with db.cursor() as c:
             try:
                 c.execute(q)
-                rdata = json.dumps({"BookCollectionID": f"{book_id}", "LastReadablePage":
-                    f"{last_readable_page}", "StartDate": f"{start_date}"})
+                rdata = json.dumps({"add_book_estimate":
+                                        {"BookCollectionID": f"{book_id}", "LastReadablePage":
+                                            f"{last_readable_page}", "StartDate": f"{start_date}"}})
             except pymysql.Error as e:
                 app.logger.error(e)
-                rdata = json.dumps(
-                    {"BookCollectionID": book_id, "LastReadablePage": last_readable_page, "error": str(e)})
+                rdata = json.dumps({"add_book_estimate": {}, "error": str(e)})
         db.commit()
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
-
-# list existing records
-# last estimate for given book
-# fix all of this for a second reading of a given book?
 
 ##########################################################################
 # IMAGES

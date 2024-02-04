@@ -39,17 +39,25 @@ form.addEventListener('submit', function(event) {
     params = '{"RecordID":' + record_id + ',"RecordDate":"'  + date +
         '","Page":'  + page + '}';
     console.log(params);
-    xhr.open("POST", url, true);
+    xhr.open("POST", url, false);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.setRequestHeader('x-api-key', apiKey);
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            console.log(xhr.responseText);
-            var record_id = JSON.parse(xhr.responseText).add_date_page.RecordID;
-            alert("Entry added successfully!\n ID=" + record_id);
+            var resp = JSON.parse(xhr.responseText);
+            console.log(resp);
+            if ("error" in resp) {
+                alert("Error: " + resp.error);
+            } else {
+                var record_id = resp.add_date_page.RecordID;
+                alert("Entry added successfully!\n Record ID=" + record_id);
+            }
             window.location.href = "./books_detail.html?bookid=" + book_id.toString();
         }
-    };
+        // else {
+        //    alert("readyState: " + this.readyState + " status: " + this.status);
+        //}
+    }
     xhr.send(params);
     window.location.href = "./books_detail.html?bookid=" + book_id.toString();
     return false;

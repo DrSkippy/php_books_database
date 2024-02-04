@@ -42,6 +42,7 @@ class EST_Tool:
             if "error" in tres:
                 print(f'Error: {tres["error"]}')
             else:
+                tres = tres["add_book_estimate"]
                 print(f'{tres["BookCollectionID"]} started on {tres["StartDate"]}.')
         self.list_book_estimates(book_id)
 
