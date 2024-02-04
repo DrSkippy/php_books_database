@@ -18,7 +18,7 @@ form.addEventListener('submit', function(event) {
     // submit form data
     var xhr = new XMLHttpRequest();
     var url = baseApiUrl + "/add_book_estimate/" + book_id;
-    baseApiUrl += "/" + readable_pages + "/" + start_date + "/";
+    url += "/" + readable_pages + "/" + start_date;
     console.log(url);
     xhr.open("PUT", url, true);
     xhr.setRequestHeader('x-api-key', apiKey);
@@ -30,7 +30,7 @@ form.addEventListener('submit', function(event) {
             window.location.href = "./books_detail.html?bookid=" + book_id.toString();
         }
     };
-    xhr.send(params);
-    window.location.href = "./books_detail.html?bookid=" + book_id.toString();
+    xhr.send();
+    //window.location.href = "./books_detail.html?bookid=" + book_id.toString();
     return false;
 })
