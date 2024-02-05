@@ -16,6 +16,7 @@ $(document).ready(function () {
     var url2 = baseApiUrl + "/recent";
     $.getJSON(url2, function (data) {
         var obj = data['data'];
+        console.log(obj);
         for (var i = 0; i < obj.length; i++) {
             var url = new URL("/php_books_database/js_reports/books_detail.html?author=&title=" +
                 obj[2].toString() + "&tags=", window.location);
