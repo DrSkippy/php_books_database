@@ -13,4 +13,16 @@ $(document).ready(function () {
             $("#mytable-sorted").append(tr);
         }
     });
+    var url2 = baseApiUrl + "/recent";
+    $.getJSON(url2, function (data) {
+        var obj = data['data'];
+        for (var i = 0; i < obj.length; i++) {
+            var url = new URL("/php_books_database/js_reports/books_detail.html?author=&title=" +
+                obj[2].toString() + "&tags=", window.location);
+            var tr = "<tr>" +
+                "<td><a href=" + url.href + ">" + obj[i][2] + "</a></td>" +
+                "<td>" + obj[i][1] + "</td></tr>";
+            $("#recent-table").append(tr);
+        }
+    });
 })
