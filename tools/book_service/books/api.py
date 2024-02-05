@@ -128,7 +128,7 @@ def recent():
         recent_books = []
         for a, b, c in cursor.fetchall():
             _date = b.strftime(FMT)
-            _title = c if len(c) <= 23 else c[:20] + "..."
+            _title = c if len(c) <= 43 else c[:40] + "..."
             recent_books.append([a, _date, _title])
         result = json.dumps({"header": ["BookCollectionID", "LastUpdate", "Title"], "data": recent_books})
 
