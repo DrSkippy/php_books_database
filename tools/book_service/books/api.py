@@ -1,4 +1,4 @@
-__version__ = '0.9.7'
+__version__ = '0.10.0'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -79,6 +79,71 @@ def valid_locations():
 
     # Return the successful response
     return Response(response=result, status=200, headers=resp_header(result))
+
+
+
+##########################################################################
+# RECENT UPDATES
+##########################################################################
+
+
+@app.route('/recent')
+def recent():
+    """
+    Endpoint to retrieve ids and title of recently updated items
+    Returns a JSON response containing the items.
+    """
+    db = None
+    try:
+        db = pymysql.connect(**conf)
+        cursor = db.cursor()
+
+        # Execute the query
+        query = """
+            SELECT abc.*, bc.Title FROM
+            (
+            SELECT BookCollectionID, LastUpdate 
+            FROM `book collection`
+            UNION
+            SELECT BookCollectionID , LastUpdate 
+            FROM `book collection`
+            UNION 
+            SELECT BookID as BookCollectionID, LastUpdate
+            FROM `books tags`
+            UNION
+            SELECT a.BookCollectionID, b.LastUpdate
+            FROM `complete date estimates` a JOIN `daily page records` b ON
+            a.RecordID = b.RecordID
+            UNION 
+            SELECT BookCollectionID, EstimateDate as LastUpdate
+            FROM `complete date estimates`
+            ) abc
+            JOIN `book collection` bc ON abc.BookCollectionID =bc.BookCollectionID 
+            ORDER BY LastUpdate DESC LIMIT 10;
+            """
+        app.logger.debug(query)
+        cursor.execute(query)
+
+        # Fetch and process the results
+        recent_books = []
+        for a, b, c in cursor.fetchall():
+            _date = b.strftime(FMT)
+            _title = c if len(c) <= 23 else c[:20] + "..."
+            recent_books.append([a, _date, _title])
+        result = json.dumps({"header": ["BookCollectionID", "LastUpdate", "Title"], "data": recent_books})
+
+    except pymysql.Error as e:
+        # Log and handle database errors
+        app.logger.error(e)
+        result = {"error": str(e)}
+    finally:
+        # Ensure the database connection is closed
+        if db:
+            db.close()
+
+    # Return the successful response
+    return Response(response=result, status=200, headers=resp_header(result))
+
 
 
 ##########################################################################
@@ -397,7 +462,7 @@ def status_read(book_id=None):
     db = pymysql.connect(**conf)
     search_str = (f"select BookCollectionID, ReadDate, ReadNote "
                   f"FROM `books read` "
-                  f"WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;"
+                  f"WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;")
     app.logger.debug(search_str)
     c = db.cursor()
     header = ["BookCollectionID", "ReadDate", "ReadNote"]
