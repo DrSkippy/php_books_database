@@ -19,7 +19,7 @@ $(document).ready(function () {
         for (var i = 0; i < obj.length; i++) {
             console.log(obj[i]);
             var url = new URL("/php_books_database/js_reports/books_detail.html?author=&title=" +
-                obj[2].toString() + "&tags=", window.location);
+                obj[i][2].toString() + "&tags=", window.location);
             console.log(url);
             var tr = "<tr><td><a href=" + url.href + ">" + obj[i][2] + "</a></td>" +
                 "<td>" + obj[i][1] + "</td></tr>";
