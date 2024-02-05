@@ -1,4 +1,4 @@
-__version__ = '0.9.6'
+__version__ = '0.9.7'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -359,11 +359,13 @@ def summary_books_read_by_year(target_year=None):
 
 def _books_read(target_year=None):
     db = pymysql.connect(**conf)
-    search_str = ("SELECT a.*, b.ReadDate "
+    search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
+                  "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
+                  "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
+                  "b.ReadDate "
                   "FROM `book collection` as a JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID "
                   "WHERE b.ReadDate is not NULL ")
-    #                  "AND b.ReadDate <> \"0000-00-00 00:00:00\" ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "ORDER BY b.ReadDate"
@@ -393,7 +395,9 @@ def books_read(target_year=None):
 @app.route('/status_read/<book_id>')
 def status_read(book_id=None):
     db = pymysql.connect(**conf)
-    search_str = f"SELECT * FROM `books read` WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;"
+    search_str = (f"select BookCollectionID, ReadDate, ReadNote "
+                  f"FROM `books read` "
+                  f"WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;"
     app.logger.debug(search_str)
     c = db.cursor()
     header = ["BookCollectionID", "ReadDate", "ReadNote"]
@@ -435,7 +439,10 @@ def books_search():
         else:
             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
     where_str = " AND ".join(where)
-    search_str = ("SELECT a.*, b.ReadDate "
+    search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
+                  "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
+                  "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
+                  "b.ReadDate " 
                   "FROM `book collection` as a LEFT JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID ")
     if where_str != '':
