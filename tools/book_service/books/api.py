@@ -1,4 +1,4 @@
-__version__ = '0.10.0'
+__version__ = '0.11.0'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -81,7 +81,6 @@ def valid_locations():
     return Response(response=result, status=200, headers=resp_header(result))
 
 
-
 ##########################################################################
 # RECENT UPDATES
 ##########################################################################
@@ -100,27 +99,28 @@ def recent():
 
         # Execute the query
         query = """
-            SELECT abc.*, bc.Title FROM
+        SELECT abc.BookCollectionID, max(abc.LastUpdate) as LastUpdate, bc.Title FROM
             (
-            SELECT BookCollectionID, LastUpdate 
-            FROM `book collection`
-            UNION
-            SELECT BookCollectionID , LastUpdate 
-            FROM `book collection`
-            UNION 
-            SELECT BookID as BookCollectionID, LastUpdate
-            FROM `books tags`
-            UNION
-            SELECT a.BookCollectionID, b.LastUpdate
-            FROM `complete date estimates` a JOIN `daily page records` b ON
-            a.RecordID = b.RecordID
-            UNION 
-            SELECT BookCollectionID, EstimateDate as LastUpdate
-            FROM `complete date estimates`
+                SELECT BookCollectionID, LastUpdate 
+                FROM `book collection`
+                UNION
+                SELECT BookCollectionID , LastUpdate 
+                FROM `book collection`
+                UNION 
+                SELECT BookID as BookCollectionID, LastUpdate
+                FROM `books tags`
+                UNION
+                SELECT a.BookCollectionID, b.LastUpdate
+                FROM `complete date estimates` a JOIN `daily page records` b ON
+                a.RecordID = b.RecordID
+                UNION 
+                SELECT BookCollectionID, EstimateDate as LastUpdate
+                FROM `complete date estimates`
             ) abc
-            JOIN `book collection` bc ON abc.BookCollectionID =bc.BookCollectionID 
-            ORDER BY LastUpdate DESC LIMIT 10;
-            """
+        JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID 
+        GROUP BY abc.BookCollectionID, bc.Title
+        ORDER BY LastUpdate DESC LIMIT 10;
+        """
         app.logger.debug(query)
         cursor.execute(query)
 
@@ -143,7 +143,6 @@ def recent():
 
     # Return the successful response
     return Response(response=result, status=200, headers=resp_header(result))
-
 
 
 ##########################################################################
@@ -368,50 +367,50 @@ def update_book_note_status():
 # REPORTS
 ##########################################################################
 
-def _summary_books_read_by_year(target_year=None):
-    """
-    Summarizes the number of pages read and books read each year.
-    Can be filtered for a specific year.
-
-    Parameters:
-    target_year (int, optional): The year for which the summary is required. Defaults to None.
-
-    Returns:
-    tuple: A tuple containing the serialized result, raw data, and header.
-    """
-    # Initialize database connection
-    db = pymysql.connect(**conf)
-    cursor = db.cursor()
-
-    # Building the SQL query string
-    query = (
-        "SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
-        "FROM `book collection` as a JOIN `books read` as b "
-        "ON a.BookCollectionID = b.BookCollectionID "
-        "WHERE b.ReadDate is not NULL "
-    )
-    if target_year is not None:
-        query += f" AND YEAR(b.ReadDate) = {target_year} "
-    query += "GROUP BY Year ORDER BY Year ASC"
-
-    # Prepare response data
-    headers = ["year", "pages read", "books read"]
-    app.logger.debug(query)
-
-    # Execute query and handle exceptions
-    try:
-        cursor.execute(query)
-        results = cursor.fetchall()
-        serialized_data = serialize_rows(results, headers)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        serialized_data = json.dumps({"error": str(e)})
-        results = None
-    finally:
-        # Close the database connection
-        db.close()
-
-    return serialized_data, results, headers
+# def _summary_books_read_by_year(target_year=None):
+#     """
+#     Summarizes the number of pages read and books read each year.
+#     Can be filtered for a specific year.
+#
+#     Parameters:
+#     target_year (int, optional): The year for which the summary is required. Defaults to None.
+#
+#     Returns:
+#     tuple: A tuple containing the serialized result, raw data, and header.
+#     """
+#     # Initialize database connection
+#     db = pymysql.connect(**conf)
+#     cursor = db.cursor()
+#
+#     # Building the SQL query string
+#     query = (
+#         "SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
+#         "FROM `book collection` as a JOIN `books read` as b "
+#         "ON a.BookCollectionID = b.BookCollectionID "
+#         "WHERE b.ReadDate is not NULL "
+#     )
+#     if target_year is not None:
+#         query += f" AND YEAR(b.ReadDate) = {target_year} "
+#     query += "GROUP BY Year ORDER BY Year ASC"
+#
+#     # Prepare response data
+#     headers = ["year", "pages read", "books read"]
+#     app.logger.debug(query)
+#
+#     # Execute query and handle exceptions
+#     try:
+#         cursor.execute(query)
+#         results = cursor.fetchall()
+#         serialized_data = serialize_rows(results, headers)
+#     except pymysql.Error as e:
+#         app.logger.error(e)
+#         serialized_data = json.dumps({"error": str(e)})
+#         results = None
+#     finally:
+#         # Close the database connection
+#         db.close()
+#
+#     return serialized_data, results, headers
 
 
 @app.route('/summary_books_read_by_year')
@@ -422,31 +421,31 @@ def summary_books_read_by_year(target_year=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-def _books_read(target_year=None):
-    db = pymysql.connect(**conf)
-    search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
-                  "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
-                  "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
-                  "b.ReadDate "
-                  "FROM `book collection` as a JOIN `books read` as b "
-                  "ON a.BookCollectionID = b.BookCollectionID "
-                  "WHERE b.ReadDate is not NULL ")
-    if target_year is not None:
-        search_str += f" AND YEAR(b.ReadDate) = {target_year} "
-    search_str += "ORDER BY b.ReadDate"
-    header = table_header + ["ReadDate"]
-    app.logger.debug(search_str)
-    s = None
-    c = db.cursor()
-    try:
-        c.execute(search_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = json.dumps({"error": str(e)})
-    else:
-        s = c.fetchall()
-        rdata = serialize_rows(s, header)
-    return rdata, s, header
+# def _books_read(target_year=None):
+#     db = pymysql.connect(**conf)
+#     search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
+#                   "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
+#                   "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
+#                   "b.ReadDate "
+#                   "FROM `book collection` as a JOIN `books read` as b "
+#                   "ON a.BookCollectionID = b.BookCollectionID "
+#                   "WHERE b.ReadDate is not NULL ")
+#     if target_year is not None:
+#         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
+#     search_str += "ORDER BY b.ReadDate"
+#     header = table_header + ["ReadDate"]
+#     app.logger.debug(search_str)
+#     s = None
+#     c = db.cursor()
+#     try:
+#         c.execute(search_str)
+#     except pymysql.Error as e:
+#         app.logger.error(e)
+#         rdata = json.dumps({"error": str(e)})
+#     else:
+#         s = c.fetchall()
+#         rdata = serialize_rows(s, header)
+#     return rdata, s, header
 
 
 @app.route('/books_read')
@@ -507,7 +506,7 @@ def books_search():
     search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
                   "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
                   "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
-                  "b.ReadDate " 
+                  "b.ReadDate "
                   "FROM `book collection` as a LEFT JOIN `books read` as b "
                   "ON a.BookCollectionID = b.BookCollectionID ")
     if where_str != '':
@@ -618,25 +617,25 @@ def update_tag_value(current, updated):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-def _tags_search(match_str):
-    match_str = match_str.lower().strip()
-    db = pymysql.connect(**conf)
-    search_str = ("SELECT a.BookID, b.TagID, b.Label as Tag"
-                  " FROM `books tags` a JOIN `tag labels` b ON a.TagID=b.TagID"
-                  f" WHERE b.Label LIKE \"%{match_str}%\" "
-                  " ORDER BY b.Label ASC")
-    header = ["BookCollectionID", "TagID", "Tag"]
-    app.logger.debug(search_str)
-    c = db.cursor()
-    try:
-        c.execute(search_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = json.dumps({"error": str(e)})
-    else:
-        s = c.fetchall()
-        rdata = serialize_rows(s, header)
-    return rdata, s, header
+# def _tags_search(match_str):
+#     match_str = match_str.lower().strip()
+#     db = pymysql.connect(**conf)
+#     search_str = ("SELECT a.BookID, b.TagID, b.Label as Tag"
+#                   " FROM `books tags` a JOIN `tag labels` b ON a.TagID=b.TagID"
+#                   f" WHERE b.Label LIKE \"%{match_str}%\" "
+#                   " ORDER BY b.Label ASC")
+#     header = ["BookCollectionID", "TagID", "Tag"]
+#     app.logger.debug(search_str)
+#     c = db.cursor()
+#     try:
+#         c.execute(search_str)
+#     except pymysql.Error as e:
+#         app.logger.error(e)
+#         rdata = json.dumps({"error": str(e)})
+#     else:
+#         s = c.fetchall()
+#         rdata = serialize_rows(s, header)
+#     return rdata, s, header
 
 
 @app.route('/tags_search/<match_str>')

@@ -14,6 +14,7 @@ pandas = "^1.4.2"
 matplotlib = "^3.5.2"
 Flask-Cors = "^3.0.10"
 cryptography = "^41.0.5"
+pytest = "^8.0.0"
 
 [tool.poetry.dev-dependencies]
 
