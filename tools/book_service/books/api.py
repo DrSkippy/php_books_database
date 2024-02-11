@@ -227,20 +227,24 @@ def add_read_dates():
     records = request.get_json()
     search_str = "INSERT INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES "
     search_str += "({BookCollectionID}, \"{ReadDate}\", \"{ReadNote}\")"
+    res = {"update_read_dates": [], "error": []}
     rdata = []
     with db:
         with db.cursor() as c:
             for record in records:
                 try:
                     r = c.execute(search_str.format(**record))
-                    rdata.append(record)
+                    if r.resonse_code == 200:
+                        res["update_read_dates"].append(record)
+                    else:
+                        res["error"].append(record)
                 except pymysql.Error as e:
                     app.logger.error(e)
-                    rdata.append({"error": str(e)})
+                    res["error"].append(str(e))
         db.commit()
-    rdata = json.dumps({"update_read_dates": rdata})
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    res = json.dumps(res)
+    response_headers = resp_header(res)
+    return Response(response=res, status=200, headers=response_headers)
 
 
 @app.route('/books_by_isbn', methods=['POST'])
