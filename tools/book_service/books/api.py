@@ -730,10 +730,10 @@ def record_set(book_id=None):
                 rdata["error"].append(str(e))
                 app.logger.error(e)
         db.commit()
-    for record in [(str(x[0]), int(x[1])) for x in res]:
+    for record in [(str(x[0]), int(x[1]), int(x[2])) for x in res]:
         rdata["record_set"]["RecordID"].append(record[1])
         date_page_records, _ = reading_book_data_from_db(record[1])
-        rdata["record_set"]["Estimate"].append(estimate_completion_dates(date_page_records, record[1], record[2]))
+        rdata["record_set"]["Estimate"].append(estimate_completion_dates(date_page_records, record[0], record[2]))
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
