@@ -719,7 +719,7 @@ def date_page_records(record_id=None):
 def record_set(book_id=None):
     db = pymysql.connect(**conf)
     rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": [], "Estimate": []}}
-    q = ("SELECT StartDate, RecordID FROM `complete date estimates` "
+    q = ("SELECT StartDate, RecordID, LastReadablePage FROM `complete date estimates` "
          f"WHERE BookCollectionID = {book_id} ORDER BY StartDate ASC")
     with db:
         with db.cursor() as c:
@@ -731,8 +731,9 @@ def record_set(book_id=None):
                 app.logger.error(e)
         db.commit()
     for record in [(str(x[0]), int(x[1])) for x in res]:
-        rdata["record_set"]["RecordID"].append(record)
-        rdata["record_set"]["Estimate"].append(estimate_completion_dates(record[1]))
+        rdata["record_set"]["RecordID"].append(record[1])
+        date_page_records, _ = reading_book_data_from_db(record[1])
+        rdata["record_set"]["Estimate"].append(estimate_completion_dates(date_page_records, record[1], record[2]))
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
