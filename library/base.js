@@ -1,3 +1,4 @@
+$(document).ready(function () {
 // const baseApiUrl = 'http://192.168.127.166:8083'
 const baseApiUrl = 'https://drskippy.worse-than.tv/book_service'
 var bookCollectionID = 102;
@@ -208,3 +209,4 @@ function sortNumber(columnValue, columnIndex) {
 
     }
 }
+});
