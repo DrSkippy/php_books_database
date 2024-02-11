@@ -1,8 +1,8 @@
-import datetime
 import functools
 import json
 import logging
 from decimal import Decimal
+import datetime
 
 import numpy as np
 import pymysql
@@ -17,6 +17,8 @@ table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNum
 locations_sort_order = [3, 4, 2, 1, 7, 6, 5]
 
 FMT = "%Y-%m-%d"
+
+API_KEY = None
 
 
 def get_configuration():
@@ -35,6 +37,8 @@ def get_configuration():
                 "url_isbn": c["isbn_com"]["url_isbn"].strip(),
                 "key": c["isbn_com"]["key"].strip()
             }
+            global API_KEY
+            API_KEY = c["api_key"].replace('\n', '')
         except KeyError as e:
             logger.error(e)
             sys.exit()
@@ -60,13 +64,9 @@ def require_appkey(view_function):
     @functools.wraps(view_function)
     # the new, post-decoration function. Note *args and **kwargs here.
     def decorated_function(*args, **kwargs):
-        config_filename = "./config/configuration.json"
-        with open(config_filename, "r") as config_file:
-            c = json.load(config_file)
-            key = c["api_key"].replace('\n', '')
         # Select one of these:
         # if request.args.get('key') and request.args.get('key') == key:
-        if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
+        if request.headers.get('x-api-key') and request.headers.get('x-api-key') == API_KEY:
             return view_function(*args, **kwargs)
         else:
             abort(401)
@@ -113,7 +113,7 @@ def resp_header(rdata):
 # REPORTS
 ##########################################################################
 
-def _summary_books_read_by_year(target_year=None):
+def summary_books_read_by_year_utility(target_year=None):
     """
     Summarizes the number of pages read and books read each year.
     Can be filtered for a specific year.
@@ -141,7 +141,7 @@ def _summary_books_read_by_year(target_year=None):
 
     # Prepare response data
     headers = ["year", "pages read", "books read"]
-    app.logger.debug(query)
+    logger.debug(query)
 
     # Execute query and handle exceptions
     try:
@@ -149,7 +149,7 @@ def _summary_books_read_by_year(target_year=None):
         results = cursor.fetchall()
         serialized_data = serialize_rows(results, headers)
     except pymysql.Error as e:
-        app.logger.error(e)
+        logger.error(e)
         serialized_data = json.dumps({"error": str(e)})
         results = None
     finally:
@@ -159,7 +159,7 @@ def _summary_books_read_by_year(target_year=None):
     return serialized_data, results, headers
 
 
-def _books_read(target_year=None):
+def books_read_utility(target_year=None):
     db = pymysql.connect(**conf)
     search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
                   "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
@@ -172,13 +172,13 @@ def _books_read(target_year=None):
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "ORDER BY b.ReadDate"
     header = table_header + ["ReadDate"]
-    app.logger.debug(search_str)
+    logger.debug(search_str)
     s = None
     c = db.cursor()
     try:
         c.execute(search_str)
     except pymysql.Error as e:
-        app.logger.error(e)
+        logger.error(e)
         rdata = json.dumps({"error": str(e)})
     else:
         s = c.fetchall()
@@ -186,7 +186,7 @@ def _books_read(target_year=None):
     return rdata, s, header
 
 
-def _tags_search(match_str):
+def tags_search_utility(match_str):
     match_str = match_str.lower().strip()
     db = pymysql.connect(**conf)
     search_str = ("SELECT a.BookID, b.TagID, b.Label as Tag"
@@ -194,12 +194,12 @@ def _tags_search(match_str):
                   f" WHERE b.Label LIKE \"%{match_str}%\" "
                   " ORDER BY b.Label ASC")
     header = ["BookCollectionID", "TagID", "Tag"]
-    app.logger.debug(search_str)
+    logger.debug(search_str)
     c = db.cursor()
     try:
         c.execute(search_str)
     except pymysql.Error as e:
-        app.logger.error(e)
+        logger.error(e)
         rdata = json.dumps({"error": str(e)})
     else:
         s = c.fetchall()
@@ -211,27 +211,91 @@ def _tags_search(match_str):
 # READING ESTIMATES
 #########################################################################
 
-def _estimate_range(x, y, p):
-    res = [0, 10000]
-    for i in range(len(x) - 1):
-        # Find max and min slopes
-        m = (y[i + 1] - y[i]) / (x[i + 1] - x[i])
-        est = int(m * (p - np.max(x)) + np.max(y))
-        if est > res[0]:
-            res[0] = est
-        if est < res[1]:
-            res[1] = est
-    return res  # (max, min)
+# def _estimate_range(x, y, p):
+#     res = [0, 10000]
+#     for i in range(len(x) - 1):
+#         # Find max and min slopes
+#         m = (y[i + 1] - y[i]) / (x[i + 1] - x[i])
+#         est = int(m * (p - np.max(x)) + np.max(y))
+#         if est > res[0]:
+#             res[0] = est
+#         if est < res[1]:
+#             res[1] = est
+#     return res
+#
+
+def _estimate_value_range(x_values, y_values, target_x):
+    """
+    Estimates the minimum and maximum y-values for a given target x-value based on linear interpolation
+    of the input x and y values.
+
+    Parameters:
+    - x_values (list or numpy array): The x-values of the data points.
+    - y_values (list or numpy array): The y-values of the data points.
+    - target_x (float): The x-value for which to estimate the corresponding y-value range.
+
+    Returns:
+    - list: A list containing the minimum and maximum estimated y-values for the target x-value.
+    """
+    estimated_range = [float('inf'), -float('inf')]
+    for i in range(len(x_values) - 1):
+        slope = (y_values[i + 1] - y_values[i]) / (x_values[i + 1] - x_values[i])
+        estimated_y = slope * (target_x - np.max(x_values)) + np.max(y_values)
+
+        estimated_range[0] = min(estimated_range[0], estimated_y)
+        estimated_range[1] = max(estimated_range[1], estimated_y)
+
+    # Swap values if necessary to ensure the first element is the min and the second is the max
+    estimated_range = [int(round(x, 0)) for x in [min(estimated_range), max(estimated_range)]]
+
+    return estimated_range
 
 
-def _line_fit_and_estimate(data, total_pages):
-    d = np.array(data)
-    x = np.array(d[:, 1], dtype=np.float64)
-    y = np.array(d[:, 2], dtype=np.float64)
-    m, b = np.polyfit(x, y, 1)
-    est = m * float(total_pages) + b
-    est_range = _estimate_range(x, y, total_pages)
-    return int(est), est_range
+def _line_fit_and_estimate_completion_time(reading_data, total_pages):
+    """
+    Fits a linear regression model to reading data and estimates the total number of days required
+    to complete the book based on the current reading pace.
+
+    Parameters:
+    - reading_data (list of lists): Each sublist contains [datetime object, pages read, day number].
+    - total_pages (int): Total number of readable pages in the book.
+
+    Returns:
+    - int: Estimated days to complete the book.
+    - tuple: Range (min, max) of estimated days to complete the book based on linear interpolation.
+    """
+    # Convert input data to numpy arrays for manipulation
+    data_array = np.array(reading_data)
+    pages_read = np.array(data_array[:, 1], dtype=np.float64)  # Extract pages read
+    day_number = np.array(data_array[:, 2], dtype=np.float64)  # Extract day numbers
+
+    # Fit a line (linear regression) to the data
+    slope, intercept = np.polyfit(pages_read, day_number, 1)
+
+    # Estimate total days to complete the book using the fitted line
+    estimated_total_days = slope * float(total_pages) + intercept
+
+    # Estimate range of days to complete the book based on current data
+    # Note: estimate_value_range function needs to be defined or imported
+    estimated_days_range = _estimate_value_range(pages_read, day_number, total_pages)
+
+    return int(estimated_total_days), estimated_days_range
+
+
+# def _line_fit_and_estimate(data, total_pages):
+#     """
+#     Fits a line to the data and estimates the number of days to complete the book.
+#     :param data: [[datetime_obj, pages, day_number]...]
+#     :param total_pages: last readable page in book
+#     :return: days to complete book, range of days to complete book
+#     """
+#     d = np.array(data)
+#     x = np.array(d[:, 1], dtype=np.float64)    # pages
+#     y = np.array(d[:, 2], dtype=np.float64)    # day_number
+#     m, b = np.polyfit(x, y, 1)
+#     estimated_days = m * float(total_pages) + b
+#     estimated_days_range = _estimate_value_range(x, y, total_pages)  # (min, max)
+#     return int(estimated_days), estimated_days_range
 
 
 def daily_page_record_from_db(RecordID):
@@ -309,12 +373,13 @@ def reading_book_data_from_db(RecordID):
         db = pymysql.connect(**conf)
         with db.cursor() as cur:
             # Execute the query to fetch book data
-            cur.execute("SELECT StartDate, LastReadablePage FROM `complete date estimates` WHERE RecordID = %s", (RecordID,))
+            cur.execute("SELECT StartDate, LastReadablePage FROM `complete date estimates` WHERE RecordID = %s",
+                        (RecordID,))
             rows = cur.fetchall()
 
             # Process each row to exclude the first and last columns
-#             for row in rows:
-#                 data.append(list(row[1:-1]))  # Exclude the first and last column
+    #             for row in rows:
+    #                 data.append(list(row[1:-1]))  # Exclude the first and last column
     except pymysql.MySQLError as e:
         # Handle database errors
         logger.error(f"Database error: {e}")
@@ -350,12 +415,40 @@ def update_reading_book_data(record_id, date_range):
         db.commit()
 
 
-def estimate_dates(data, start_date, total_readable_pages):
-    estimated_completion_days, estimated_range = _line_fit_and_estimate(data, float(total_readable_pages))
+
+def estimate_completion_dates(reading_data, start_date, total_readable_pages):
+    """
+    Estimates the book completion date based on reading data and provides a range of potential completion dates.
+
+    Parameters:
+    - reading_data (list of lists): Each sublist contains [datetime object, pages read, day number].
+    - start_date (datetime.date): The date when the reading started.
+    - total_readable_pages (int): Total number of pages in the book.
+
+    Returns:
+    - datetime.date: The estimated date of completion.
+    - tuple: A tuple containing the earliest and latest estimated completion dates as datetime.date objects.
+    """
+    # Estimate completion time in days and a range of possible completion days
+    estimated_completion_days, estimated_days_range = _line_fit_and_estimate_completion_time(
+        reading_data, float(total_readable_pages))
+
+    # Calculate the estimated completion date based on the start date and estimated days
     estimated_completion_date = start_date + datetime.timedelta(days=estimated_completion_days)
-    est_date_max = start_date + datetime.timedelta(days=estimated_range[0])
-    est_date_min = start_date + datetime.timedelta(days=estimated_range[1])
+
+    # Calculate the minimum and maximum estimated completion dates
+    est_date_min = start_date + datetime.timedelta(days=estimated_days_range[0])
+    est_date_max = start_date + datetime.timedelta(days=estimated_days_range[1])
+
     return estimated_completion_date, est_date_min, est_date_max
+
+
+# def estimate_dates(data, start_date, total_readable_pages):
+#     estimated_completion_days, estimated_range = _line_fit_and_estimate_completion_time(data, float(total_readable_pages))
+#     estimated_completion_date = start_date + datetime.timedelta(days=estimated_completion_days)
+#     est_date_max = start_date + datetime.timedelta(days=estimated_range[1])
+#     est_date_min = start_date + datetime.timedelta(days=estimated_range[0])
+#     return estimated_completion_date, est_date_min, est_date_max
 
 # def calculate_estimates(record_id):
 #     reading_data, _ = daily_page_record_from_db(record_id)

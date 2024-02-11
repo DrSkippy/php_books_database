@@ -416,7 +416,7 @@ def update_book_note_status():
 @app.route('/summary_books_read_by_year')
 @app.route('/summary_books_read_by_year/<target_year>')
 def summary_books_read_by_year(target_year=None):
-    rdata, _, _ = _summary_books_read_by_year(target_year)
+    rdata, _, _ = summary_books_read_by_year_utility(target_year)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -451,7 +451,7 @@ def summary_books_read_by_year(target_year=None):
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
 def books_read(target_year=None):
-    rdata, _, _ = _books_read(target_year)
+    rdata, _, _ = books_read_utility(target_year)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -640,7 +640,7 @@ def update_tag_value(current, updated):
 
 @app.route('/tags_search/<match_str>')
 def tags_search(match_str):
-    rdata, s, header = _tags_search(match_str)
+    rdata, s, header = tags_search_utility(match_str)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -728,7 +728,7 @@ def record_set(book_id=None):
         db.commit()
     for record in [(str(x[0]), int(x[1])) for x in res]:
         rdata["record_set"]["RecordID"].append(record)
-        rdata["record_set"]["Estimate"].append(calculate_estimates(record[1]))
+        rdata["record_set"]["Estimate"].append(estimate_completion_dates(record[1]))
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)

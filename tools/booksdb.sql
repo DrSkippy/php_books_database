@@ -1,92 +1,79 @@
---
--- Table structure for table `book collection`
---
--- scott.`book collection` definition
+-- books.`book collection` definition
 
-DROP TABLE IF EXISTS `book collection`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `book collection` (
-  `BookCollectionID` int(11) NOT NULL AUTO_INCREMENT,
+  `BookCollectionID` int NOT NULL AUTO_INCREMENT,
   `Title` varchar(200) NOT NULL,
   `Author` varchar(200) NOT NULL,
   `CopyrightDate` datetime DEFAULT NULL,
   `ISBNNumber` varchar(13) DEFAULT NULL,
   `PublisherName` varchar(50) DEFAULT NULL,
   `CoverType` varchar(30) DEFAULT NULL,
-  `Pages` smallint(6) DEFAULT NULL,
+  `Pages` smallint DEFAULT NULL,
   `Category` varchar(10) DEFAULT NULL,
   `Note` mediumtext,
   `Recycled` tinyint(1) DEFAULT NULL,
   `Location` varchar(50) NOT NULL,
   `ISBNNumber13` varchar(13) DEFAULT NULL,
+  `LastUpdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`BookCollectionID`),
   KEY `Location_idx` (`Location`),
   FULLTEXT KEY `Author_idx` (`Author`),
   FULLTEXT KEY `Title_idx` (`Title`)
-) ENGINE=MyISAM AUTO_INCREMENT=1743 DEFAULT CHARSET=utf8
+) ENGINE=MyISAM AUTO_INCREMENT=1807 DEFAULT CHARSET=utf8mb3;
 
 
---
--- Table structure for table `books read`
---
-DROP TABLE IF EXISTS `books read`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
--- scott.`books read` definition
+-- books.`books read` definition
 
 CREATE TABLE `books read` (
-  `BookCollectionID` int(10) unsigned NOT NULL,
+  `BookCollectionID` int unsigned NOT NULL,
   `ReadDate` date NOT NULL,
-  `ReadNote` text CHARACTER SET utf8,
+  `ReadNote` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci,
+  `LastUpdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`BookCollectionID`,`ReadDate`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `books read`
---
-DROP TABLE IF EXISTS `tag labels`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
--- scott.`tag labels` definition
-CREATE TABLE `tag labels` (
-  `TagID` int(11) NOT NULL AUTO_INCREMENT,
-  `Label` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`TagID`)
-) ENGINE=MyISAM AUTO_INCREMENT=1085 DEFAULT CHARSET=utf8
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
---
--- Table structure for table `books tags`
---
-DROP TABLE IF EXISTS `books tags`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
--- scott.`books tags` definition
+-- books.`books tags` definition
+
 CREATE TABLE `books tags` (
   `BookID` varchar(50) NOT NULL,
-  `Tag_ID` int(11) NOT NULL,
-  PRIMARY KEY (`BookID`,`Tag_ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `TagID` int NOT NULL,
+  `LastUpdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`BookID`,`TagID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
 
 
---
--- DEPRECATED -- DEPRECATED -- DEPRECATED -- DEPRECATED --
--- Table structure for table `tags`
---
-DROP TABLE IF EXISTS `tags`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
--- scott.tags definition
+-- books.`complete date estimates` definition
 
-CREATE TABLE `tags` (
-  `BookID` varchar(50) NOT NULL DEFAULT '',
-  `TagID` int(11) NOT NULL AUTO_INCREMENT,
-  `Tag` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`BookID`,`TagID`),
-  KEY `BookID_idx` (`BookID`),
-  FULLTEXT KEY `Tag_idx` (`Tag`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+CREATE TABLE `complete date estimates` (
+  `BookCollectionID` bigint unsigned NOT NULL,
+  `StartDate` datetime NOT NULL,
+  `LastReadablePage` bigint NOT NULL,
+  `EstimateDate` datetime DEFAULT NULL,
+  `EstimatedFinishDate` datetime DEFAULT NULL,
+  `RecordID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`RecordID`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- books.`daily page records` definition
+
+CREATE TABLE `daily page records` (
+  `RecordDate` datetime NOT NULL,
+  `page` bigint NOT NULL,
+  `RecordID` bigint unsigned NOT NULL,
+  `LastUpdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`RecordID`,`RecordDate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- books.`tag labels` definition
+
+CREATE TABLE `tag labels` (
+  `TagID` int NOT NULL AUTO_INCREMENT,
+  `Label` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`TagID`),
+  UNIQUE KEY `tag_labels_UN` (`Label`)
+) ENGINE=MyISAM AUTO_INCREMENT=1211 DEFAULT CHARSET=utf8mb3;
+
+
