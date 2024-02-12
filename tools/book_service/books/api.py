@@ -1,4 +1,4 @@
-__version__ = '0.11.0'
+__version__ = '0.11.1'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -225,19 +225,16 @@ def add_read_dates():
     # records should be a list of dictionaries including all fields
     db = pymysql.connect(**conf)
     records = request.get_json()
-    search_str = "INSERT INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES "
-    search_str += "({BookCollectionID}, \"{ReadDate}\", \"{ReadNote}\")"
+    search_str = 'INSERT INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES '
+    search_str += '({BookCollectionID}, "{ReadDate}", "{ReadNote}")'
     res = {"update_read_dates": [], "error": []}
-    rdata = []
     with db:
         with db.cursor() as c:
             for record in records:
                 try:
-                    r = c.execute(search_str.format(**record))
-                    if r.resonse_code == 200:
-                        res["update_read_dates"].append(record)
-                    else:
-                        res["error"].append(record)
+                    app.logger.debug(search_str.format(**record))
+                    c.execute(search_str.format(**record))
+                    res["update_read_dates"].append(record)
                 except pymysql.Error as e:
                     app.logger.error(e)
                     res["error"].append(str(e))
