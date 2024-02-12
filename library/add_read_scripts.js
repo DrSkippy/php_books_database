@@ -28,6 +28,7 @@ form.addEventListener('submit', function(event) {
     console.log(params);
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setRequestHeader('x-api-key', apiKey);
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             console.log(xhr.responseText);
