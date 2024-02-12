@@ -800,7 +800,7 @@ def add_book_estimate(book_id, last_readable_page, start_date=None):
 def year_progress_comparison(window=15):
     window = int(window)
     img = BytesIO()
-    _, s, h = _books_read()
+    _, s, h = books_read_utility()
     df1 = pd.DataFrame(s, columns=h)
     df1 = df1.set_index("ReadDate")
     df1.index = pd.to_datetime(df1.index)
@@ -832,7 +832,7 @@ def all_years(year=None):
     else:
         year = int(year)
     img = BytesIO()
-    _, s, h = _summary_books_read_by_year()
+    _, s, h = summary_books_read_by_year_utility()
     df = pd.DataFrame(s, columns=h)
     df['pages read'] = df['pages read'].astype(float)
     df["rank"] = df["pages read"].rank(ascending=False)
