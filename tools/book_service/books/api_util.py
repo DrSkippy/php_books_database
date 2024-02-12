@@ -1,8 +1,8 @@
+import datetime
 import functools
 import json
 import logging
 from decimal import Decimal
-import datetime
 
 import numpy as np
 import pymysql
@@ -415,7 +415,6 @@ def update_reading_book_data(record_id, date_range):
         db.commit()
 
 
-
 def estimate_completion_dates(reading_data, start_date, total_readable_pages):
     """
     Estimates the book completion date based on reading data and provides a range of potential completion dates.
@@ -486,7 +485,7 @@ def calculate_estimates(record_id):
     [start_date, total_readable_pages] = book_data[0]
 
     # Calculate the estimate date range
-    estimate_date_range = estimate_dates(reading_data, start_date, total_readable_pages)
+    estimate_date_range = estimate_completion_dates(reading_data, start_date, total_readable_pages)
 
     # Update the database with the estimated date range
     update_reading_book_data(record_id, estimate_date_range)

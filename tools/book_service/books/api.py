@@ -672,22 +672,13 @@ def tag_maintenance():
 ##########################################################################
 @app.route('/date_page_records/<record_id>')
 def date_page_records(record_id=None):
-    db = pymysql.connect(**conf)
+    # data is [(RecordDate, page, day_number from first page record), ...]
+    data, record_id = daily_page_record_from_db(record_id)
     rdata = {"date_page_records": [], "RecordID": record_id}
-    q = ("SELECT RecordDate, page FROM `daily page records` "
-         f"WHERE RecordID = {record_id} ORDER BY RecordDate ASC")
-    with db:
-        with db.cursor() as c:
-            try:
-                c.execute(q)
-                res = c.fetchall()
-            except pymysql.Error as e:
-                rdata["error"] = str(e)
-                app.logger.error(e)
-        db.commit()
-    app.logger.debug(res)
-    if len(res) > 0:
-        rdata["date_page_records"] = [[x.strftime(FMT), int(y)] for [x, y] in res]
+    if len(data) > 0:
+        rdata["date_page_records"] = [(x.strftime(FMT), int(y)) for [x, y] in data]
+    else:
+        rdata["error"] = "No records found."
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
@@ -719,7 +710,7 @@ def date_page_records(record_id=None):
 def record_set(book_id=None):
     db = pymysql.connect(**conf)
     rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": [], "Estimate": []}}
-    q = ("SELECT StartDate, RecordID, LastReadablePage FROM `complete date estimates` "
+    q = ("SELECT StartDate, RecordID FROM `complete date estimates` "
          f"WHERE BookCollectionID = {book_id} ORDER BY StartDate ASC")
     with db:
         with db.cursor() as c:
@@ -730,10 +721,9 @@ def record_set(book_id=None):
                 rdata["error"].append(str(e))
                 app.logger.error(e)
         db.commit()
-    for record in [(str(x[0]), int(x[1]), int(x[2])) for x in res]:
-        rdata["record_set"]["RecordID"].append(record[1])
-        date_page_records, _ = reading_book_data_from_db(record[1])
-        rdata["record_set"]["Estimate"].append(estimate_completion_dates(date_page_records, record[0], record[2]))
+    for record in [(str(x[0]), int(x[1])) for x in res]:
+        rdata["record_set"]["RecordID"].append(record)
+        rdata["record_set"]["Estimate"].append(calculate_estimates(record[1]))
     rdata = json.dumps(rdata)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)

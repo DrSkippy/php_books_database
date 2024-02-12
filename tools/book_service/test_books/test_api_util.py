@@ -84,5 +84,13 @@ class TestAppFunctions(unittest.TestCase):
         self.assertEqual(res1[1], datetime.datetime(2022, 4, 26, 0, 0))
         self.assertEqual(res1[2], datetime.datetime(2022, 11, 6, 0, 0))
 
+    def test_calculate_estimates(self):
+        res = au.calculate_estimates(1)
+        self.assertEqual(len(res), 3)
+        self.assertEqual(res[0], "2022-04-17")
+        self.assertEqual(res[1], "2022-04-04")
+        self.assertEqual(res[2], "2022-08-19")
+
+
 if __name__ == '__main__':
     unittest.main()
