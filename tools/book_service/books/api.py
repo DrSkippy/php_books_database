@@ -494,7 +494,7 @@ def books_search():
         elif key == "ReadDate":
             where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
         elif key == "Tags":
-            _, s, _ = _tags_search(args.get(key))
+            _, s, _ = tags_search_utility(args.get(key))
             id_list = str(tuple([int(x[0]) for x in s]))
             if len(s) == 1:
                 # remove trailing comma
