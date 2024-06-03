@@ -113,10 +113,12 @@ function update_note() {
     xhr = new XMLHttpRequest();
     xhr.open("POST", urlBook, false);
     xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader('x-api-key', apiKey);
     xhr.send(dataBook);
     xhr = new XMLHttpRequest();
     xhr.open("POST", urlRead, false);
     xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader('x-api-key', apiKey);
     xhr.send(dataRead);
     navigate(1);
 }

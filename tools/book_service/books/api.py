@@ -98,29 +98,25 @@ def recent():
         cursor = db.cursor()
 
         # Execute the query
-        query = """
-        SELECT abc.BookCollectionID, max(abc.LastUpdate) as LastUpdate, bc.Title FROM
-            (
-                SELECT BookCollectionID, LastUpdate 
-                FROM `book collection`
-                UNION
-                SELECT BookCollectionID , LastUpdate 
-                FROM `book collection`
-                UNION 
-                SELECT BookID as BookCollectionID, LastUpdate
-                FROM `books tags`
-                UNION
-                SELECT a.BookCollectionID, b.LastUpdate
-                FROM `complete date estimates` a JOIN `daily page records` b ON
-                a.RecordID = b.RecordID
-                UNION 
-                SELECT BookCollectionID, EstimateDate as LastUpdate
-                FROM `complete date estimates`
-            ) abc
-        JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID 
-        GROUP BY abc.BookCollectionID, bc.Title
-        ORDER BY LastUpdate DESC LIMIT 10;
-        """
+        query = ('SELECT abc.BookCollectionID, max(abc.LastUpdate) as LastUpdate, bc.Title FROM\n'
+                 '(       SELECT BookCollectionID, LastUpdate \n'
+                 '        FROM `book collection`\n'
+                 '        UNION\n'
+                 '        SELECT BookCollectionID , LastUpdate \n'
+                 '        FROM `book collection`\n'
+                 '        UNION \n'
+                 '        SELECT BookID as BookCollectionID, LastUpdate\n'
+                 '        FROM `books tags`\n'
+                 '        UNION\n'
+                 '        SELECT a.BookCollectionID, b.LastUpdate\n'
+                 '        FROM `complete date estimates` a JOIN `daily page records` b ON\n'
+                 '        a.RecordID = b.RecordID\n'
+                 '        UNION \n'
+                 '        SELECT BookCollectionID, EstimateDate as LastUpdate\n'
+                 '        FROM `complete date estimates`) abc\n'
+                 'JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID \n'
+                 'GROUP BY abc.BookCollectionID, bc.Title\n'
+                 'ORDER BY LastUpdate DESC LIMIT 10;\n')
         app.logger.debug(query)
         cursor.execute(query)
 
