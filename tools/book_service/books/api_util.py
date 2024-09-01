@@ -318,8 +318,10 @@ def daily_page_record_from_db(RecordID):
         db = pymysql.connect(**conf)
         with db.cursor() as cur:
             # Execute the query to fetch daily page records
-            cur.execute("SELECT a.RecordDate, a.page FROM `daily page records` a "
-                        "WHERE a.RecordID = %s ORDER BY a.RecordDate ASC", (RecordID,))
+            q=("SELECT a.RecordDate, a.page FROM `daily page records` a "
+                    f"WHERE a.RecordID = {RecordID} ORDER BY a.RecordDate ASC")
+            logging.debug(q)
+            cur.execute(q)
             rows = cur.fetchall()
 
             # Check if any rows were returned
@@ -367,19 +369,21 @@ def reading_book_data_from_db(RecordID):
     """
     # Initialize an empty list for the data
     rows = []
+    data = []
 
     # Establish a database connection
     try:
         db = pymysql.connect(**conf)
         with db.cursor() as cur:
             # Execute the query to fetch book data
-            cur.execute("SELECT StartDate, LastReadablePage FROM `complete date estimates` WHERE RecordID = %s",
-                        (RecordID,))
+            q = f'SELECT StartDate, LastReadablePage FROM `complete date estimates` WHERE RecordID = {RecordID}'
+            logging.debug(q)
+            cur.execute(q)
             rows = cur.fetchall()
 
             # Process each row to exclude the first and last columns
-    #             for row in rows:
-    #                 data.append(list(row[1:-1]))  # Exclude the first and last column
+            # for row in rows:
+                # data.append(list(row[1:-1]))  # Exclude the first and last column
     except pymysql.MySQLError as e:
         # Handle database errors
         logger.error(f"Database error: {e}")

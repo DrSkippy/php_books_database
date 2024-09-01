@@ -1,4 +1,4 @@
-__version__ = '0.11.1'
+__version__ = '0.11.2'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -669,7 +669,7 @@ def date_page_records(record_id=None):
     data, record_id = daily_page_record_from_db(record_id)
     rdata = {"date_page_records": [], "RecordID": record_id}
     if len(data) > 0:
-        rdata["date_page_records"] = [(x.strftime(FMT), int(y)) for [x, y] in data]
+        rdata["date_page_records"] = [(x.strftime(FMT), int(y), int(z)) for [x, y, z] in data]
     else:
         rdata["error"] = "No records found."
     rdata = json.dumps(rdata)
