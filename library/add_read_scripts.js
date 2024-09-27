@@ -17,7 +17,15 @@ form.addEventListener('submit', function(event) {
     event.preventDefault(); // prevent page reload
     console.log("submit called...");
     // get form values
-    var note = document.forms["add_read"]["read_note"].value;
+    var myJSONString = JSON.stringify(document.forms["add_read"]["read_note"].value);
+    var note = myJSONString.replace(/\\n/g, "\\n")
+                                  .replace(/\\'/g, "\\'")
+                                  .replace(/\\"/g, '\\"')
+                                  .replace(/\\&/g, "\\&")
+                                  .replace(/\\r/g, "\\r")
+                                  .replace(/\\t/g, "\\t")
+                                  .replace(/\\b/g, "\\b")
+                                  .replace(/\\f/g, "\\f");
     var date = document.forms["add_read"]["read_date"].value;
 
     // submit form data
