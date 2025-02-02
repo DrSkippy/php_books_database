@@ -77,7 +77,7 @@ else if ($_REQUEST['submit'] == '   >   ') {
 }
 # Update record with changes
 else if ($_REQUEST['submit'] == 'Update Record') {
-    # Add or update books read table record if use enters a new date
+    # Add or update books read table record if user enters a new date
     $new_flag = True;
     if ($_REQUEST['readtoday']) {
         # new date! Don't alter the new_flag
@@ -94,14 +94,15 @@ else if ($_REQUEST['submit'] == 'Update Record') {
         $update_str    .= $_REQUEST['id'] . '" AND ReadDate = "' . $readdate . '";';
     }
     # execute query
-    if ($debug)
+    if ($debug) {
         echo $update_str;
-        echo nl2br('\n');
+	echo nl2br('\n');
+    }
     $result     = @mysqli_query($dbcnx, $update_str);
     if (!$result) {
         exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
     } else {
-        echo '<td>Record ' . $_REQUEST['id'] . ' updated.</td>';
+        echo '<p>Reading record ' . $_REQUEST['id'] . ' updated.</p>';
         $recordselector = $_REQUEST['id'];
     }
     # Update book collection table record
@@ -124,7 +125,7 @@ else if ($_REQUEST['submit'] == 'Update Record') {
     if (!$result) {
         exit('<p>' . $search_str . '</p><p>Error performing query: ' . mysqli_error($dbcnx) . '</p>');
     } else {
-        echo '<td>Record ' . $_REQUEST['id'] . ' updated.</td>';
+        echo '<p>Record ' . $_REQUEST['id'] . ' updated.</p>';
         $recordselector = $_REQUEST['id'];
     }
 }
