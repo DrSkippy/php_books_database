@@ -40,7 +40,7 @@ $(document).ready(function () {
     console.log(idArray);
     console.log(idArrayURLEnc);
     document.getElementById("updatereadnotesurl").innerHTML = '<a href=' +
-        '"/php_books_database/js_reports/update_read_notes.html?' + idArrayURLEnc + '">' +
+        '"' + baseApiPath + 'js_reports/update_read_notes.html?' + idArrayURLEnc + '">' +
         'Update book read notes for items in this list</a>';
     createDetailTableRows();
     $.ajaxSetup({async: true});  // suppress async so the summary row is always at the bottom
