@@ -1,7 +1,8 @@
 // const baseApiUrl = 'http://192.168.127.166:8083'
 //const baseApiUrl = 'https://drskippy.worse-than.tv/book_service'
-const baseApiUrl = 'http://book-service.drskippy.worse-than.tv'
-const baseApiPath = '/php_books_database/';
+const baseApiUrl = 'https://book-service.drskippy.worse-than.tv'
+//const baseApiPath = '/php_books_database/';
+const baseApiPath = '/';
 var bookCollectionID = 102;
 const apiKey = 'sdf876a234hqkajsdv9876x87ehruia76df';
 const apiHeaders = {
@@ -14,6 +15,7 @@ $.ajaxSetup({
 
 function topnavbar() {
     var urlVersion = baseApiUrl + "/configuration";
+    console.log(urlVersion);
     $.getJSON(urlVersion, function (data) {
         var obj = data['version'];
         console.log(obj.toString());
@@ -56,7 +58,7 @@ function setval(bcid) {
         var obj = data['tag_list'];
         var trTwo = "<tr id='replace-me-two'>" +
             "<td>Tags:</td><td colspan=6>" + tag_links_list(obj) + "</td>" +
-            "   <td colspan=6><form name=\"add_tag\" action=\"' + baseApiPath + 'js_reports/add_tags.html\">" +
+            "   <td colspan=6><form name=\"add_tag\" action=\"" + baseApiPath + 'js_reports/add_tags.html\">' +
             "   <label for=\"lname\">Add Tag List:&nbsp; </label>" +
             "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data["BookID"] + "\">" +
             "   <input type=\"text\" id=\"tag_string\" name=\"tag_string\">" +
@@ -68,7 +70,7 @@ function setval(bcid) {
         var obj = data['data'];
         console.log(obj);
         var trThree = "<tr id='replace-me-three'>" +
-            "<td>Read:  <a href=\"' + baseApiPath + 'js_reports/add_read.html?book_id=" +
+            '<td>Read:  <a href=\"' + baseApiPath + 'js_reports/add_read.html?book_id=' +
             bookCollectionID + "\">Add</a></td>" +
             "<td colspan=12>" +
             "<table id='readtable' class=\"styled-inner-table\">\n" +
@@ -92,7 +94,7 @@ function setval(bcid) {
         var estList = obj["Estimate"];
         console.log(recordList);
         var trFour = "<tr id='replace-me-four'>" +
-            "<td><a href=\"' + baseApiPath + 'js_reports/add_book_estimate.html?book_id=" +
+            '<td><a href=\"' + baseApiPath + 'js_reports/add_book_estimate.html?book_id=' +
             bookCollectionID + "\">Add</a> Book Estimate</td>" +
             "<td colspan=12>" +
             "<table id='readtable' class=\"styled-inner-table\">\n" +
@@ -110,7 +112,7 @@ function setval(bcid) {
             console.log(recordList[i]);
             console.log(estList[i]);
             trFour += "<tr><td>" + recordList[i][0].substring(0,11) + "</td><td>";
-            trFour += "<a href=\"' + baseApiPath + 'js_reports/add_date_pages.html?record_id=" +
+            trFour += '<a href=\"' + baseApiPath + 'js_reports/add_date_pages.html?record_id=' +
                 recordList[i][1] + "&book_id=" + bookCollectionID + "\">Add pages to " + recordList[i][1] + "</a>";
             trFour += "</td><td>" + estList[i][0] + "</td>" +
                 "<td>" + estList[i][1] + "</td><td>" + estList[i][2] + "</td></tr>";
@@ -123,7 +125,7 @@ function setval(bcid) {
 function tag_links_list(tags_list) {
     var tag_links = "";
     for (var i = 0; i < tags_list.length; i++) {
-        tag_links += "<a href=\"' + baseApiPath + 'js_reports/books_detail.html?tags=" +
+        tag_links += '<a href=\"' + baseApiPath + 'js_reports/books_detail.html?tags=' +
             tags_list[i] + "\">"+tags_list[i]+"</a>, ";
     }
     return tag_links.substring(0,tag_links.length - 2);

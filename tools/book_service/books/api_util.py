@@ -69,6 +69,7 @@ def require_appkey(view_function):
         if request.headers.get('x-api-key') and request.headers.get('x-api-key') == API_KEY:
             return view_function(*args, **kwargs)
         else:
+            logger.error("x-api-key missing or incorrect.")
             abort(401)
 
     return decorated_function
@@ -102,7 +103,6 @@ def serialize_rows(cursor, header=None):
 
 def resp_header(rdata):
     response_header = [
-        ('Access-Control-Allow-Origin', '*'),
         ('Content-type', 'application/json'),
         ('Content-Length', str(len(rdata)))
     ]

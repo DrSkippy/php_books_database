@@ -4,7 +4,7 @@ $(document).ready(function () {
     $.getJSON(url1, function (data) {
         var obj = data['data'];
         for (var i = 0; i < obj.length; i++) {
-            var url = new URL("' + baseApiPath + 'js_reports/books_read_by_year.html", window.location);
+            var url = new URL(baseApiPath + 'js_reports/books_read_by_year.html', window.location);
             url.searchParams.append("year", obj[i][0]);
             var tr = "<tr>" +
                 "<td><a href=" + url.href + ">" + obj[i][0] + "</a></td>" +
@@ -17,8 +17,8 @@ $(document).ready(function () {
     $.getJSON(url2, function (data) {
         var obj = data['data'];
         for (var i = 0; i < obj.length; i++) {
-            var url = new URL("' + baseApiPath + 'js_reports/books_detail.html?author=&title=" +
-                obj[i][2].toString().substring(0,40) + "&tags=", window.location);
+            var url = new URL(baseApiPath + 'js_reports/books_detail.html?author=&title=' +
+                obj[i][2].toString().substring(0,40) + '&tags=', window.location);
             var tr = "<tr><td><a href=\"" + url.href + "\">" + obj[i][2] + "</a></td>" +
                 "<td>" + obj[i][1] + "</td></tr>";
             console.log(tr);
