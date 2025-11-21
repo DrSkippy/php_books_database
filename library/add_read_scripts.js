@@ -35,7 +35,7 @@ form.addEventListener('submit', function(event) {
     params = '[{"BookCollectionID":' + book_id + ',"ReadDate":"'  + date + '","ReadNote":'  + note + '}]';
     console.log(params);
     xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
     xhr.setRequestHeader('x-api-key', apiKey);
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {

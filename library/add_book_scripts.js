@@ -29,7 +29,7 @@ window.addEventListener('DOMContentLoaded', function() {
         console.log(params);
         var xhr = new XMLHttpRequest();
         xhr.open("POST", url, true);
-        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
         xhr.setRequestHeader('x-api-key', apiKey);
         xhr.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
@@ -88,7 +88,7 @@ form.addEventListener('submit', function(event) {
         copyrightdate + '"}]';
     console.log(params);
     xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
     xhr.setRequestHeader('x-api-key', apiKey);
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {

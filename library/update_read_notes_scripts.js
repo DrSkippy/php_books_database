@@ -112,12 +112,12 @@ function update_note() {
     // Post the data
     xhr = new XMLHttpRequest();
     xhr.open("POST", urlBook, false);
-    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
     xhr.setRequestHeader('x-api-key', apiKey);
     xhr.send(dataBook);
     xhr = new XMLHttpRequest();
     xhr.open("POST", urlRead, false);
-    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
     xhr.setRequestHeader('x-api-key', apiKey);
     xhr.send(dataRead);
     navigate(1);
