@@ -8,7 +8,7 @@ import numpy as np
 import pymysql
 from flask import request, abort
 
-logger = logging.getLogger('app.py.sub')
+app_logger = logging.getLogger('app.py.sub')
 
 table_header = ["BookCollectionID", "Title", "Author", "CopyrightDate", "ISBNNumber", "PublisherName",
                 "CoverType", "Pages", "Category", "Note", "Recycled",
@@ -40,7 +40,7 @@ def get_configuration():
             global API_KEY
             API_KEY = c["api_key"].replace('\n', '')
         except KeyError as e:
-            logger.error(e)
+            app_logger.error(e)
             sys.exit()
         return res, res1
 
@@ -69,7 +69,7 @@ def require_appkey(view_function):
         if request.headers.get('x-api-key') and request.headers.get('x-api-key') == API_KEY:
             return view_function(*args, **kwargs)
         else:
-            logger.error("x-api-key missing or incorrect.")
+            app_logger.error("x-api-key missing or incorrect.")
             abort(401)
 
     return decorated_function
@@ -142,16 +142,16 @@ def update_book_record_by_key(record):
             continuation = True
             search_str += f" {key} = \"{record[key]}\""
     search_str += f" WHERE BookCollectionID = {BookCollectionID} "
-    app.logger.debug(search_str)
+    app_logger.debug(search_str)
     results = []
     with db:
         with db.cursor() as c:
             try:
                 c.execute(search_str.format(**record))
-                app.logger.debug(search_str.format(**record))
+                app_logger.debug(search_str.format(**record))
                 results.append(record)
             except pymysql.Error as e:
-                app.logger.error(e)
+                app_logger.error(e)
                 results.append({"error": str(e)})
         db.commit()
     return results
@@ -189,7 +189,7 @@ def summary_books_read_by_year_utility(target_year=None):
 
     # Prepare response data
     headers = ["year", "pages read", "books read"]
-    logger.debug(query)
+    app_logger.debug(query)
 
     # Execute query and handle exceptions
     try:
@@ -197,7 +197,7 @@ def summary_books_read_by_year_utility(target_year=None):
         results = cursor.fetchall()
         serialized_data = serialize_rows(results, headers)
     except pymysql.Error as e:
-        logger.error(e)
+        app_logger.error(e)
         serialized_data = json.dumps({"error": str(e)})
         results = None
     finally:
@@ -220,13 +220,13 @@ def books_read_utility(target_year=None):
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
     search_str += "ORDER BY b.ReadDate"
     header = table_header + ["ReadDate"]
-    logger.debug(search_str)
+    app_logger.debug(search_str)
     s = None
     c = db.cursor()
     try:
         c.execute(search_str)
     except pymysql.Error as e:
-        logger.error(e)
+        app_logger.error(e)
         rdata = json.dumps({"error": str(e)})
     else:
         s = c.fetchall()
@@ -242,12 +242,12 @@ def tags_search_utility(match_str):
                   f" WHERE b.Label LIKE \"%{match_str}%\" "
                   " ORDER BY b.Label ASC")
     header = ["BookCollectionID", "TagID", "Tag"]
-    logger.debug(search_str)
+    app_logger.debug(search_str)
     c = db.cursor()
     try:
         c.execute(search_str)
     except pymysql.Error as e:
-        logger.error(e)
+        app_logger.error(e)
         rdata = json.dumps({"error": str(e)})
     else:
         s = c.fetchall()
@@ -282,7 +282,7 @@ def daily_page_record_from_db(RecordID):
             # Execute the query to fetch daily page records
             q = ("SELECT a.RecordDate, a.page FROM `daily page records` a "
                  f"WHERE a.RecordID = {RecordID} ORDER BY a.RecordDate ASC")
-            logging.debug(q)
+            app_logger.debug(q)
             cur.execute(q)
             rows = cur.fetchall()
 
@@ -294,7 +294,7 @@ def daily_page_record_from_db(RecordID):
                     day_number = (row[0] - first_record_date).days
                     data.append(list(row) + [day_number])
     except pymysql.MySQLError as e:
-        logger.error(f"Database error: {e}")
+        app_logger.error(f"Database error: {e}")
     finally:
         # Ensure the database connection is closed
         db.close()
@@ -322,12 +322,12 @@ def reading_book_data_from_db(RecordID):
         with db.cursor() as cur:
             # Execute the query to fetch book data
             q = f'SELECT StartDate, LastReadablePage FROM `complete date estimates` WHERE RecordID = {RecordID}'
-            logging.debug(q)
+            app_logger.debug(q)
             cur.execute(q)
             rows = cur.fetchall()
     except pymysql.MySQLError as e:
         # Handle database errors
-        logger.error(f"Database error: {e}")
+        app_logger.error(f"Database error: {e}")
     finally:
         # Ensure the database connection is closed
         db.close()
@@ -344,7 +344,7 @@ def update_reading_book_data(record_id, date_range):
                     "UPDATE `complete date estimates` SET EstimateDate = %s, EstimatedFinishDate = %s WHERE RecordID = %s",
                     (datetime.datetime.now(), date_range[0], record_id))
             except pymysql.Error as e:
-                logger.error(e)
+                app_logger.error(e)
         db.commit()
 
 
@@ -367,8 +367,8 @@ def _estimate_values(x_values, y_values, target_x):
     for i in range(len(x_values) - 1):
         denom = x_values[i + 1] - x_values[i]
         if denom == 0:
-            logging.error(f"Divide by zero error at index {i} -- skipping")
-            logging.debug(f"Did you enter the same page count for two different days?")
+            app_logger.error(f"Divide by zero error at index {i} -- skipping")
+            app_logger.debug(f"Did you enter the same page count for two different days?")
             continue
         else:
             slope = (y_values[i + 1] - y_values[i]) / denom
@@ -376,7 +376,7 @@ def _estimate_values(x_values, y_values, target_x):
         estimated_range[0] = min(estimated_range[0], estimated_y)
         estimated_range[1] = max(estimated_range[1], estimated_y)
 
-    logging.debug(f"Estimated days: {most_likely_y} and estimated range: {estimated_range}")
+    app_logger.debug(f"Estimated days: {most_likely_y} and estimated range: {estimated_range}")
     # expected, shortest, longest in days from first record
     return [int(x) for x in [most_likely_y, estimated_range[0], estimated_range[1]]]
 

@@ -23,6 +23,35 @@ docker run -p 127.0.0.1:80:8083 book-service
 curl -H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" localhost/valid_locations
 ```
 
+## BUILD and DEPLOY SERVICE with Portainer.io
+
+Run a local registry in Portainer.io
+```aiignore
+version: '3.8'
+services:
+  registry:
+    image: registry:2
+    ports:
+      - "5000:5000" # Map host port 5000 to container port 5000
+    volumes:
+      - ./data/registry:/var/lib/registry # Persist registry data
+    restart: always # Ensure the registry restarts if it stops
+```
+Set insecure registry in /etc/docker/daemon.json
+```aiignore
+{
+  "insecure-registries" : ["localhost:5000"]
+}
+```
+
+Push to registry:
+
+```
+docker build . -t localhost:5000/book-service:latest
+docker push localhost:5000/book-service:latest
+curl localhost:5000/v2/_catalog
+```
+
 ## BUILD and DEPLOY SERVICE to K8s
 
 ```angular2html

@@ -16,6 +16,12 @@ p {
     width: 50%;
 }
 
+.columns {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+}
+
 .two-column-row:after {
     content: "";
     display: table;
@@ -134,7 +140,7 @@ input[type=button], input[type=submit], input[type=reset] {
 
 .styled-table tbody tr.summary-row {
     font-weight: bold;
-    border-top: 2px solid var(--green-sheen);
+    border-top: 4px solid var(--slate-gray);
     color: var(--deep-taupe);
 }
 
