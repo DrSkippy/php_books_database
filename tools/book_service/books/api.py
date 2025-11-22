@@ -1,4 +1,4 @@
-__version__ = '0.11.3'
+__version__ = '0.12.0'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -328,86 +328,53 @@ def update_book_note_status():
 
     :return:
     """
-    # records should be a single dictionaries including all fields
-    db = pymysql.connect(**conf)
+    # records should be a single dictionaries including all changed fields
     record = request.get_json()
-    search_str = "UPDATE `book collection` SET "
-    continuation = False
-    for key in record:
-        if key == "BookCollectionID":
-            BookCollectionID = record[key]
-            continue
-        if continuation:
-            search_str += ", "
-        else:
-            continuation = True
-            search_str += f" {key} = \"{record[key]}\""
-    search_str += f" WHERE BookCollectionID = {BookCollectionID} "
-    app.logger.debug(search_str)
-    rdata = []
-    with db:
-        with db.cursor() as c:
-            try:
-                c.execute(search_str.format(**record))
-                app.logger.debug(search_str.format(**record))
-                rdata.append(record)
-            except pymysql.Error as e:
-                app.logger.error(e)
-                rdata.append({"error": str(e)})
-        db.commit()
-    rdata = json.dumps({"update_book": rdata})
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    # test of the record has BookCollectionID and one or both of Note and Recycled fields
+    if not ("BookCollectionID" in record and ("Note" in record or "Recycled" in record)):
+        rdata = json.dumps({"error": "Missing required fields: BookCollectionID, Note OR Recycled"})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=400, headers=response_headers)
+    else:
+        data = update_book_record_by_key(record)
+        rdata = json.dumps({"update_read": data})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/update_book_record', methods=['POST'])
+@require_appkey
+def update_book_record():
+    """
+    Post Payload:
+    {
+      "BookCollectionID": 1606,
+      "Recycled": 0
+    }
+
+    E.g.
+    curl -X POST -H "Content-type: application/json" -d @./example_json_payloads/test_update_book_note_status.json \
+    http://172.17.0.2:5000/update_book_record
+
+    :return:
+    """
+    # records should be a single dictionaries including all changed fields
+    record = request.get_json()
+    # test of the record has BookCollectionID and one of any other field
+    if not ("BookCollectionID" in record and len(record.keys()) > 1):
+        rdata = json.dumps({"error": "Missing required fields: BookCollectionID, and any other field"})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=400, headers=response_headers)
+    else:
+        data = update_book_record_by_key(record)
+        rdata = json.dumps({"update_read": data})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=200, headers=response_headers)
 
 
 ##########################################################################
 # REPORTS
 ##########################################################################
-
-# def _summary_books_read_by_year(target_year=None):
-#     """
-#     Summarizes the number of pages read and books read each year.
-#     Can be filtered for a specific year.
-#
-#     Parameters:
-#     target_year (int, optional): The year for which the summary is required. Defaults to None.
-#
-#     Returns:
-#     tuple: A tuple containing the serialized result, raw data, and header.
-#     """
-#     # Initialize database connection
-#     db = pymysql.connect(**conf)
-#     cursor = db.cursor()
-#
-#     # Building the SQL query string
-#     query = (
-#         "SELECT YEAR(b.ReadDate) as Year, SUM(a.Pages) as Pages, COUNT(a.Pages) as Books "
-#         "FROM `book collection` as a JOIN `books read` as b "
-#         "ON a.BookCollectionID = b.BookCollectionID "
-#         "WHERE b.ReadDate is not NULL "
-#     )
-#     if target_year is not None:
-#         query += f" AND YEAR(b.ReadDate) = {target_year} "
-#     query += "GROUP BY Year ORDER BY Year ASC"
-#
-#     # Prepare response data
-#     headers = ["year", "pages read", "books read"]
-#     app.logger.debug(query)
-#
-#     # Execute query and handle exceptions
-#     try:
-#         cursor.execute(query)
-#         results = cursor.fetchall()
-#         serialized_data = serialize_rows(results, headers)
-#     except pymysql.Error as e:
-#         app.logger.error(e)
-#         serialized_data = json.dumps({"error": str(e)})
-#         results = None
-#     finally:
-#         # Close the database connection
-#         db.close()
-#
-#     return serialized_data, results, headers
 
 
 @app.route('/summary_books_read_by_year')
@@ -416,33 +383,6 @@ def summary_books_read_by_year(target_year=None):
     rdata, _, _ = summary_books_read_by_year_utility(target_year)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
-
-
-# def _books_read(target_year=None):
-#     db = pymysql.connect(**conf)
-#     search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
-#                   "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
-#                   "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
-#                   "b.ReadDate "
-#                   "FROM `book collection` as a JOIN `books read` as b "
-#                   "ON a.BookCollectionID = b.BookCollectionID "
-#                   "WHERE b.ReadDate is not NULL ")
-#     if target_year is not None:
-#         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
-#     search_str += "ORDER BY b.ReadDate"
-#     header = table_header + ["ReadDate"]
-#     app.logger.debug(search_str)
-#     s = None
-#     c = db.cursor()
-#     try:
-#         c.execute(search_str)
-#     except pymysql.Error as e:
-#         app.logger.error(e)
-#         rdata = json.dumps({"error": str(e)})
-#     else:
-#         s = c.fetchall()
-#         rdata = serialize_rows(s, header)
-#     return rdata, s, header
 
 
 @app.route('/books_read')
@@ -614,27 +554,6 @@ def update_tag_value(current, updated):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-# def _tags_search(match_str):
-#     match_str = match_str.lower().strip()
-#     db = pymysql.connect(**conf)
-#     search_str = ("SELECT a.BookID, b.TagID, b.Label as Tag"
-#                   " FROM `books tags` a JOIN `tag labels` b ON a.TagID=b.TagID"
-#                   f" WHERE b.Label LIKE \"%{match_str}%\" "
-#                   " ORDER BY b.Label ASC")
-#     header = ["BookCollectionID", "TagID", "Tag"]
-#     app.logger.debug(search_str)
-#     c = db.cursor()
-#     try:
-#         c.execute(search_str)
-#     except pymysql.Error as e:
-#         app.logger.error(e)
-#         rdata = json.dumps({"error": str(e)})
-#     else:
-#         s = c.fetchall()
-#         rdata = serialize_rows(s, header)
-#     return rdata, s, header
-
-
 @app.route('/tags_search/<match_str>')
 def tags_search(match_str):
     rdata, s, header = tags_search_utility(match_str)
@@ -676,28 +595,6 @@ def date_page_records(record_id=None):
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
-
-# @app.route('/book_id_from_record_id/<record_id>')
-# def book_id_from_record_id(record_id=None):
-#     db = pymysql.connect(**conf)
-#     rdata = {}
-#     q = f"SELECT BookCollectionID FROM `complete date estimates` WHERE RecordID = {record_id}"
-#     with db:
-#         with db.cursor() as c:
-#             try:
-#                 c.execute(q)
-#                 res = c.fetchall()
-#             except pymysql.Error as e:
-#                 rdata["error"] = str(e)
-#                 app.logger.error(e)
-#         db.commit()
-#     app.logger.debug(res)
-#     if len(res) > 0:
-#         rdata["BookCollectionID"] = res[0][0]
-#     rdata = json.dumps(rdata)
-#     response_headers = resp_header(rdata)
-#     return Response(response=rdata, status=200, headers=response_headers)
-#
 
 @app.route('/record_set/<book_id>')
 def record_set(book_id=None):

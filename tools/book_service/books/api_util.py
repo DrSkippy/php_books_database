@@ -103,10 +103,58 @@ def serialize_rows(cursor, header=None):
 
 def resp_header(rdata):
     response_header = [
-        ('Content-type', 'application/json'),
+        ('Content-type', 'application/json; charset=utf-8'),
         ('Content-Length', str(len(rdata)))
     ]
     return response_header
+
+
+##########################################################################
+# UPDATE BOOKS
+##########################################################################
+
+def update_book_record_by_key(record):
+    """
+    Updates a book record in the database using the provided dictionary of record
+    values and the corresponding `BookCollectionID`. Key-value pairs in the record
+    represent the columns to update and their new values. If an error occurs while
+    executing the SQL operation, an error dictionary will be returned.
+
+    :param record: A dictionary containing the record information for the book to
+        be updated. The keys represent the column names, and the values represent
+        the new data to be inserted for those columns.
+    :type record: dict
+    :return: A list containing the result of the update operation. If successful,
+        the `record` dictionary is returned; otherwise, an error dictionary is
+        returned.
+    :rtype: list
+    """
+    db = pymysql.connect(**conf)
+    search_str = "UPDATE `book collection` SET "
+    continuation = False
+    for key in record:
+        if key == "BookCollectionID":
+            BookCollectionID = record[key]
+            continue
+        if continuation:
+            search_str += ", "
+        else:
+            continuation = True
+            search_str += f" {key} = \"{record[key]}\""
+    search_str += f" WHERE BookCollectionID = {BookCollectionID} "
+    app.logger.debug(search_str)
+    results = []
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(search_str.format(**record))
+                app.logger.debug(search_str.format(**record))
+                results.append(record)
+            except pymysql.Error as e:
+                app.logger.error(e)
+                results.append({"error": str(e)})
+        db.commit()
+    return results
 
 
 ##########################################################################

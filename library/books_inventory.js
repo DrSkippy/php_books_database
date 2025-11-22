@@ -44,7 +44,8 @@ function changeCheckStatus(cb, bookCollectionID) {
     console.log(params);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+    xhr.setRequestHeader('x-api-key', apiKey);
     xhr.onreadystatechange = function () {
         console.log(xhr.responseText);
     };
