@@ -1,7 +1,9 @@
 $(document).ready(function () {
     topnavbar();
+    /*
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
+    */
     var url = baseApiUrl + "/books_search?Recycled=0&Location=Main";
     $.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
     var idArray;
