@@ -18,9 +18,8 @@ $(document).ready(function () {
             var obj = data['data'];
             for (var i = 0; i < obj.length; i++) {
                 var tr = "<tr class='summary-row'>" +
-                    "<td>" + obj[i][0] + "</td><td></td><td></td><td></td>" +
-                    "<td>" + obj[i][1] + "</td>" +
-                    "<td>" + obj[i][2] + "</td></tr>";
+                    "<td colspan='3'>Year: " + obj[i][0] +
+                    "<td colspan='3'>Pages: " + obj[i][1] + " &nbsp;&nbsp;(" + obj[i][2] + " books)</td></tr>";
                 $("#mytable-sorted").append(tr);
             }
         });
@@ -32,7 +31,7 @@ $(document).ready(function () {
             }));
             for (var i = 0; i < obj.length; i++) {
                 var tr = "<tr>" +
-                    "<td><button onclick=\"setval(" + obj[i][0] + ")\">" + obj[i][0].toString() + "</button></td>" +
+                    "<td><button class='book-id-button' onclick=\"setval(" + obj[i][0] + ")\">" + obj[i][0].toString() + "</button></td>" +
                     "<td>" + obj[i][1] + "</td>" +
                     "<td>" + obj[i][2] + "</td>" +
                     "<td>" + obj[i][3] + "</td>" +

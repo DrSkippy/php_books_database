@@ -57,7 +57,7 @@ function setval(bcid) {
     $.getJSON(urlTag, function (data) {
         var obj = data['tag_list'];
         var trTwo = "<tr id='replace-me-two'>" +
-            "<td>Tags:</td><td colspan=6>" + tag_links_list(obj) + "</td>" +
+            "<td>Tags:</td><td class='tags' colspan=6>" + tag_links_list(obj) + "</td>" +
             "   <td colspan=6><form name=\"add_tag\" action=\"" + baseApiPath + 'js_reports/add_tags.html\">' +
             "   <label for=\"lname\">Add Tag List:&nbsp; </label>" +
             "   <input type=\"hidden\" id=\"book_id\" name=\"book_id\" value=\"" + data["BookID"] + "\">" +
@@ -70,8 +70,8 @@ function setval(bcid) {
         var obj = data['data'];
         console.log(obj);
         var trThree = "<tr id='replace-me-three'>" +
-            '<td>Read:  <a href=\"' + baseApiPath + 'js_reports/add_read.html?book_id=' +
-            bookCollectionID + "\">Add</a></td>" +
+            '<td><a href=\"' + baseApiPath + 'js_reports/add_read.html?book_id=' +
+            bookCollectionID + "\">Add</a> Read:</td>" +
             "<td colspan=12>" +
             "<table id='readtable' class=\"styled-inner-table\">\n" +
             "<thead>\n" +
@@ -119,6 +119,8 @@ function setval(bcid) {
         }
         trFour += "</tbody></table></tr>";
         $("#replace-me-four").replaceWith(trFour);
+        $('html, body').animate({
+            scrollTop: $(document).height()},'slow'); // 'slow' can be replaced with a duration in milliseconds, e.g., 1000
     });
 }
 

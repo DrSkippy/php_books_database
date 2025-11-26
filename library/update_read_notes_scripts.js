@@ -6,7 +6,6 @@ var readReadNote = "Read Note";
 var idArrayIndex = 0;
 var idArraySubIndex = 0;
 var subArraySize = 0;
-var idSubInc = 0;
 
 $(document).ready(function () {
     topnavbar();
@@ -15,18 +14,18 @@ $(document).ready(function () {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     // ...&idArray=1604&idArray=1605&idArray=1696
-    idArray = urlParams.getAll("idArray");
+    idArray = urlParams.getAll("idArray")[0].split(",");
     console.log(idArray);
     populateFields();
 });
 
 function populateFields() {
     bookCollectionID = idArray[idArrayIndex];
-    var urlBook = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
     var urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
-
     $.getJSON(urlRead, function (data) {
         var obj = data['data'];
+        // possibly more than one read record per book
+        // use idArraySubIndex
         subArraySize = obj.length;
         if (idArraySubIndex < 0) {
             // last element in the subArray
@@ -37,6 +36,7 @@ function populateFields() {
         readReadNote = obj[idArraySubIndex][2];
     });
 
+    var urlBook = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
     $.getJSON(urlBook, function (data) {
         var obj = data['data'];
         bookTitle = obj[0][1];
@@ -87,6 +87,8 @@ function navigate(direction) {
         }
     }
     populateFields();
+    console.log(idArrayIndex);
+    console.log(idArraySubIndex);
 }
 
 function update_note() {

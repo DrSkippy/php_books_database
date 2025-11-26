@@ -11,13 +11,24 @@
 <body>
 <div id="insertTopNavBar"></div>
 <div class=columns>
-    <h1> Compare Yearly Progress</h1>
-    <H1> Compare to Previous Year End Values</H1>
-<script type="text/Javascript">
-    topnavbar();
-    document.write("<img src=\"" + baseApiUrl + "/image/year_progress_comparison.png\" width='800' height='800'>");
-    document.write("<img src=\"" + baseApiUrl + "/image/all_years.png\" width='800'>");
-</script>
+    <div class="column1">
+        <h1> Compare Yearly Progress</h1>
+        <script type="text/Javascript">
+            topnavbar();
+            document.write("<img src=\"" + baseApiUrl + "/image/year_progress_comparison.png\" width='800' height='800'>");
+        </script>
+        <p>The figure shows the yearly reading progression in pages for the past dozen years. This year is the bold line stopping
+            at the date of the last book read. Notice the occasional reading lull in the late summer months.</p>
+    </div>
+    <div>
+        <H1> Compare to Previous Year End Values</H1>
+        <script type="text/Javascript">
+            document.write("<img src=\"" + baseApiUrl + "/image/all_years.png\" width='800'>");
+        </script>
+        <p>The figures show the year-end reading totals in pages for all year on record. The first histogram is a plot of years
+            with books read in range shown. The other plots show ranking and yearly pages. The current year acheivement
+            is shown by the vertical red line.</p>
+    </div>
 </div>
 </body>
 </html>
