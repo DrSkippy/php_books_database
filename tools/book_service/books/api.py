@@ -1,4 +1,4 @@
-__version__ = '0.13.0'
+__version__ = '0.13.1'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -171,8 +171,9 @@ def add_books():
     :return:
     """
     # records should be a list of dictionaries including all fields
-    records = request.get_json()
     db = pymysql.connect(**conf)
+    records = request.get_json()
+    records["Note"] = db.escape(records["Note"])
     search_str = ("INSERT INTO `book collection` "
                   "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
                   "Location, Note, Recycled) "
@@ -221,6 +222,7 @@ def add_read_dates():
     # records should be a list of dictionaries including all fields
     db = pymysql.connect(**conf)
     records = request.get_json()
+    records["ReadNote"] = db.escape(records["ReadNote"])
     search_str = 'INSERT INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES '
     search_str += '({BookCollectionID}, "{ReadDate}", "{ReadNote}")'
     res = {"update_read_dates": [], "error": []}
