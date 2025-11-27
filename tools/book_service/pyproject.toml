@@ -10,12 +10,12 @@ Flask = "^2.0.3"
 requests = "^2.27.1"
 PyMySQL = "^1.0.2"
 uWSGI = "^2.0.20"
-pandas = "^1.4.2"
 matplotlib = "^3.5.2"
 Flask-Cors = "^3.0.10"
 cryptography = "^41.0.5"
 pytest = "^8.0.0"
 pytest-cov = "^4.1.0"
+pandas = "^2.3.3"
 
 [tool.poetry.dev-dependencies]
 
