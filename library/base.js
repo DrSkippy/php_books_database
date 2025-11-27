@@ -14,7 +14,7 @@ $.ajaxSetup({
 });
 
 function topnavbar() {
-    var urlVersion = baseApiUrl + "/configuration";
+    const urlVersion = baseApiUrl + "/configuration";
     console.log(urlVersion);
     $.getJSON(urlVersion, function (data) {
         var obj = data['version'];
@@ -32,10 +32,10 @@ function topnavbar() {
 
 function setval(bcid) {
     bookCollectionID = bcid;
-    var urlId = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
-    var urlTag = baseApiUrl + "/tags/" + bookCollectionID;
-    var urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
-    var urlListRecords = baseApiUrl + "/record_set/" + bookCollectionID;
+    const urlId = baseApiUrl + "/books_search?BookCollectionID=" + bookCollectionID;
+    const urlTag = baseApiUrl + "/tags/" + bookCollectionID;
+    const urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
+    const urlListRecords = baseApiUrl + "/record_set/" + bookCollectionID;
     $.getJSON(urlId, function (data) {
         var obj = data['data'];
         var trOne = "<tr id='replace-me-one'>" +
@@ -56,7 +56,7 @@ function setval(bcid) {
     });
     $.getJSON(urlTag, function (data) {
         var obj = data['tag_list'];
-        var trTwo = "<tr id='replace-me-two'>" +
+        const trTwo = "<tr id='replace-me-two'>" +
             "<td>Tags:</td><td class='tags' colspan=6>" + tag_links_list(obj) + "</td>" +
             "   <td colspan=6><form name=\"add_tag\" action=\"" + baseApiPath + 'js_reports/add_tags.html\">' +
             "   <label for=\"lname\">Add Tag List:&nbsp; </label>" +
@@ -69,7 +69,7 @@ function setval(bcid) {
     $.getJSON(urlRead, function (data) {
         var obj = data['data'];
         console.log(obj);
-        var trThree = "<tr id='replace-me-three'>" +
+        const trThree = "<tr id='replace-me-three'>" +
             '<td><a href=\"' + baseApiPath + 'js_reports/add_read.html?book_id=' +
             bookCollectionID + "\">Add</a> Read:</td>" +
             "<td colspan=12>" +
@@ -134,17 +134,17 @@ function tag_links_list(tags_list) {
 }
 
 function createDetailTableRows() {
-    var trOne = "<tr id='replace-me-one'>" +
+    const trOne = "<tr id='replace-me-one'>" +
         "<td/><td>(select a record)</td><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/>" +
         "</tr>";
     $("#sumtable").append(trOne);
-    var trTwo = "<tr id='replace-me-two'>" +
+    const trTwo = "<tr id='replace-me-two'>" +
         "<td>Tags:</td><td colspan=12></td></tr>";
     $("#sumtable").append(trTwo);
-    var trThree = "<tr id='replace-me-three'>" +
+    const trThree = "<tr id='replace-me-three'>" +
         "<td>Read:</td><td colspan=12></td></tr>";
     $("#sumtable").append(trThree);
-    var trFour = "<tr id='replace-me-four'>" +
+    const trFour = "<tr id='replace-me-four'>" +
         "<td>Reading Record:</td><td colspan=12></td></tr>";
     $("#sumtable").append(trFour);
 }

@@ -1,8 +1,8 @@
 $(document).ready(function () {
     topnavbar();
-    var url1 = baseApiUrl + "/summary_books_read_by_year";
+    const url1 = baseApiUrl + "/summary_books_read_by_year";
     $.getJSON(url1, function (data) {
-        var obj = data['data'];
+        const obj = data['data'];
         for (var i = 0; i < obj.length; i++) {
             var url = new URL(baseApiPath + 'js_reports/books_read_by_year.html', window.location);
             url.searchParams.append("year", obj[i][0]);
@@ -13,9 +13,9 @@ $(document).ready(function () {
             $("#mytable-sorted").append(tr);
         }
     });
-    var url2 = baseApiUrl + "/recent";
+    const url2 = baseApiUrl + "/recent";
     $.getJSON(url2, function (data) {
-        var obj = data['data'];
+        const obj = data['data'];
         for (var i = 0; i < obj.length; i++) {
             var url = new URL(baseApiPath + 'js_reports/books_detail.html?author=&title=' +
                 obj[i][2].toString().substring(0,40) + '&tags=', window.location);
