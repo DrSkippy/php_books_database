@@ -695,6 +695,7 @@ def year_progress_comparison(window=15):
     img = BytesIO()
     _, s, h = books_read_utility()
     df1 = pd.DataFrame(s, columns=h)
+    df1["read_date"] = pd.to_datetime(df1["ReadDate"])
     df1 = df1.set_index("ReadDate")
     df1.index = pd.to_datetime(df1.index)
     ds_pages = df1.groupby(df1.index.to_period('Y'))["Pages"].cumsum()
