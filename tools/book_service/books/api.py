@@ -292,6 +292,7 @@ def update_edit_read_note():
     # records should be a single dictionaries including all fields
     db = pymysql.connect(**conf)
     record = request.get_json()
+    record["ReadNote"] = db.escape(record["ReadNote"])
     search_str = "UPDATE `books read` SET "
     search_str += "ReadNote=\"{ReadNote}\" "
     search_str += "WHERE BookCollectionID = \"{BookCollectionID}\" AND ReadDate = \"{ReadDate}\";"
