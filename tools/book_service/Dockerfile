@@ -18,7 +18,7 @@ RUN poetry config virtualenvs.create false
 
 ENV PYTHONPATH $APP
 COPY ./pyproject.toml ./poetry.lock $APP/
-RUN poetry install --no-dev
+RUN poetry install --no-root --without dev
 
 COPY ./books $APP/
 COPY ./config/* $APP/config/
