@@ -21,7 +21,7 @@ $(document).ready(function () {
 
 function populateFields() {
     bookCollectionID = idArray[idArrayIndex];
-    var urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
+    const urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
     $.getJSON(urlRead, function (data) {
         var obj = data['data'];
         // possibly more than one read record per book
@@ -96,20 +96,20 @@ function update_note() {
     readDate = document.getElementById("bookReadDateValue").value
     bookNote = document.getElementById("bookNoteValue").value
 
-    var dataRead = JSON.stringify({
+    const dataRead = JSON.stringify({
         "BookCollectionID": bookCollectionID,
         "ReadDate": readDate,
         "ReadNote": readNote
     });
-    var dataBook = JSON.stringify({
+    const dataBook = JSON.stringify({
         "BookCollectionID": bookCollectionID,
         "Note": bookNote
     });
     console.log(dataRead);
     console.log(dataBook);
 
-    var urlBook = baseApiUrl + "/update_book_note_status";
-    var urlRead = baseApiUrl + "/update_edit_read_note";
+    const urlBook = baseApiUrl + "/update_book_note_status";
+    const urlRead = baseApiUrl + "/update_edit_read_note";
 
     // Post the data
     xhr = new XMLHttpRequest();
@@ -123,4 +123,5 @@ function update_note() {
     xhr.setRequestHeader('x-api-key', apiKey);
     xhr.send(dataRead);
     navigate(1);
+    console.log(xhr.response);
 }
