@@ -5,7 +5,7 @@ description = ""
 authors = ["Scott Hendrickson <scott@drskippy.net>"]
 
 [tool.poetry.dependencies]
-python = "3.8.13"
+python = "3.9.15"
 Flask = "^2.0.3"
 requests = "^2.27.1"
 PyMySQL = "^1.0.2"

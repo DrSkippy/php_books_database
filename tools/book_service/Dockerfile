@@ -1,5 +1,5 @@
 
-FROM python:3.8.13
+FROM python:3.9.15
 RUN apt update && apt upgrade -y
 
 ENV APP /books
@@ -27,6 +27,4 @@ COPY ./config/* $APP/config/
 #ARG MY_SERVICE_NAME
 #ENV ENV_MY_SERVICE_NAME=$MY_SERVICE_NAME
 
-#ENTRYPOINT poetry run python api.py
-#ENTRYPOINT uwsgi -s /tmp/yourapplication.sock --manage-script-name --mount /books=api
 ENTRYPOINT poetry run uwsgi --ini api.ini
