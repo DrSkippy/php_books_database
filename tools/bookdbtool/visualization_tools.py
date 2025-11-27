@@ -3,11 +3,14 @@ import matplotlib.pyplot as plt
 
 
 def running_total_comparison(df1, window=15):
+    df1["read_date"] = pd.to_datetime(df1["ReadDate"])
     df1 = df1.set_index("ReadDate")
     df1.index = pd.to_datetime(df1.index)
-    df1 = df1.groupby(df1.index.to_period('y')).cumsum().reset_index()
-    df1["Day"] = df1.ReadDate.apply(lambda x: x.dayofyear)
-    df1["Year"] = df1.ReadDate.apply(lambda x: x.year)
+    ds_pages = df1.groupby(df1.index.to_period('Y'))["Pages"].cumsum()
+    ds_day = df1.read_date.apply(lambda x: x.dayofyear)
+    ds_year = df1.read_date.apply(lambda x: x.year)
+    df1 = pd.concat([ds_pages, ds_day, ds_year], axis=1)
+    df1.columns = ["Pages", "Day", "Year"]
     fig_size = [12, 12]
     xlim = [0, 365]
     ylim = [0, max(df1.Pages)]

@@ -697,11 +697,11 @@ def year_progress_comparison(window=15):
     df1 = pd.DataFrame(s, columns=h)
     df1 = df1.set_index("ReadDate")
     df1.index = pd.to_datetime(df1.index)
-    df1 = df1.groupby(df1.index.to_period('Y'))['Pages'].apply(lambda x: x.cumsum())
-    #df1 = df1.reset_index()
-    df1["Day"] = df1.ReadDate.apply(lambda x: x.dayofyear)
-    df1["Year"] = df1.ReadDate.apply(lambda x: x.year)
-    app.logger.debug(df1)
+    ds_pages = df1.groupby(df1.index.to_period('Y'))["Pages"].cumsum()
+    ds_day = df1.read_date.apply(lambda x: x.dayofyear)
+    ds_year = df1.read_date.apply(lambda x: x.year)
+    df1 = pd.concat([ds_pages, ds_day, ds_year], axis=1)
+    df1.columns = ["Pages", "Day", "Year"]
     fig_size = [8, 8]
     xlim = [0, 365]
     ylim = [0, max(df1.Pages)]
