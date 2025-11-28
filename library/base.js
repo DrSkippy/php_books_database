@@ -55,7 +55,7 @@ function setval(bcid) {
         $("#replace-me-one").replaceWith(trOne);
     });
     $.getJSON(urlTag, function (data) {
-        var obj = data['tag_list'];
+        const obj = data['tag_list'];
         const trTwo = "<tr id='replace-me-two'>" +
             "<td>Tags:</td><td class='tags' colspan=6>" + tag_links_list(obj) + "</td>" +
             "   <td colspan=6><form name=\"add_tag\" action=\"" + baseApiPath + 'js_reports/add_tags.html\">' +
@@ -67,9 +67,9 @@ function setval(bcid) {
         $("#replace-me-two").replaceWith(trTwo);
     });
     $.getJSON(urlRead, function (data) {
-        var obj = data['data'];
+        const obj = data['data'];
         console.log(obj);
-        const trThree = "<tr id='replace-me-three'>" +
+        let trThree = "<tr id='replace-me-three'>" +
             '<td><a href=\"' + baseApiPath + 'js_reports/add_read.html?book_id=' +
             bookCollectionID + "\">Add</a> Read:</td>" +
             "<td colspan=12>" +
@@ -89,11 +89,11 @@ function setval(bcid) {
         $("#replace-me-three").replaceWith(trThree);
     });
     $.getJSON(urlListRecords, function (data) {
-        var obj = data['record_set'];
-        var recordList = obj["RecordID"];
-        var estList = obj["Estimate"];
+        const obj = data['record_set'];
+        const recordList = obj["RecordID"];
+        const estList = obj["Estimate"];
         console.log(recordList);
-        var trFour = "<tr id='replace-me-four'>" +
+        let trFour = "<tr id='replace-me-four'>" +
             '<td><a href=\"' + baseApiPath + 'js_reports/add_book_estimate.html?book_id=' +
             bookCollectionID + "\">Add</a> Book Estimate</td>" +
             "<td colspan=12>" +
@@ -125,7 +125,7 @@ function setval(bcid) {
 }
 
 function tag_links_list(tags_list) {
-    var tag_links = "";
+    let tag_links = "";
     for (var i = 0; i < tags_list.length; i++) {
         tag_links += '<a href=\"' + baseApiPath + 'js_reports/books_detail.html?tags=' +
             tags_list[i] + "\">"+tags_list[i]+"</a>, ";

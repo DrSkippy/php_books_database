@@ -82,23 +82,60 @@ def serialize_rows(cursor, header=None):
     :param header: list of strings describing data to keep
     :return: json payload
     """
-    result = {"header": header, "data": []}
-    result_rows = []
-    for row in cursor:
-        _row = []
-        if len(header) != len(row):
-            print("mismatched header to data provided")
-        for d in row:
-            if isinstance(d, Decimal):
-                _row.append(float(d))
-            elif isinstance(d, datetime.datetime) or isinstance(d, datetime.date):
-                _row.append(d.strftime("%Y-%m-%d"))
-            else:
-                _row.append(d)
-        result_rows.append(_row)
-    result["data"] = result_rows
+    result = result_dict(cursor, header)
     rdata = json.dumps(result)
     return rdata
+
+
+def result_dict(cursor, header):
+    """
+    Converts the results of a database query into a dictionary format with a header and data.
+
+    This function processes the rows returned by a database cursor and organizes them into a
+    dictionary with two keys: 'header' and 'data'. The 'header' key contains the provided list
+    of column names, and the 'data' key contains the rows of data, with each value formatted
+    appropriately based on its type.
+
+    Parameters:
+    cursor (iterable): The database cursor containing the query results.
+    header (list): A list of strings representing the column names for the data.
+
+    Returns:
+    dict: A dictionary with the following structure:
+        {
+            "header": [header],
+            "data": [
+                [row1_values],
+                [row2_values],
+                ...
+            ]
+        }
+        - Decimal values are converted to floats.
+        - datetime.date and datetime.datetime values are formatted as "YYYY-MM-DD".
+        - Other values are included as-is.
+
+    Notes:
+    - If the length of the header does not match the length of a row, a warning message
+      is printed to the console.
+    """
+    result = {"header": header, "data": []}  # Initialize the result dictionary
+    result_rows = []  # List to store processed rows
+
+    for row in cursor:  # Iterate over each row in the cursor
+        _row = []  # Temporary list to store processed values for the current row
+        if len(header) != len(row):  # Check if the header length matches the row length
+            app_logger.debug("mismatched header to data provided")
+        for d in row:  # Process each value in the row
+            if isinstance(d, Decimal):  # Convert Decimal values to float
+                _row.append(float(d))
+            elif isinstance(d, datetime.datetime) or isinstance(d, datetime.date):  # Format dates
+                _row.append(d.strftime("%Y-%m-%d"))
+            else:  # Include other values as-is
+                _row.append(d)
+        result_rows.append(_row)  # Add the processed row to the result rows list
+
+    result["data"] = result_rows  # Add the processed rows to the result dictionary
+    return result  # Return the result dictionary
 
 
 def resp_header(rdata):
@@ -107,6 +144,129 @@ def resp_header(rdata):
         ('Content-Length', str(len(rdata)))
     ]
     return response_header
+
+
+##########################################################################
+# BOOKS WINDOW
+##########################################################################
+
+
+def get_book_ids(book_id, window):
+    db = pymysql.connect(**conf)
+    top_half_window = int((window + 1) / 2)
+    bottom_half_window = window - top_half_window
+
+    query_str = ("SELECT a.BookCollectionID "
+                 "FROM `book collection` as a "
+                 "WHERE a.BookCollectionID {ineq} {book_id} "
+                 "ORDER BY a.BookCollectionID {order} "
+                 "LIMIT {limit};")
+    # get the bottom half first - window leading up to book_id
+    q = query_str.format(ineq="<=", book_id=book_id, order="DESC", limit=bottom_half_window)
+    app_logger.debug(q)
+    c = db.cursor()
+    book_id_list = []
+    try:
+        c.execute(q)
+    except pymysql.Error as e:
+        app_logger.error(e)
+    else:
+        s = c.fetchall()
+        for row in s:
+            book_id_list.append(row[0])
+        book_id_list.reverse()
+    if len(book_id_list) < bottom_half_window:
+        # Make a ring of ideas - get some from the end of book records
+        deficit = bottom_half_window - len(book_id_list)
+        q = query_str.format(ineq=">", book_id=book_id, order="DESC", limit=deficit)
+        app_logger.debug(q)
+        try:
+            c.execute(q)
+        except pymysql.Error as e:
+            app_logger.error(e)
+        else:
+            s = c.fetchall()
+            for row in s:
+                book_id_list.insert(0, row[0])
+    # now get the top half - window after book_id
+    q = query_str.format(ineq=">", book_id=book_id, order="ASC", limit=top_half_window)
+    app_logger.debug(q)
+    try:
+        c.execute(q)
+    except pymysql.Error as e:
+        app_logger.error(e)
+    else:
+        s = c.fetchall()
+        for row in s:
+            book_id_list.append(row[0])
+    if len(book_id_list) < window:
+        # Make a ring of ideas - get some from the start of book records
+        deficit = window - len(book_id_list)
+        q = query_str.format(ineq="<=", book_id=book_id, order="ASC", limit=deficit)
+        app_logger.debug(q)
+        try:
+            c.execute(q)
+        except pymysql.Error as e:
+            app_logger.error(e)
+        else:
+            s = c.fetchall()
+            for row in s:
+                book_id_list.append(row[0])
+    return book_id_list
+
+
+def complete_book_record(book_id):
+    # process any query parameters
+    db = pymysql.connect(**conf)
+    q_book = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
+              "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
+              "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13 "
+              "FROM `book collection` as a "
+              f"WHERE a.BookCollectionID = {book_id};")
+    h_book = table_header
+    q_read = ("SELECT b.ReadDate, b.ReadNote "
+              "FROM `books read` as b "
+              f"WHERE b.BookCollectionID = {book_id};")
+    h_read = ["DateRead", "ReadNote"]
+    q_tags = ("SELECT b.Label "
+              "FROM `books tags` as a JOIN `tag labels` as b "
+              "ON b.TagID = a.TagID "
+              f"WHERE a.BookID = {book_id};")
+    h_tags = ["Tag"]
+    app_logger.debug(q_book)
+    app_logger.debug(q_read)
+    app_logger.debug(q_tags)
+
+    result_data = {"book": None, "reads": None, "tags": None, "error": []}
+    c = db.cursor()
+    try:
+        c.execute(q_book)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        result_data["error"].append(str(e))
+    else:
+        s = c.fetchall()
+        result_data["book"] = result_dict(s, h_book)
+    try:
+        c.execute(q_read)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        result_data["error"].append(str(e))
+    else:
+        s = c.fetchall()
+        result_data["reads"] = result_dict(s, h_read)
+    try:
+        c.execute(q_tags)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        result_data["error"].append(str(e))
+    else:
+        s = c.fetchall()
+        result_data["tags"] = result_dict([[x[0] for x in s]], h_tags)
+
+    if len(result_data["error"]) == 0:
+        del result_data["error"]
+    return result_data
 
 
 ##########################################################################
@@ -218,7 +378,7 @@ def books_read_utility(target_year=None):
                   "WHERE b.ReadDate is not NULL ")
     if target_year is not None:
         search_str += f" AND YEAR(b.ReadDate) = {target_year} "
-    search_str += "ORDER BY b.ReadDate"
+    search_str += "ORDER BY b.ReadDate, a.BookCollectionID ASC"
     header = table_header + ["ReadDate"]
     app_logger.debug(search_str)
     s = None

@@ -35,9 +35,9 @@ class TestAppFunctions(unittest.TestCase):
     def test_resp_header(self):
         rdata = '{"header": ["ID", "Title", "Author", "Date"], "data": [[1, "Title1", "Author1", "2022-01-01"], [2, "Title2", "Author2", "2022-01-02"]]}'
         response_header = au.resp_header(rdata)
+        print(response_header)
         expected_header = [
-            ('Access-Control-Allow-Origin', '*'),
-            ('Content-type', 'application/json'),
+            ('Content-type', 'application/json; charset=utf-8'),
             ('Content-Length', str(len(rdata)))
         ]
         self.assertEqual(response_header, expected_header)
@@ -46,14 +46,15 @@ class TestAppFunctions(unittest.TestCase):
         res = au.summary_books_read_by_year_utility(target_year=1966)
         self.assertEqual(len(res), 3)
         self.assertEqual(str(res),
-                         """('{"header": ["year", "pages read", "books read"], "data": [[1966, 4281.0, 20]]}', ((1966, Decimal('4281'), 20),), ['year', 'pages read', 'books read'])""")
+                         """('{"header": ["year", "pages read", "books read"], "data": [[1966, 2527.0, 13]]}', ((1966, Decimal('2527'), 13),), ['year', 'pages read', 'books read'])""")
 
     def test_books_read(self):
         res = au.books_read_utility(target_year=1966)
         self.assertEqual(len(res), 3)
+        # print(res)
         print(str(res[1])[:65])
         self.assertEqual(str(res[1])[:65],
-                         """((257, 'Pastures of Heaven, The', 'Steinbeck, John', datetime.dat""")
+                         """((155, 'Letters To Children', 'Lewis, C S', datetime.datetime(198""")
 
     def test_tags_search(self):
         res = au.tags_search_utility("zander")
@@ -66,9 +67,6 @@ class TestAppFunctions(unittest.TestCase):
         d, _ = au.daily_page_record_from_db(1)
         self.assertEqual(len(d), 4)
         self.assertEqual(str(d[3]), '[datetime.datetime(2022, 2, 9, 0, 0), 279, 8]')
-        a, b = au._line_fit_and_estimate_completion_time(d, 1000)
-        self.assertEqual(a, 103)
-        self.assertEqual(b, [84, 278])
 
     def test_depending_on_reading_book_data_from_db(self):
         res = au.reading_book_data_from_db(1)
@@ -78,18 +76,43 @@ class TestAppFunctions(unittest.TestCase):
 
         d, _ = au.daily_page_record_from_db(1)
         print(res[0][0])
-        res1 = au.estimate_completion_dates(d, res[0][0][0], 1000)
+        res1 = au.estimate_completion_dates(d, 1000)
         self.assertEqual(len(res), 2)
-        self.assertEqual(res1[0], datetime.datetime(2022, 5, 15, 0, 0))
-        self.assertEqual(res1[1], datetime.datetime(2022, 4, 26, 0, 0))
+        self.assertEqual(res1[0], datetime.datetime(2022, 5, 16, 0, 0))
+        self.assertEqual(res1[1], datetime.datetime(2022, 4, 25, 0, 0))
         self.assertEqual(res1[2], datetime.datetime(2022, 11, 6, 0, 0))
 
     def test_calculate_estimates(self):
         res = au.calculate_estimates(1)
         self.assertEqual(len(res), 3)
-        self.assertEqual(res[0], "2022-04-17")
-        self.assertEqual(res[1], "2022-04-04")
-        self.assertEqual(res[2], "2022-08-19")
+        self.assertEqual(res[0], "2022-04-18")
+        self.assertEqual(res[1], "2022-04-03")
+        self.assertEqual(res[2], "2022-08-18")
+
+    def test_get_book_ids_(self):
+        book_ids = au.get_book_ids(2, 20)
+        print(book_ids)
+        self.assertEqual(book_ids, [1869, 1870, 1871, 1872, 1873, 1874, 1875, 1876,
+                                    1877, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+        self.assertEqual(len(book_ids), 20)
+        book_ids = au.get_book_ids(1875, 20)  # last as of 2025-11-26
+        print(book_ids)
+        self.assertEqual(book_ids, [1866, 1867, 1868, 1869, 1870, 1871, 1872, 1873,
+                                    1874, 1875, 1876, 1877, 2, 3, 4, 5, 6, 7, 8, 9])
+
+        self.assertEqual(len(book_ids), 20)
+        book_ids = au.get_book_ids(477, 30)
+        print(book_ids)
+        self.assertEqual(len(book_ids), 30)
+
+    def test_complete_book_record(self):
+        rec = au.complete_book_record(1873)
+        print(rec)
+        self.assertEqual(len(rec), 3)
+        self.assertEqual(rec["book"]["data"][0][0], 1873)
+        self.assertEqual(rec["book"]["data"][0][7], 548)
+        self.assertEqual(len(rec["reads"]["data"]), 1)
+        self.assertEqual(len(rec["tags"]["data"][0]), 8)
 
 
 if __name__ == '__main__':

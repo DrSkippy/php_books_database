@@ -23,8 +23,4 @@ RUN poetry install --no-root --without dev
 COPY ./books $APP/
 COPY ./config/* $APP/config/
 
-# Set an env variable from the build arg that is substituted at runtime
-#ARG MY_SERVICE_NAME
-#ENV ENV_MY_SERVICE_NAME=$MY_SERVICE_NAME
-
 ENTRYPOINT poetry run uwsgi --ini api.ini

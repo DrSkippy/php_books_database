@@ -1,4 +1,4 @@
-__version__ = '0.13.1'
+__version__ = '0.13.2'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -173,7 +173,6 @@ def add_books():
     # records should be a list of dictionaries including all fields
     db = pymysql.connect(**conf)
     records = request.get_json()
-    records["Note"] = db.escape(records["Note"])
     search_str = ("INSERT INTO `book collection` "
                   "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
                   "Location, Note, Recycled) "
@@ -187,6 +186,7 @@ def add_books():
         with db.cursor() as c:
             for record in records:
                 try:
+                    record["Note"] = db.escape(record["Note"])
                     if len(record["CopyrightDate"].strip()) == 4:
                         record["CopyrightDate"] += "-01-01 00:00:00"  # make it a valid date string!
                     c.execute(search_str.format(**record))
@@ -222,7 +222,6 @@ def add_read_dates():
     # records should be a list of dictionaries including all fields
     db = pymysql.connect(**conf)
     records = request.get_json()
-    records["ReadNote"] = db.escape(records["ReadNote"])
     search_str = 'INSERT INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES '
     search_str += '({BookCollectionID}, "{ReadDate}", "{ReadNote}")'
     res = {"update_read_dates": [], "error": []}
@@ -230,6 +229,7 @@ def add_read_dates():
         with db.cursor() as c:
             for record in records:
                 try:
+                    record["ReadNote"] = db.escape(record["ReadNote"])
                     app.logger.debug(search_str.format(**record))
                     c.execute(search_str.format(**record))
                     res["update_read_dates"].append(record)
@@ -463,6 +463,28 @@ def books_search():
     else:
         s = c.fetchall()
         rdata = serialize_rows(s, header)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+##########################################################################
+# COMPLETE BOOK RECORD
+##########################################################################
+
+
+@app.route('/complete_records_window/<book_id>/<window>')
+def complete_record_window(book_id, window=20):
+    window_list = []
+    for bid in get_book_ids(book_id, window):
+        window_list.append(complete_book_record(bid))
+    rdata = json.dumps(window_list)
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/complete_record/<book_id>')
+def complete_record(book_id):
+    rdata = json.dumps(complete_book_record(book_id))
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 

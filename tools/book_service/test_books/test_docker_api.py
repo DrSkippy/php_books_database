@@ -2,7 +2,7 @@ import json
 
 import requests
 
-ENDPOINT = "http://localhost"
+ENDPOINT = "http://localhost:9999"
 EXAMPLES_PATH = "./example_json_payloads"
 API_KEY = 'sdf876a234hqkajsdv9876x87ehruia76df'
 
@@ -12,21 +12,23 @@ def test_configuration():
     print(f"QUERY={ep}")
     r = requests.get(ep, headers={'x-api-key': 'sdf876a234hqkajsdv9876x87ehruia76df'})
     print(r.json())
-    assert(r.status_code == 200)
+    assert (r.status_code == 200)
+
 
 def test_configuration():
     ep = ENDPOINT + "/configuration"
     print(f"QUERY={ep}")
     r = requests.get(ep)
     print(r.status_code)
-    assert(r.status_code == 401)
+    assert (r.status_code == 401)
+
 
 def test_locations():
     ep = ENDPOINT + "/valid_locations"
     print(f"QUERY={ep}")
     r = requests.get(ep, headers={'x-api-key': 'sdf876a234hqkajsdv9876x87ehruia76df'})
     print(r.json())
-    assert(r.status_code == 200)
+    assert (r.status_code == 200)
 
 
 def test_add_books():
@@ -36,7 +38,7 @@ def test_add_books():
         data = json.load(infile)
     r = requests.post(ep, json=data, headers={'x-api-key': f'{API_KEY}'})
     print(r.json())
-    assert(r.status_code == 200)
+    assert (r.status_code == 200)
     res = [x["BookCollectionID"] for x in r.json()["add_books"]]
     return res
 
@@ -50,7 +52,7 @@ def test_add_read_dates(book_id_list):
         x["BookCollectionID"] = r
     res = requests.post(ep, json=data, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
 
 
 def test_update_book_note_status(id):
@@ -61,7 +63,7 @@ def test_update_book_note_status(id):
     data["BookCollectionID"] = int(id)
     res = requests.post(ep, json=data, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
 
 
 def test_summary_books_read_by_year(year=2015):
@@ -69,12 +71,12 @@ def test_summary_books_read_by_year(year=2015):
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
     ep1 = ENDPOINT + "/summary_books_read_by_year"
     print(f"QUERY={ep1}")
     res1 = requests.get(ep1, headers={'x-api-key': f'{API_KEY}'})
     print(res1.json())
-    assert(res1.status_code == 200)
+    assert (res1.status_code == 200)
 
 
 def test_books_read(year=2015):
@@ -82,12 +84,12 @@ def test_books_read(year=2015):
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
     ep1 = ENDPOINT + "/books_read"
     print(f"QUERY={ep1}")
     res1 = requests.get(ep1, headers={'x-api-key': f'{API_KEY}'})
     print(res1.json())
-    assert(res1.status_code == 200)
+    assert (res1.status_code == 200)
 
 
 def test_books_search():
@@ -96,11 +98,11 @@ def test_books_search():
     print(f"QUERY={ep1}")
     res1 = requests.get(ep1, headers={'x-api-key': f'{API_KEY}'})
     print(res1.json())
-    assert(res1.status_code == 200)
+    assert (res1.status_code == 200)
     ep2 = ep + "?PublisherName=dover"
     res2 = requests.get(ep2, headers={'x-api-key': f'{API_KEY}'})
     print(res2.json())
-    assert(res2.status_code == 200)
+    assert (res2.status_code == 200)
 
 
 def test_add_tags(book_ids):
@@ -109,7 +111,7 @@ def test_add_tags(book_ids):
     for book_id in book_ids:
         res = requests.put(ep + f"/{book_id}/deleteme", headers={'x-api-key': f'{API_KEY}'})
         print(res.json())
-        assert(res.status_code == 200)
+        assert (res.status_code == 200)
 
 
 def test_tag_counts():
@@ -117,7 +119,7 @@ def test_tag_counts():
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
 
 
 def test_tags(id):
@@ -125,7 +127,7 @@ def test_tags(id):
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
 
 
 def test_update_tag_value():
@@ -133,7 +135,7 @@ def test_update_tag_value():
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
 
 
 def test_tags_search():
@@ -141,11 +143,11 @@ def test_tags_search():
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
     ep2 = ENDPOINT + "/tags_search/dog"
     res2 = requests.get(ep2, headers={'x-api-key': f'{API_KEY}'})
     print(res2.json())
-    assert(res2.status_code == 200)
+    assert (res2.status_code == 200)
 
 
 def test_tag_maintenance():
@@ -153,7 +155,7 @@ def test_tag_maintenance():
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
 
 
 def test_status_read(id):
@@ -161,7 +163,7 @@ def test_status_read(id):
     print(f"QUERY={ep}")
     res = requests.get(ep, headers={'x-api-key': f'{API_KEY}'})
     print(res.json())
-    assert(res.status_code == 200)
+    assert (res.status_code == 200)
 
 
 if __name__ == "__main__":
