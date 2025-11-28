@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 DT=$(date +%Y-%m-%d_%H%M)
-DEST=~/Working/data
+DEST=/mnt/raid1/shares/backups
 UN=$(cat ../book_service/config/configuration.json | jq -r .username)
 PWD=$(cat ../book_service/config/configuration.json | jq -r .password)
 DB=$(cat ../book_service/config/configuration.json | jq -r .database)
@@ -15,12 +15,13 @@ echo "Reading database ${DB} from host ${DBHOST} for user ${UN}."
 echo "Results in $DEST/$BOOKSDBDUMP..."
 #
 if [ -d $DEST ];  then
- mysqldump --column-statistics=0 -h$DBHOST -u$UN -p$PWD $DB "book collection" "books tags" "books read" "tag labels" > $DEST/$BOOKSDBDUMP
- echo "Backups present:"
- ls -lhs $DEST/*.sql
- echo "Done."
- echo "****************************************"
+  mysqldump --single-transaction --column-statistics=0 -h$DBHOST -u$UN -p$PWD $DB "book collection" "books tags" "books read" "tag labels" > $DEST/$BOOKSDBDUMP
+  mysqldump --single-transaction --no-data -h$DBHOST -u$UN -p$PWD $DB > $DEST/schema_$BOOKSDBDUMP
+  echo "Backups present:"
+  ls -lhs $DEST/*.sql
+  echo "Done."
+  echo "****************************************"
 else
- echo "Destination $DEST does not exist. Aborting."
+  echo "Destination $DEST does not exist. Aborting."
 fi
 

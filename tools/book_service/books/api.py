@@ -475,7 +475,7 @@ def books_search():
 @app.route('/complete_records_window/<book_id>/<window>')
 def complete_record_window(book_id, window=20):
     window_list = []
-    for bid in get_book_ids(book_id, window):
+    for bid in get_book_ids(book_id, int(window)):
         window_list.append(complete_book_record(bid))
     rdata = json.dumps(window_list)
     response_headers = resp_header(rdata)
@@ -493,7 +493,7 @@ def complete_record(book_id):
 # TAGS
 ##########################################################################
 
-@app.route('/add_tag/<book_id>/<tag>', methods=["put"])
+@app.route('/add_tag/<book_id>/<tag>', methods=["PUT"])
 @require_appkey
 def add_tag(book_id, tag):
     db = pymysql.connect(**conf)
@@ -713,8 +713,8 @@ def add_book_estimate(book_id, last_readable_page, start_date=None):
 ##########################################################################
 # IMAGES
 ##########################################################################
-@app.route("/image/year_progress_comparison.png")
-@app.route("/image/year_progress_comparison.png/<window>")
+@app.route('/image/year_progress_comparison.png')
+@app.route('/image/year_progress_comparison.png/<window>')
 def year_progress_comparison(window=15):
     window = int(window)
     img = BytesIO()
@@ -745,8 +745,8 @@ def year_progress_comparison(window=15):
     return send_file(img, mimetype='image/png')
 
 
-@app.route("/image/all_years.png")
-@app.route("/image/all_years.png/<year>")
+@app.route('/image/all_years.png')
+@app.route('/image/all_years.png/<year>')
 def all_years(year=None):
     if year is None:
         year = datetime.datetime.now().year

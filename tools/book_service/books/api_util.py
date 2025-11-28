@@ -153,6 +153,7 @@ def resp_header(rdata):
 
 def get_book_ids(book_id, window):
     db = pymysql.connect(**conf)
+    app_logger.debug(f"Getting book ID window for book ID {book_id} with window {window}")
     top_half_window = int((window + 1) / 2)
     bottom_half_window = window - top_half_window
 

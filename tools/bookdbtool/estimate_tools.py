@@ -7,12 +7,13 @@ import requests
 FMT = "%Y-%m-%d"
 DIVIDER_WIDTH = 72
 
-class EST_Tool:
+class ESTTool:
     def __init__(self, endpoint, api_key):
         # File path contortions so notebook uses the same config as REPL command line
         self.end_point = endpoint
         self.header = {"x-api-key": f"{api_key}"}
         self.result = None
+
     def version(self):
         """ Retrieve the back end version. """
         q = self.end_point + "/configuration"
@@ -59,6 +60,7 @@ class EST_Tool:
         except requests.RequestException as e:
             logging.error(e)
         else:
+            logging.debug(br)
             if "error" in tres:
                 print(f'Error: {tres["error"]}')
             elif len(tres["record_set"]) > 0:
