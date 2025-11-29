@@ -16,8 +16,8 @@
 
 On OSX and Linux to run local tests: 
 ```angular2html
-docker build . -t book-service
-docker run -p 127.0.0.1:80:8083 book-service
+docker build . -t book-test
+docker run -p 127.0.0.1:9999:8083 book-test
 ```
 ```
 curl -H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" localhost/valid_locations

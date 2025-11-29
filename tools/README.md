@@ -4,7 +4,7 @@
 
 2. Book Service - A REST API service to manage book records and reading progress (see documentation in `tools/book_service/books/README.md`)
 2. Book CLI - A command line interface to interact with the Book Service. This is a REPL interface to issue commands to the Book Service API.  (See inline help)
-3. Book Database backup - A SQLite database to store book records and reading progress
+3. Book Database Backup - A SQLite database to store book records and reading progress
 4. Jupyter Notebooks for interacting with API and REPL utilities
 
 ```aiignore

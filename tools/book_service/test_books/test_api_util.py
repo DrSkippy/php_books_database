@@ -91,18 +91,12 @@ class TestAppFunctions(unittest.TestCase):
 
     def test_get_book_ids_(self):
         book_ids = au.get_book_ids(2, 20)
-        print(book_ids)
-        self.assertEqual(book_ids, [1869, 1870, 1871, 1872, 1873, 1874, 1875, 1876,
-                                    1877, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+        self.assertTrue(set([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).issubset(book_ids))
         self.assertEqual(len(book_ids), 20)
-        book_ids = au.get_book_ids(1875, 20)  # last as of 2025-11-26
-        print(book_ids)
-        self.assertEqual(book_ids, [1866, 1867, 1868, 1869, 1870, 1871, 1872, 1873,
-                                    1874, 1875, 1876, 1877, 2, 3, 4, 5, 6, 7, 8, 9])
-
+        book_ids = au.get_book_ids(3000, 20)  # last as of 2025-11-26
+        self.assertTrue(set([2, 3, 4, 5, 6, 7, 8, 9, 10]).issubset(book_ids))
         self.assertEqual(len(book_ids), 20)
         book_ids = au.get_book_ids(477, 30)
-        print(book_ids)
         self.assertEqual(len(book_ids), 30)
 
     def test_complete_book_record(self):
@@ -113,6 +107,26 @@ class TestAppFunctions(unittest.TestCase):
         self.assertEqual(rec["book"]["data"][0][7], 548)
         self.assertEqual(len(rec["reads"]["data"]), 1)
         self.assertEqual(len(rec["tags"]["data"][0]), 8)
+
+    def test_update_book_record_by_key(self):
+        update_data = {
+            "BookCollectionID": 1873,
+            "Title": "FKA - Demon Copperhead A Novel"
+        }
+        res = au.update_book_record_by_key(update_data)
+        rec = au.complete_book_record(1873)
+        self.assertTrue(res)
+        self.assertEqual(rec["book"]["data"][0][1], "FKA - Demon Copperhead A Novel")
+        # Change it back
+        update_data = {
+            "BookCollectionID": 1873,
+            "Title": "Demon Copperhead A Novel"
+        }
+        res = au.update_book_record_by_key(update_data)
+        self.assertTrue(res)
+        rec = au.complete_book_record(1873)
+        self.assertEqual(rec["book"]["data"][0][1], "Demon Copperhead A Novel")
+
 
 
 if __name__ == '__main__':

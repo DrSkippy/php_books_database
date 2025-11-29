@@ -560,7 +560,7 @@ def tags(book_id=None):
     return Response(response=rdata, status=200, headers=response_headers)
 
 
-@app.route('/update_tag_value/<current>/<updated>')
+@app.route('/update_tag_value/<current>/<updated>', methods=["PUT"])
 @require_appkey
 def update_tag_value(current, updated):
     db = pymysql.connect(**conf)

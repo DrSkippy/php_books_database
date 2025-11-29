@@ -274,17 +274,17 @@ def complete_book_record(book_id):
 # UPDATE BOOKS
 ##########################################################################
 
-def update_book_record_by_key(record):
+def update_book_record_by_key(update_dict):
     """
     Updates a book record in the database using the provided dictionary of record
     values and the corresponding `BookCollectionID`. Key-value pairs in the record
     represent the columns to update and their new values. If an error occurs while
     executing the SQL operation, an error dictionary will be returned.
 
-    :param record: A dictionary containing the record information for the book to
+    :param update_dict: A dictionary containing the record information for the book to
         be updated. The keys represent the column names, and the values represent
         the new data to be inserted for those columns.
-    :type record: dict
+    :type update_dict: dict
     :return: A list containing the result of the update operation. If successful,
         the `record` dictionary is returned; otherwise, an error dictionary is
         returned.
@@ -293,24 +293,24 @@ def update_book_record_by_key(record):
     db = pymysql.connect(**conf)
     search_str = "UPDATE `book collection` SET "
     continuation = False
-    for key in record:
+    for key in update_dict:
         if key == "BookCollectionID":
-            BookCollectionID = record[key]
+            BookCollectionID = update_dict[key]
             continue
         if continuation:
             search_str += ", "
         else:
             continuation = True
-            search_str += f" {key} = \"{record[key]}\""
+            search_str += f" {key} = \"{update_dict[key]}\""
     search_str += f" WHERE BookCollectionID = {BookCollectionID} "
     app_logger.debug(search_str)
     results = []
     with db:
         with db.cursor() as c:
             try:
-                c.execute(search_str.format(**record))
-                app_logger.debug(search_str.format(**record))
-                results.append(record)
+                c.execute(search_str.format(**update_dict))
+                app_logger.debug(search_str.format(**update_dict))
+                results.append(update_dict)
             except pymysql.Error as e:
                 app_logger.error(e)
                 results.append({"error": str(e)})
