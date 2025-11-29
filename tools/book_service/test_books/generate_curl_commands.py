@@ -1,12 +1,12 @@
 import json
 import subprocess
 import random
-from imp import get_tag
 
+cleanup = ["""DELETE FROM `complete date estimates` WHERE LastReadablePage=15000\;"""]
 
 def generate_curl_commands():
 
-    config_file = "../config/configuration.json"
+    config_file = "./config/configuration.json"
 
     with open(config_file, "r") as infile:
         config = json.load(infile)
@@ -22,17 +22,17 @@ def generate_curl_commands():
                    "<updated>": "recovery",
                    "<window>": "20",
                    "<record_id>": "50",
-                   "<last_readable_page>": "1500",
+                   "<last_readable_page>": "15000",
                    "<start_date>": "1945-10-19"
     }
 
-    print("Sample data for endpoints:")
+    print("# Sample data for endpoints:")
     for k, v in sample_data.items():
-        print(f"{k}: {v}")
+        print(f"#   {k}: {v}")
     print("\n")
 
-    print("Getting all of the GET endpoints from book_service/books/api.py")
-    command = "cat ../books/api.py | grep app.route | grep -v POST | grep -v PUT | cut -d\\' -f2"
+    print("# Getting all of the GET endpoints from book_service/books/api.py")
+    command = "cat ./books/api.py | grep app.route | grep -v POST | grep -v PUT | cut -d\\' -f2"
     result = subprocess.check_output(command, shell=True)
     result = result.decode("utf-8").strip().split("\n")
 
@@ -40,12 +40,12 @@ def generate_curl_commands():
     for line in result:
         for k, v in sample_data.items():
             line = line.replace(k, v)
-        print(line)
+        print("# "+line)
         get_endpoints.append(line)
     print("\n")
 
-    print("Getting all of the PUT endpoints from book_service/books/api.py")
-    command = "cat ../books/api.py | grep app.route | grep PUT | cut -d\\' -f2"
+    print("# Getting all of the PUT endpoints from book_service/books/api.py")
+    command = "cat ./books/api.py | grep app.route | grep PUT | cut -d\\' -f2"
     result = subprocess.check_output(command, shell=True)
     result = result.decode("utf-8").strip().split("\n")
 
@@ -53,11 +53,11 @@ def generate_curl_commands():
     for line in result:
         for k, v in sample_data.items():
             line = line.replace(k, v)
-        print(line)
+        print("# "+line)
         put_endpoints.append(line)
     print("\n")
 
-    print("\nGenerating curl commands for common API calls:\n")
+    print("# Generating curl commands for common API calls:\n")
     get_template = {"method": "GET", "endpoint_suffix": None, "headers": f"x-api-key: {API_KEY}", "ENDPOINT": ENDPOINT}
     cases = []
     for endpoint in get_endpoints:
@@ -81,6 +81,11 @@ def generate_curl_commands():
     return curl_strings
 
 if __name__ == "__main__":
+    print("#!/bin/bash\nset -e\n") # Bash script header, exit on error
     curl_strings = generate_curl_commands()
     for cs in curl_strings:
         print(cs)
+
+    print("\n# Cleanup SQL commands:")
+    for cmd in cleanup:
+        print(f"echo {cmd}")

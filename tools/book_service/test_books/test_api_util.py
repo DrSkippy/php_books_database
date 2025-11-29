@@ -4,7 +4,7 @@ import unittest
 from books import api_util as au
 
 
-class TestAppFunctions(unittest.TestCase):
+class TestAppUtilityFunctions(unittest.TestCase):
 
     def test_const(self):
         self.assertEqual(len(au.locations_sort_order), 7)
