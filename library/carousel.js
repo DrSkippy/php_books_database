@@ -1,52 +1,34 @@
 $(document).ready(function () {
     topnavbar();
 
-    var url = baseApiUrl + "/books_search?Recycled=0&Location=Main";
-    var idArray;
+    const endpointUrl = baseApiUrl + "/complete_records_window";
+    const windowSize = 20;
+    // GET with 2 parameeters /BOOKID/WINDOWSIZE (Optional, default 20)
+    var url = endpointUrl + "/2/" + windowSize;
     $.getJSON(url, function (data) {
-        var obj = data['data'];
-        idArray = obj.map(function (x) {
-            return x[0];
-        });
-        $.ajaxSetup({async: false});  // suppress async so the summary row is always at the bottom
-        /* for (var i = 0; i < obj.length; i++) { */
-        for (var i = 0; i < 100; i++) {
-            var bookCollectionID = obj[i][0];
-            var urlTag = baseApiUrl + "/tags/" + bookCollectionID;
-            var tagStr = "Not Found";
-            var readStr = "Not Found";
-            $.getJSON(urlTag, function (data) {
-                var tagObj = data['tag_list'];
-                tagStr = "Tags: " + tagObj.join(", ").slice(0,50) + "...";
-            });
-            var urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
-            $.getJSON(urlRead, function (data) {
-                var readObj = data['data'];
-                readStr = "";
-                for (var i = 0; i < readObj.length; i++) {
-                    readStr += readObj[i][1] + "</br>\n" +
-                        readObj[i][2] + "</br>\n";
-                }
-                if (readStr.length >0) {
-                    readStr = "Read: " + readStr;
-                }
-            });
-            var bookString = "\n" +
-                "<li class=\"card-item swiper-slide\">\n" +
-                "  <a href=\"#\" class=\"card-link\">\n" +
-                "     <img src=\"https://plus.unsplash.com/premium_photo-1732736768075-4738ba4ccf1a?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D\" class=\"card-image\">\n" +
-                "     <p class=\"badge\"> Title: " + obj[i][1] + "</p>\n" +
-                "     <h3 class=\"card-title\"> Author: " +
-                obj[i][2] + " (pub. " + obj[i][3].slice(0,4) + ")</br>\n Pages: " +
-                obj[i][7] + " &nbsp;&nbsp;&nbsp; Cover Type: " +
-                obj[i][6] + "</br>\n ISBN: " +
-                obj[i][12] + "</br>\n" +
-                tagStr + "</br>" +
-                readStr + "</h3>\n" +
+        for (var bookIdx = 0; bookIdx < windowSize; bookIdx++) {
+            var bookString = "\n<li class=\"card-item swiper-slide\">\n" +
+                "  <a href=\"#\" class=\"card-link\">\n";
+            const bookObj = data[bookIdx]['book'];
+            const readObj = data[bookIdx]['reads'];
+            const tagObj = data[bookIdx]['tags'];
+            bookString += "     <img src=\"https://plus.unsplash.com/premium_photo-173273dd6768075-4738ba4ccf1a?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D\" class=\"card-image\">\n"
+            bookString += "     <p class=\"badge\"> Book ID: " + bookObj['data'][0][0] + "</p>\n";
+            bookString += "<h3>";
+            for (var i = 1; i < bookObj['header'].length; i++) {
+                bookString += bookObj['header'][i] + ": " + bookObj['data'][0][i] + "</br>\n";
+            }
+            if (readObj['data'].length > 0) {
+            for (var i = 1; i < readObj['header'].length; i++) {
+                bookString += readObj['header'][i] + ": " + readObj['data'][0][i] + "</br>\n";
+            }
+            }
+            bookString += tagObj['header'][0] + ": " + tagObj['data'][0].join("</br>") + "\n";
+            bookString += "</h3>" +
                 "     <button class=\"card-button\"><i class=\"fa-solid fa-arrow-right\"></i></button>\n" +
-                "   </a>\n" +
-                "</li>\n"
-            console.log(bookString);
+                "  </a>\n" +
+                "</li>\n";
+            console.log(bookObj);
             $("#card-deck").append(bookString);
         }
     });
@@ -55,7 +37,7 @@ $(document).ready(function () {
 
 const swiper = new Swiper('.card-wrapper', {
     init: false,
-    loop: true,
+    loop: false,
     speed: 700,
     spaceBetween: 30,
     direction: 'horizontal',
