@@ -1,4 +1,4 @@
-__version__ = '0.13.2'
+__version__ = '0.13.0'
 
 from io import BytesIO
 from logging.config import dictConfig
