@@ -3,7 +3,7 @@
 ## Tests
 
 ```
-cat config/configuration.json 
+cat config/configuration.json | jq . 
 docker images 
 docker build . -t books-test
 docker run -d -p 9999:8083 --name books-test-container books-test

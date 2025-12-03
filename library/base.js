@@ -4,7 +4,7 @@ const baseApiUrl = 'https://book-service.drskippy.worse-than.tv'
 //const baseApiPath = '/php_books_database/';
 const baseApiPath = '/';
 var bookCollectionID = 102;
-const apiKey = 'sdf876a234hqkajsdv9876x87ehruia76df';
+const apiKey = 'abcsdf876a234hqkajsdv9876x87ehruia76df';
 const apiHeaders = {
     'x-api-key': apiKey
 }
@@ -21,6 +21,7 @@ function topnavbar() {
         console.log(obj.toString());
         document.getElementById("insertTopNavBar").innerHTML = '<div class="topnav">' +
             '<a href="' + baseApiPath + 'index.php">Browse Collection</a>' +
+            '<a href="' + baseApiPath + 'js_reports/carousel.html">Book Carousel</a>' +
             '<a href="' + baseApiPath + 'js_reports/index.html">Search & Reports</a>' +
             '<a href="' + baseApiPath + 'js_reports/progress.html">Yearly Progress</a>' +
             '<a href="' + baseApiPath + 'js_reports/books_read_by_year.html">Books Read - All</a>' +

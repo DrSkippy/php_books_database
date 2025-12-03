@@ -1,4 +1,4 @@
-__version__ = '0.13.0'
+__version__ = '0.14.0'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -483,8 +483,17 @@ def complete_record_window(book_id, window=20):
 
 
 @app.route('/complete_record/<book_id>')
-def complete_record(book_id):
-    rdata = json.dumps(complete_book_record(book_id))
+@app.route('/complete_record/<book_id>/<adjacent>')
+def complete_record(book_id, adjacent=None):
+    rdata = json.dumps([])
+    if adjacent is None:
+        rdata = json.dumps(complete_book_record(book_id))
+    elif adjacent.lower() == "next":
+        next_id = get_next_book_id(book_id, 1)
+        rdata = json.dumps(complete_book_record(next_id))
+    elif adjacent.lower().startswith("prev"):
+        previous_id = get_next_book_id(book_id, -1)
+        rdata = json.dumps(complete_book_record(previous_id))
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 

@@ -89,6 +89,17 @@ class TestAppUtilityFunctions(unittest.TestCase):
         self.assertEqual(res[1], "2022-04-03")
         self.assertEqual(res[2], "2022-08-18")
 
+    def test_get_next_book_id(self):
+        next_id = au.get_next_book_id(1873)
+        self.assertEqual(next_id, 1874)
+        next_id = au.get_next_book_id(1873, -1)
+        self.assertEqual(next_id, 1872)
+        next_id = au.get_next_book_id(3000, +1)  # last as of 2025-11-26
+        self.assertEqual(next_id, 2)
+        next_id = au.get_next_book_id(2, -1)  # last as of 2025-11-26
+        self.assertGreaterEqual(next_id, 1875)
+
+
     def test_get_book_ids_(self):
         book_ids = au.get_book_ids(2, 20)
         self.assertTrue(set([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).issubset(book_ids))

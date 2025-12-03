@@ -150,6 +150,44 @@ def resp_header(rdata):
 # BOOKS WINDOW
 ##########################################################################
 
+def get_next_book_id(current_book_id, direction=1):
+    db = pymysql.connect(**conf)
+    order = "ASC" if direction > 0 else "DESC"
+    ineq = ">" if direction > 0 else "<"
+    query_str = ("SELECT a.BookCollectionID "
+                 "FROM `book collection` as a "
+                 f"WHERE a.BookCollectionID {ineq} {current_book_id} "
+                 f"ORDER BY a.BookCollectionID {order} "
+                 "LIMIT 1;")
+    app_logger.debug(query_str)
+    result = None
+    c = db.cursor()
+    try:
+        c.execute(query_str)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        return None
+    else:
+        s = c.fetchall()
+        # If no results, wrap around
+        if len(s) == 0:
+            if direction > 0:
+                # get the first record
+                result = 2
+            else:
+                query_str = ("SELECT max(a.BookCollectionID) "
+                             "FROM `book collection` as a; ")
+                c = db.cursor()
+                try:
+                    c.execute(query_str)
+                except pymysql.Error as e:
+                    app_logger.error(e)
+                else:
+                    s = c.fetchall()
+                    result = s[0][0]
+        else:
+            result = s[0][0]
+        return result
 
 def get_book_ids(book_id, window):
     db = pymysql.connect(**conf)
