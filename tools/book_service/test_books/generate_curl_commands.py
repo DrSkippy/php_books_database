@@ -24,7 +24,8 @@ def generate_curl_commands():
                    "<record_id>": "50",
                    "<last_readable_page>": "15000",
                    "<start_date>": "1945-10-19",
-                   "<adjacent>": "next"
+                   "<adjacent>": "next",
+                   "<limit>": "10"
     }
 
     print("# Sample data for endpoints:")

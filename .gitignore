@@ -5,3 +5,5 @@ __pycache__/
 .DS_Store
 .python-version
 test_*.png
+.coverage
+curl_test_script.bash

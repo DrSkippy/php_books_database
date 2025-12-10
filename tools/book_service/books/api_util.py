@@ -147,6 +147,88 @@ def resp_header(rdata):
 
 
 ##########################################################################
+# BASIC API UTILITIES
+##########################################################################
+
+def get_valid_locations():
+    db = None
+    try:
+        db = pymysql.connect(**conf)
+        cursor = db.cursor()
+
+        # Execute the query
+        query = "SELECT DISTINCT Location FROM `book collection` ORDER by Location ASC;"
+        app_logger.debug(query)
+        cursor.execute(query)
+
+        # Fetch and process the results
+        locations = cursor.fetchall()
+        locations_list = [loc[0] for loc in locations]
+        sorted_locations_list = sort_by_indexes(locations_list, locations_sort_order)
+        result = json.dumps({"header": "Location", "data": sorted_locations_list})
+
+    except pymysql.Error as e:
+        # Log and handle database errors
+        app_logger.error(e)
+        result = {"error": str(e)}
+    finally:
+        # Ensure the database connection is closed
+        if db:
+            db.close()
+
+    return result
+
+def get_recently_touched(limit=10):
+
+    db = None
+    try:
+        db = pymysql.connect(**conf)
+        cursor = db.cursor()
+
+        # Execute the query
+        query = ('SELECT abc.BookCollectionID, max(abc.LastUpdate) as LastUpdate, bc.Title FROM\n'
+                 '(       SELECT BookCollectionID, LastUpdate \n'
+                 '        FROM `book collection`\n'
+                 '        UNION\n'
+                 '        SELECT BookCollectionID , LastUpdate \n'
+                 '        FROM `book collection`\n'
+                 '        UNION \n'
+                 '        SELECT BookID as BookCollectionID, LastUpdate\n'
+                 '        FROM `books tags`\n'
+                 '        UNION\n'
+                 '        SELECT a.BookCollectionID, b.LastUpdate\n'
+                 '        FROM `complete date estimates` a JOIN `daily page records` b ON\n'
+                 '        a.RecordID = b.RecordID\n'
+                 '        UNION \n'
+                 '        SELECT BookCollectionID, EstimateDate as LastUpdate\n'
+                 '        FROM `complete date estimates`) abc\n'
+                 'JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID \n'
+                 'GROUP BY abc.BookCollectionID, bc.Title\n'
+                 'ORDER BY LastUpdate DESC LIMIT ' + str(limit) + ';\n')
+        app_logger.debug(query)
+        cursor.execute(query)
+
+        # Fetch and process the results
+        recent_books = []
+        for a, b, c in cursor.fetchall():
+            _date = b.strftime(FMT)
+            _title = c if len(c) <= 43 else c[:40] + "..."
+            recent_books.append([a, _date, _title])
+        result = json.dumps({"header": ["BookCollectionID", "LastUpdate", "Title"], "data": recent_books})
+
+    except pymysql.Error as e:
+        # Log and handle database errors
+        app_logger.error(e)
+        result = {"error": str(e)}
+    finally:
+        # Ensure the database connection is closed
+        if db:
+            db.close()
+
+    return result
+
+##########################################################################
+##########################################################################
 # BOOKS WINDOW
 ##########################################################################
 
@@ -406,7 +488,7 @@ def summary_books_read_by_year_utility(target_year=None):
     return serialized_data, results, headers
 
 
-def books_read_utility(target_year=None):
+def books_read_by_year_utility(target_year=None):
     db = pymysql.connect(**conf)
     search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
                   "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
@@ -432,6 +514,25 @@ def books_read_utility(target_year=None):
         rdata = serialize_rows(s, header)
     return rdata, s, header
 
+def status_read_utility(book_id):
+
+    db = pymysql.connect(**conf)
+    search_str = (f"select BookCollectionID, ReadDate, ReadNote "
+                  f"FROM `books read` "
+                  f"WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;")
+    app_logger.debug(search_str)
+    c = db.cursor()
+    header = ["BookCollectionID", "ReadDate", "ReadNote"]
+    try:
+        c.execute(search_str)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        rdata = {"error": str(e)}
+    else:
+        s = c.fetchall()
+        rdata = serialize_rows(s, header)
+    return rdata, s, header
+
 
 def tags_search_utility(match_str):
     match_str = match_str.lower().strip()
@@ -452,6 +553,69 @@ def tags_search_utility(match_str):
         s = c.fetchall()
         rdata = serialize_rows(s, header)
     return rdata, s, header
+
+
+def books_search_utility(args):
+
+    db = pymysql.connect(**conf)
+    where = []
+    for key in args:
+        if key == "BookCollectionID":
+            where.append(f"a.{key} = \"{args.get(key)}\"")
+        elif key == "ReadDate":
+            where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
+        elif key == "Tags":
+            _, s, _ = tags_search_utility(args.get(key))
+            id_list = str(tuple([int(x[0]) for x in s]))
+            if len(s) == 1:
+                # remove trailing comma
+                id_list = id_list.replace(",", "")
+            app_logger.debug(id_list)
+            where.append(f"a.BookCollectionID in {id_list}")
+        else:
+            where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
+    where_str = " AND ".join(where)
+    search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
+                  "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
+                  "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
+                  "b.ReadDate "
+                  "FROM `book collection` as a LEFT JOIN `books read` as b "
+                  "ON a.BookCollectionID = b.BookCollectionID ")
+    if where_str != '':
+        search_str += "WHERE " + where_str
+    search_str += " ORDER BY a.Author, a.Title ASC"
+    app_logger.debug(search_str)
+    header = table_header + ["ReadDate"]
+    c = db.cursor()
+    try:
+        c.execute(search_str)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        rdata = json.dumps({"error": str(e)})
+    else:
+        s = c.fetchall()
+        rdata = serialize_rows(s, header)
+    return rdata, s, header
+
+def book_tags(book_id):
+
+    db = pymysql.connect(**conf)
+    search_str = "SELECT a.Label as Tag"
+    search_str += " FROM `tag labels` a JOIN `books tags` b ON a.TagID =b.TagID"
+    search_str += f" WHERE b.BookID = {book_id} ORDER BY Tag"
+    app_logger.debug(search_str)
+    c = db.cursor()
+    try:
+        c.execute(search_str)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        rdata = {"error": str(e)}
+    else:
+        s = c.fetchall()
+        tag_list = [x[0].strip() for x in s]
+        s = list(s)
+        rdata = json.dumps({"BookID": book_id, "tag_list": tag_list})
+    return rdata, s, ["Tag"]
 
 
 ##########################################################################
@@ -535,6 +699,7 @@ def reading_book_data_from_db(RecordID):
 
 
 def update_reading_book_data(record_id, date_range):
+    result = {}
     db = pymysql.connect(**conf)
     with db:
         with db.cursor() as c:
@@ -544,7 +709,9 @@ def update_reading_book_data(record_id, date_range):
                     (datetime.datetime.now(), date_range[0], record_id))
             except pymysql.Error as e:
                 app_logger.error(e)
+                result = {"error": [str(e)]}
         db.commit()
+    return result
 
 
 def _estimate_values(x_values, y_values, target_x):
@@ -632,7 +799,9 @@ def calculate_estimates(record_id):
     estimate_date_range = estimate_completion_dates(reading_data, total_readable_pages)
 
     # Update the database with the estimated date range
-    update_reading_book_data(record_id, estimate_date_range)
+    result = update_reading_book_data(record_id, estimate_date_range)
+    if "error" in result:
+        return [f'book reading data failure: {result["error"]}', None, None]
 
     # Format the estimated date range for output
     formatted_estimates = [date.strftime(FMT) for date in estimate_date_range]

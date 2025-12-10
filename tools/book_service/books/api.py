@@ -1,4 +1,4 @@
-__version__ = '0.14.0'
+__version__ = '0.14.1'
 
 from io import BytesIO
 from logging.config import dictConfig
@@ -52,30 +52,32 @@ def valid_locations():
     Endpoint to retrieve distinct locations from the 'book collection' table.
     Returns a JSON response containing the locations.
     """
-    db = None
-    try:
-        db = pymysql.connect(**conf)
-        cursor = db.cursor()
+    result = get_valid_locations()
 
-        # Execute the query
-        query = "SELECT DISTINCT Location FROM `book collection` ORDER by Location ASC;"
-        app.logger.debug(query)
-        cursor.execute(query)
-
-        # Fetch and process the results
-        locations = cursor.fetchall()
-        locations_list = [loc[0] for loc in locations]
-        sorted_locations_list = sort_by_indexes(locations_list, locations_sort_order)
-        result = json.dumps({"header": "Location", "data": sorted_locations_list})
-
-    except pymysql.Error as e:
-        # Log and handle database errors
-        app.logger.error(e)
-        result = {"error": str(e)}
-    finally:
-        # Ensure the database connection is closed
-        if db:
-            db.close()
+#     db = None
+#     try:
+#         db = pymysql.connect(**conf)
+#         cursor = db.cursor()
+#
+#         # Execute the query
+#         query = "SELECT DISTINCT Location FROM `book collection` ORDER by Location ASC;"
+#         app.logger.debug(query)
+#         cursor.execute(query)
+#
+#         # Fetch and process the results
+#         locations = cursor.fetchall()
+#         locations_list = [loc[0] for loc in locations]
+#         sorted_locations_list = sort_by_indexes(locations_list, locations_sort_order)
+#         result = json.dumps({"header": "Location", "data": sorted_locations_list})
+#
+#     except pymysql.Error as e:
+#         # Log and handle database errors
+#         app.logger.error(e)
+#         result = {"error": str(e)}
+#     finally:
+#         # Ensure the database connection is closed
+#         if db:
+#             db.close()
 
     # Return the successful response
     return Response(response=result, status=200, headers=resp_header(result))
@@ -87,56 +89,57 @@ def valid_locations():
 
 
 @app.route('/recent')
-def recent():
+@app.route('/recent/<limit>')
+def recent(limit=10):
     """
     Endpoint to retrieve ids and title of recently updated items
     Returns a JSON response containing the items.
     """
-    db = None
-    try:
-        db = pymysql.connect(**conf)
-        cursor = db.cursor()
-
-        # Execute the query
-        query = ('SELECT abc.BookCollectionID, max(abc.LastUpdate) as LastUpdate, bc.Title FROM\n'
-                 '(       SELECT BookCollectionID, LastUpdate \n'
-                 '        FROM `book collection`\n'
-                 '        UNION\n'
-                 '        SELECT BookCollectionID , LastUpdate \n'
-                 '        FROM `book collection`\n'
-                 '        UNION \n'
-                 '        SELECT BookID as BookCollectionID, LastUpdate\n'
-                 '        FROM `books tags`\n'
-                 '        UNION\n'
-                 '        SELECT a.BookCollectionID, b.LastUpdate\n'
-                 '        FROM `complete date estimates` a JOIN `daily page records` b ON\n'
-                 '        a.RecordID = b.RecordID\n'
-                 '        UNION \n'
-                 '        SELECT BookCollectionID, EstimateDate as LastUpdate\n'
-                 '        FROM `complete date estimates`) abc\n'
-                 'JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID \n'
-                 'GROUP BY abc.BookCollectionID, bc.Title\n'
-                 'ORDER BY LastUpdate DESC LIMIT 10;\n')
-        app.logger.debug(query)
-        cursor.execute(query)
-
-        # Fetch and process the results
-        recent_books = []
-        for a, b, c in cursor.fetchall():
-            _date = b.strftime(FMT)
-            _title = c if len(c) <= 43 else c[:40] + "..."
-            recent_books.append([a, _date, _title])
-        result = json.dumps({"header": ["BookCollectionID", "LastUpdate", "Title"], "data": recent_books})
-
-    except pymysql.Error as e:
-        # Log and handle database errors
-        app.logger.error(e)
-        result = {"error": str(e)}
-    finally:
-        # Ensure the database connection is closed
-        if db:
-            db.close()
-
+#     db = None
+#     try:
+#         db = pymysql.connect(**conf)
+#         cursor = db.cursor()
+#
+#         # Execute the query
+#         query = ('SELECT abc.BookCollectionID, max(abc.LastUpdate) as LastUpdate, bc.Title FROM\n'
+#                  '(       SELECT BookCollectionID, LastUpdate \n'
+#                  '        FROM `book collection`\n'
+#                  '        UNION\n'
+#                  '        SELECT BookCollectionID , LastUpdate \n'
+#                  '        FROM `book collection`\n'
+#                  '        UNION \n'
+#                  '        SELECT BookID as BookCollectionID, LastUpdate\n'
+#                  '        FROM `books tags`\n'
+#                  '        UNION\n'
+#                  '        SELECT a.BookCollectionID, b.LastUpdate\n'
+#                  '        FROM `complete date estimates` a JOIN `daily page records` b ON\n'
+#                  '        a.RecordID = b.RecordID\n'
+#                  '        UNION \n'
+#                  '        SELECT BookCollectionID, EstimateDate as LastUpdate\n'
+#                  '        FROM `complete date estimates`) abc\n'
+#                  'JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID \n'
+#                  'GROUP BY abc.BookCollectionID, bc.Title\n'
+#                  'ORDER BY LastUpdate DESC LIMIT 10;\n')
+#         app.logger.debug(query)
+#         cursor.execute(query)
+#
+#         # Fetch and process the results
+#         recent_books = []
+#         for a, b, c in cursor.fetchall():
+#             _date = b.strftime(FMT)
+#             _title = c if len(c) <= 43 else c[:40] + "..."
+#             recent_books.append([a, _date, _title])
+#         result = json.dumps({"header": ["BookCollectionID", "LastUpdate", "Title"], "data": recent_books})
+#
+#     except pymysql.Error as e:
+#         # Log and handle database errors
+#         app.logger.error(e)
+#         result = {"error": str(e)}
+#     finally:
+#         # Ensure the database connection is closed
+#         if db:
+#             db.close()
+    result = get_recently_touched(limit)
     # Return the successful response
     return Response(response=result, status=200, headers=resp_header(result))
 
@@ -391,28 +394,29 @@ def summary_books_read_by_year(target_year=None):
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
 def books_read(target_year=None):
-    rdata, _, _ = books_read_utility(target_year)
+    rdata, _, _ = books_read_by_year_utility(target_year)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
 @app.route('/status_read/<book_id>')
 def status_read(book_id=None):
-    db = pymysql.connect(**conf)
-    search_str = (f"select BookCollectionID, ReadDate, ReadNote "
-                  f"FROM `books read` "
-                  f"WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;")
-    app.logger.debug(search_str)
-    c = db.cursor()
-    header = ["BookCollectionID", "ReadDate", "ReadNote"]
-    try:
-        c.execute(search_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = {"error": str(e)}
-    else:
-        s = c.fetchall()
-        rdata = serialize_rows(s, header)
+#     db = pymysql.connect(**conf)
+#     search_str = (f"select BookCollectionID, ReadDate, ReadNote "
+#                   f"FROM `books read` "
+#                   f"WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;")
+#     app.logger.debug(search_str)
+#     c = db.cursor()
+#     header = ["BookCollectionID", "ReadDate", "ReadNote"]
+#     try:
+#         c.execute(search_str)
+#     except pymysql.Error as e:
+#         app.logger.error(e)
+#         rdata = {"error": str(e)}
+#     else:
+#         s = c.fetchall()
+#         rdata = serialize_rows(s, header)
+    rdata, _, _ = status_read_utility(book_id)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -424,45 +428,47 @@ def status_read(book_id=None):
 @app.route('/books_search')
 def books_search():
     # process any query parameters
-    db = pymysql.connect(**conf)
     args = request.args
-    where = []
-    for key in args:
-        if key == "BookCollectionID":
-            where.append(f"a.{key} = \"{args.get(key)}\"")
-        elif key == "ReadDate":
-            where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
-        elif key == "Tags":
-            _, s, _ = tags_search_utility(args.get(key))
-            id_list = str(tuple([int(x[0]) for x in s]))
-            if len(s) == 1:
-                # remove trailing comma
-                id_list = id_list.replace(",", "")
-            app.logger.debug(id_list)
-            where.append(f"a.BookCollectionID in {id_list}")
-        else:
-            where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
-    where_str = " AND ".join(where)
-    search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
-                  "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
-                  "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
-                  "b.ReadDate "
-                  "FROM `book collection` as a LEFT JOIN `books read` as b "
-                  "ON a.BookCollectionID = b.BookCollectionID ")
-    if where_str != '':
-        search_str += "WHERE " + where_str
-    search_str += " ORDER BY a.Author, a.Title ASC"
-    app.logger.debug(search_str)
-    header = table_header + ["ReadDate"]
-    c = db.cursor()
-    try:
-        c.execute(search_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = json.dumps({"error": str(e)})
-    else:
-        s = c.fetchall()
-        rdata = serialize_rows(s, header)
+    rdata, s, header = books_search_utility(args)
+
+#     db = pymysql.connect(**conf)
+#     where = []
+#     for key in args:
+#         if key == "BookCollectionID":
+#             where.append(f"a.{key} = \"{args.get(key)}\"")
+#         elif key == "ReadDate":
+#             where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
+#         elif key == "Tags":
+#             _, s, _ = tags_search_utility(args.get(key))
+#             id_list = str(tuple([int(x[0]) for x in s]))
+#             if len(s) == 1:
+#                 # remove trailing comma
+#                 id_list = id_list.replace(",", "")
+#             app.logger.debug(id_list)
+#             where.append(f"a.BookCollectionID in {id_list}")
+#         else:
+#             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
+#     where_str = " AND ".join(where)
+#     search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
+#                   "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
+#                   "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
+#                   "b.ReadDate "
+#                   "FROM `book collection` as a LEFT JOIN `books read` as b "
+#                   "ON a.BookCollectionID = b.BookCollectionID ")
+#     if where_str != '':
+#         search_str += "WHERE " + where_str
+#     search_str += " ORDER BY a.Author, a.Title ASC"
+#     app.logger.debug(search_str)
+#     header = table_header + ["ReadDate"]
+#     c = db.cursor()
+#     try:
+#         c.execute(search_str)
+#     except pymysql.Error as e:
+#         app.logger.error(e)
+#         rdata = json.dumps({"error": str(e)})
+#     else:
+#         s = c.fetchall()
+#         rdata = serialize_rows(s, header)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -549,22 +555,23 @@ def tag_counts(tag=None):
 
 @app.route('/tags/<book_id>')
 def tags(book_id=None):
-    db = pymysql.connect(**conf)
-    search_str = "SELECT a.Label as Tag"
-    search_str += " FROM `tag labels` a JOIN `books tags` b ON a.TagID =b.TagID"
-    search_str += f" WHERE b.BookID = {book_id} ORDER BY Tag"
-    app.logger.debug(search_str)
-    c = db.cursor()
-    try:
-        c.execute(search_str)
-    except pymysql.Error as e:
-        app.logger.error(e)
-        rdata = {"error": str(e)}
-    else:
-        s = c.fetchall()
-        tag_list = [x[0].strip() for x in s]
-        s = list(s)
-        rdata = json.dumps({"BookID": book_id, "tag_list": tag_list})
+#     db = pymysql.connect(**conf)
+#     search_str = "SELECT a.Label as Tag"
+#     search_str += " FROM `tag labels` a JOIN `books tags` b ON a.TagID =b.TagID"
+#     search_str += f" WHERE b.BookID = {book_id} ORDER BY Tag"
+#     app.logger.debug(search_str)
+#     c = db.cursor()
+#     try:
+#         c.execute(search_str)
+#     except pymysql.Error as e:
+#         app.logger.error(e)
+#         rdata = {"error": str(e)}
+#     else:
+#         s = c.fetchall()
+#         tag_list = [x[0].strip() for x in s]
+#         s = list(s)
+#         rdata = json.dumps({"BookID": book_id, "tag_list": tag_list})
+    rdata, s, header = book_tags(book_id)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -727,7 +734,7 @@ def add_book_estimate(book_id, last_readable_page, start_date=None):
 def year_progress_comparison(window=15):
     window = int(window)
     img = BytesIO()
-    _, s, h = books_read_utility()
+    _, s, h = books_read_by_year_utility()
     df1 = pd.DataFrame(s, columns=h)
     df1["read_date"] = pd.to_datetime(df1["ReadDate"])
     df1 = df1.set_index("ReadDate")

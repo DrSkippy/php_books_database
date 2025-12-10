@@ -49,7 +49,7 @@ class TestAppUtilityFunctions(unittest.TestCase):
                          """('{"header": ["year", "pages read", "books read"], "data": [[1966, 2527.0, 13]]}', ((1966, Decimal('2527'), 13),), ['year', 'pages read', 'books read'])""")
 
     def test_books_read(self):
-        res = au.books_read_utility(target_year=1966)
+        res = au.books_read_by_year_utility(target_year=1966)
         self.assertEqual(len(res), 3)
         # print(res)
         print(str(res[1])[:65])

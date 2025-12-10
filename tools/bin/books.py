@@ -3,8 +3,8 @@ import readline
 from code import InteractiveConsole
 
 import bookdbtool.estimate_tools as et
-import bookdbtool.repl_tools as rt
-import bookdbtool.isbn_lookup as isbn
+import bookdbtool.book_db_tools as rt
+import bookdbtool.isbn_lookup_tools as isbn
 import bookdbtool.ai_tools as ai
 
 CONFIG_PATH = "/book_service/config/configuration.json"  # root is "tools"
