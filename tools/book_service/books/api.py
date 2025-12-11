@@ -1,10 +1,10 @@
-__version__ = '0.14.1'
+__version__ = '0.15.0'
 
 from io import BytesIO
 from logging.config import dictConfig
 
 import pandas as pd
-from flask import Flask, Response, request, send_file
+from flask import Flask, Response, send_file
 from flask_cors import CORS
 from matplotlib import pylab as plt
 
@@ -31,11 +31,22 @@ cors = CORS(app)
 
 
 @app.route('/configuration')
-@require_appkey
+@require_app_key
 def configuration():
+    """
+    Retrieves the application configuration and metadata as a JSON response.
+
+    Parameters
+        None
+
+    Returns
+        flask.Response - JSON string containing the application version, the
+        configuration dictionaries, the ISBN configuration, and the current
+        date/time in ISO 8601 format.
+    """
     rdata = json.dumps({
         "version": __version__,
-        "configuration": conf,
+        "configuration": books_conf,
         "isbn_configuration": isbn_conf,
         "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
     response_headers = resp_header(rdata)
@@ -49,97 +60,60 @@ def configuration():
 @app.route('/valid_locations')
 def valid_locations():
     """
-    Endpoint to retrieve distinct locations from the 'book collection' table.
-    Returns a JSON response containing the locations.
+    Retrieve a list of all valid locations.
+
+    This endpoint gathers the data of all valid locations from the database,
+    serialises it into the desired format, and returns a HTTP 200 response.
+    The data is obtained by calling :func:`get_valid_locations`, which returns
+    the raw data rows, the status code, the header information, and any
+    validation errors. The rows, header, and errors are then processed by
+    :func:`serialize_rows` to produce a serialised representation suitable
+    for the client. The resulting string is wrapped in a Flask
+    :class:`Response` object and returned with a 200 status code and headers
+    derived from :func:`resp_header`.
+
+    Returns
+    -------
+    Response
+        A Flask Response object containing the serialized valid locations
+        data and the appropriate HTTP headers.
     """
-    result = get_valid_locations()
-
-#     db = None
-#     try:
-#         db = pymysql.connect(**conf)
-#         cursor = db.cursor()
-#
-#         # Execute the query
-#         query = "SELECT DISTINCT Location FROM `book collection` ORDER by Location ASC;"
-#         app.logger.debug(query)
-#         cursor.execute(query)
-#
-#         # Fetch and process the results
-#         locations = cursor.fetchall()
-#         locations_list = [loc[0] for loc in locations]
-#         sorted_locations_list = sort_by_indexes(locations_list, locations_sort_order)
-#         result = json.dumps({"header": "Location", "data": sorted_locations_list})
-#
-#     except pymysql.Error as e:
-#         # Log and handle database errors
-#         app.logger.error(e)
-#         result = {"error": str(e)}
-#     finally:
-#         # Ensure the database connection is closed
-#         if db:
-#             db.close()
-
-    # Return the successful response
+    rdata, s, header, errors = get_valid_locations()
+    result = serialized_result_dict(rdata, header, errors)
     return Response(response=result, status=200, headers=resp_header(result))
 
 
 ##########################################################################
-# RECENT UPDATES
+# BOOKS WITH MOST RECENT UPDATES
 ##########################################################################
 
 
 @app.route('/recent')
 @app.route('/recent/<limit>')
+@require_app_key
 def recent(limit=10):
     """
-    Endpoint to retrieve ids and title of recently updated items
-    Returns a JSON response containing the items.
+    Retrieves a list of the most recently accessed books.
+
+    The function is registered as a route handler for the `/recent` endpoint and accepts an
+    optional `limit` parameter that determines the maximum number of books to return.
+    The default limit is 10.  It calls the internal helper `get_recently_touched` to
+    obtain the books, serializes the result, and returns a Flask `Response` object
+    containing the data along with appropriate headers.
+
+    Args:
+        limit (int): Maximum number of recent books to return. Defaults to 10.
+
+    Returns:
+        flask.Response: A response object containing the serialized list of recent
+        books, a status code of 200, and any necessary headers.
+
+    Raises:
+        None.
     """
-#     db = None
-#     try:
-#         db = pymysql.connect(**conf)
-#         cursor = db.cursor()
-#
-#         # Execute the query
-#         query = ('SELECT abc.BookCollectionID, max(abc.LastUpdate) as LastUpdate, bc.Title FROM\n'
-#                  '(       SELECT BookCollectionID, LastUpdate \n'
-#                  '        FROM `book collection`\n'
-#                  '        UNION\n'
-#                  '        SELECT BookCollectionID , LastUpdate \n'
-#                  '        FROM `book collection`\n'
-#                  '        UNION \n'
-#                  '        SELECT BookID as BookCollectionID, LastUpdate\n'
-#                  '        FROM `books tags`\n'
-#                  '        UNION\n'
-#                  '        SELECT a.BookCollectionID, b.LastUpdate\n'
-#                  '        FROM `complete date estimates` a JOIN `daily page records` b ON\n'
-#                  '        a.RecordID = b.RecordID\n'
-#                  '        UNION \n'
-#                  '        SELECT BookCollectionID, EstimateDate as LastUpdate\n'
-#                  '        FROM `complete date estimates`) abc\n'
-#                  'JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID \n'
-#                  'GROUP BY abc.BookCollectionID, bc.Title\n'
-#                  'ORDER BY LastUpdate DESC LIMIT 10;\n')
-#         app.logger.debug(query)
-#         cursor.execute(query)
-#
-#         # Fetch and process the results
-#         recent_books = []
-#         for a, b, c in cursor.fetchall():
-#             _date = b.strftime(FMT)
-#             _title = c if len(c) <= 43 else c[:40] + "..."
-#             recent_books.append([a, _date, _title])
-#         result = json.dumps({"header": ["BookCollectionID", "LastUpdate", "Title"], "data": recent_books})
-#
-#     except pymysql.Error as e:
-#         # Log and handle database errors
-#         app.logger.error(e)
-#         result = {"error": str(e)}
-#     finally:
-#         # Ensure the database connection is closed
-#         if db:
-#             db.close()
-    result = get_recently_touched(limit)
+    limit = int(limit)
+    recent_books, s, header, error_list = get_recently_touched(limit)
+    result = serialized_result_dict(recent_books, header, error_list)
     # Return the successful response
     return Response(response=result, status=200, headers=resp_header(result))
 
@@ -149,7 +123,7 @@ def recent(limit=10):
 ##########################################################################
 
 @app.route('/add_books', methods=['POST'])
-@require_appkey
+@require_app_key
 def add_books():
     """
     JSON Post Payload:
@@ -174,7 +148,7 @@ def add_books():
     :return:
     """
     # records should be a list of dictionaries including all fields
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     records = request.get_json()
     search_str = ("INSERT INTO `book collection` "
                   "(Title, Author, CopyrightDate, ISBNNumber, ISBNNumber13, PublisherName, CoverType, Pages, "
@@ -206,7 +180,7 @@ def add_books():
 
 
 @app.route('/add_read_dates', methods=['POST'])
-@require_appkey
+@require_app_key
 def add_read_dates():
     """
     Post Payload:
@@ -223,7 +197,7 @@ def add_read_dates():
     :return:
     """
     # records should be a list of dictionaries including all fields
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     records = request.get_json()
     search_str = 'INSERT INTO `books read` (BookCollectionID, ReadDate, ReadNote) VALUES '
     search_str += '({BookCollectionID}, "{ReadDate}", "{ReadNote}")'
@@ -246,7 +220,7 @@ def add_read_dates():
 
 
 @app.route('/books_by_isbn', methods=['POST'])
-@require_appkey
+@require_app_key
 def books_by_isbn():
     """
     Creates records from isbn lookup and adds to the collection.
@@ -278,7 +252,7 @@ def books_by_isbn():
 # UPDATES
 ##########################################################################
 @app.route('/update_edit_read_note', methods=['POST'])
-@require_appkey
+@require_app_key
 def update_edit_read_note():
     """
     Post Payload:
@@ -295,7 +269,7 @@ def update_edit_read_note():
     :return:
     """
     # records should be a single dictionaries including all fields
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     record = request.get_json()
     record["ReadNote"] = db.escape(record["ReadNote"])
     search_str = "UPDATE `books read` SET "
@@ -318,7 +292,7 @@ def update_edit_read_note():
 
 
 @app.route('/update_book_note_status', methods=['POST'])
-@require_appkey
+@require_app_key
 def update_book_note_status():
     """
     Post Payload:
@@ -349,7 +323,7 @@ def update_book_note_status():
 
 
 @app.route('/update_book_record', methods=['POST'])
-@require_appkey
+@require_app_key
 def update_book_record():
     """
     Post Payload:
@@ -386,91 +360,115 @@ def update_book_record():
 @app.route('/summary_books_read_by_year')
 @app.route('/summary_books_read_by_year/<target_year>')
 def summary_books_read_by_year(target_year=None):
-    rdata, _, _ = summary_books_read_by_year_utility(target_year)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    """
+    Generates a summarized list of books read by year, optionally filtered by a
+    specific target year.
+
+    Parameters
+    ----------
+    target_year : str or None
+        The year to filter the summary. If ``None``, summaries for all years
+        are included.
+
+    Returns
+    -------
+    Response
+        A Flask Response object containing the serialized summary data, the
+        appropriate HTTP headers, and a 200 status code.
+    """
+    rdata, _, header, error_list = summary_books_read_by_year_utility(target_year)
+    result = serialized_result_dict(rdata, header, error_list)
+    response_headers = resp_header(result)
+    return Response(response=result, status=200, headers=response_headers)
 
 
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
 def books_read(target_year=None):
-    rdata, _, _ = books_read_by_year_utility(target_year)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    """
+    Handles HTTP GET requests for books read statistics.
+
+    This route accepts an optional ``target_year`` path parameter. When
+    provided, the function retrieves books read data for the specified year;
+    otherwise it returns data for all available years. The underlying utility
+    function ``books_read_by_year_utility`` returns a tuple of the data,
+    header and error list. The response is serialized, wrapped with
+    appropriate HTTP headers, and returned as a Flask ``Response`` object
+    with status code 200.
+
+    :param target_year: The year for which to filter the books read
+        statistics. If omitted, statistics for all years are returned.
+    :type target_year: str or None
+
+    :return: Flask response object containing the serialized data and HTTP
+        headers.
+    :rtype: Response
+    """
+    rdata, _, header, error_list = books_read_by_year_utility(target_year)
+    result = serialized_result_dict(rdata, header, error_list)
+    response_headers = resp_header(result)
+    return Response(response=result, status=200, headers=response_headers)
 
 
 @app.route('/status_read/<book_id>')
 def status_read(book_id=None):
-#     db = pymysql.connect(**conf)
-#     search_str = (f"select BookCollectionID, ReadDate, ReadNote "
-#                   f"FROM `books read` "
-#                   f"WHERE BookCollectionID = {book_id} ORDER BY ReadDate ASC;")
-#     app.logger.debug(search_str)
-#     c = db.cursor()
-#     header = ["BookCollectionID", "ReadDate", "ReadNote"]
-#     try:
-#         c.execute(search_str)
-#     except pymysql.Error as e:
-#         app.logger.error(e)
-#         rdata = {"error": str(e)}
-#     else:
-#         s = c.fetchall()
-#         rdata = serialize_rows(s, header)
-    rdata, _, _ = status_read_utility(book_id)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    """
+    Return the status of a book identified by book_id.
+
+    Parameters
+    ----------
+    book_id : str, optional
+        Identifier of the book.  If omitted, the function will
+        return status information for all books.
+
+    Returns
+    -------
+    Response
+        A Flask Response object containing the status data for the
+        requested book.  The response body is the raw data returned
+        by `status_read_utility`, and the status code is 200.
+    """
+    rdata, _, header, error_list = status_read_utility(book_id)
+    result = serialized_result_dict(rdata, header, error_list)
+    response_headers = resp_header(result)
+    return Response(response=result, status=200, headers=response_headers)
 
 
 ##########################################################################
 # SEARCH
 ##########################################################################
 
-@app.route('/books_search')
+@app.route('/books_search', methods=['POST'])
 def books_search():
+    """
+    Search for books by query parameters.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    Response
+        A Flask Response object containing the serialized search results.
+        The response body is JSON encoded and includes any error messages that
+        occurred during processing. The HTTP status code is always 200.
+
+    Notes
+    -----
+    The function extracts query arguments from the Flask `request.args` object,
+    passes them to the `books_search_utility` helper, and then serializes
+    the resulting data with `serialized_result_dict`.
+    The `resp_header` function is used to construct the appropriate HTTP
+    headers for the response.
+
+    """
     # process any query parameters
     args = request.args
-    rdata, s, header = books_search_utility(args)
-
-#     db = pymysql.connect(**conf)
-#     where = []
-#     for key in args:
-#         if key == "BookCollectionID":
-#             where.append(f"a.{key} = \"{args.get(key)}\"")
-#         elif key == "ReadDate":
-#             where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
-#         elif key == "Tags":
-#             _, s, _ = tags_search_utility(args.get(key))
-#             id_list = str(tuple([int(x[0]) for x in s]))
-#             if len(s) == 1:
-#                 # remove trailing comma
-#                 id_list = id_list.replace(",", "")
-#             app.logger.debug(id_list)
-#             where.append(f"a.BookCollectionID in {id_list}")
-#         else:
-#             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
-#     where_str = " AND ".join(where)
-#     search_str = ("SELECT a.BookCollectionID, a.Title, a.Author, a.CopyrightDate, "
-#                   "a.ISBNNumber, a.PublisherName, a.CoverType, a.Pages, "
-#                   "a.Category, a.Note, a.Recycled, a.Location, a.ISBNNumber13, "
-#                   "b.ReadDate "
-#                   "FROM `book collection` as a LEFT JOIN `books read` as b "
-#                   "ON a.BookCollectionID = b.BookCollectionID ")
-#     if where_str != '':
-#         search_str += "WHERE " + where_str
-#     search_str += " ORDER BY a.Author, a.Title ASC"
-#     app.logger.debug(search_str)
-#     header = table_header + ["ReadDate"]
-#     c = db.cursor()
-#     try:
-#         c.execute(search_str)
-#     except pymysql.Error as e:
-#         app.logger.error(e)
-#         rdata = json.dumps({"error": str(e)})
-#     else:
-#         s = c.fetchall()
-#         rdata = serialize_rows(s, header)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    rdata, s, header, error_list = books_search_utility(args)
+    result = serialized_result_dict(rdata, header, error_list)
+    response_headers = resp_header(result)
+    return Response(response=result, status=200, headers=response_headers)
 
 
 ##########################################################################
@@ -480,9 +478,44 @@ def books_search():
 
 @app.route('/complete_records_window/<book_id>/<window>')
 def complete_record_window(book_id, window=20):
+    """
+    Return a JSON list of complete book records for a window of book IDs
+    around the given book_id.
+
+    Parameters
+    ----------
+    book_id
+        The identifier of the book for which a window of complete records
+        is requested.
+    window
+        The number of book IDs to include in the window.  Defaults to 20
+        if not supplied.
+
+    Returns
+    -------
+    flask.Response
+        A Flask Response object containing a JSON string that represents a
+        list of complete book records for the requested window.  The HTTP
+        status is set to 200.
+
+    Raises
+    ------
+    None.
+
+    Notes
+    -----
+    This route internally uses `get_book_ids_in_window` to obtain the list
+    of book IDs, then retrieves each complete record with
+    `get_complete_book_record`.  The response headers are generated by
+    `resp_header`.
+
+    See Also
+    --------
+    get_book_ids_in_window, get_complete_book_record, resp_header
+    """
     window_list = []
-    for bid in get_book_ids(book_id, int(window)):
-        window_list.append(complete_book_record(bid))
+    for bid in get_book_ids_in_window(book_id, int(window)):
+        window_list.append(get_complete_book_record(bid))
     rdata = json.dumps(window_list)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
@@ -491,15 +524,48 @@ def complete_record_window(book_id, window=20):
 @app.route('/complete_record/<book_id>')
 @app.route('/complete_record/<book_id>/<adjacent>')
 def complete_record(book_id, adjacent=None):
-    rdata = json.dumps([])
+    """
+    Detailed summary:
+    The `complete_record` view retrieves the full book record for a given book ID.
+    It can optionally navigate to the next or previous book by interpreting the
+    `adjacent` parameter. The returned value is a Flask `Response` containing JSON
+    data and the necessary HTTP headers.
+
+    Parameters:
+        book_id (str): Identifier of the book whose complete record is requested.
+        adjacent (str or None, optional): Navigation direction relative to the
+            current book. Accepts `"next"` or `"prev"` (case‑insensitive).
+            If omitted or `None`, the current book record is returned.
+
+    Returns:
+        flask.Response: A Flask `Response` object with a JSON‑encoded body that
+        contains the complete book record. The response headers are set by
+        `resp_header`. If an invalid `adjacent` value is supplied, an empty JSON
+        object is returned.
+
+    Raises:
+        None: The function handles any invalid input internally via logging and
+        does not raise exceptions to the caller.
+
+    Notes:
+        * When `adjacent` is `"next"`, the function obtains the next book ID
+          with `get_next_book_id(book_id, 1)` and retrieves that record.
+        * When `adjacent` starts with `"prev"`, it obtains the previous book ID
+          with `get_next_book_id(book_id, -1)` and retrieves that record.
+        * Invalid `adjacent` values are logged with `app.logger.error` and result
+          in an empty JSON response.
+    """
     if adjacent is None:
-        rdata = json.dumps(complete_book_record(book_id))
+        rdata = json.dumps(get_complete_book_record(book_id))
     elif adjacent.lower() == "next":
         next_id = get_next_book_id(book_id, 1)
-        rdata = json.dumps(complete_book_record(next_id))
+        rdata = json.dumps(get_complete_book_record(next_id))
     elif adjacent.lower().startswith("prev"):
         previous_id = get_next_book_id(book_id, -1)
-        rdata = json.dumps(complete_book_record(previous_id))
+        rdata = json.dumps(get_complete_book_record(previous_id))
+    else:
+        app.logger.error(f"Invalid adjacent parameter: {adjacent}")
+        rdata = json.dumps({})
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -509,9 +575,9 @@ def complete_record(book_id, adjacent=None):
 ##########################################################################
 
 @app.route('/add_tag/<book_id>/<tag>', methods=["PUT"])
-@require_appkey
+@require_app_key
 def add_tag(book_id, tag):
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     tag = tag.lower()
     with db:
         with db.cursor() as c:
@@ -532,7 +598,18 @@ def add_tag(book_id, tag):
 @app.route('/tag_counts')
 @app.route('/tag_counts/<tag>')
 def tag_counts(tag=None):
-    db = pymysql.connect(**conf)
+    """
+    Retrieve tag count information from the database.
+
+    This view handles GET requests to `/tag_counts` or `/tag_counts/<tag>`. It queries the MySQL database configured in `books_conf` to count occurrences of each tag label. If a `tag` parameter is supplied, the query filters results to labels that start with the provided string. The function logs the executed query, executes it, handles any database errors, and returns a Flask Response object containing the serialized JSON data and appropriate response headers.
+
+    Args:
+        tag (str or None): Optional tag name used to filter results by label prefix.
+
+    Returns:
+        Response: Flask Response object with JSON data and response headers.
+    """
+    db = pymysql.connect(**books_conf)
     search_str = "SELECT a.Label as Tag, COUNT(b.TagID) as Count"
     search_str += " FROM `tag labels` a JOIN `books tags` b ON a.TagID =b.TagID"
     if tag is not None:
@@ -548,38 +625,69 @@ def tag_counts(tag=None):
         app.logger.error(e)
     else:
         s = c.fetchall()
-        rdata = serialize_rows(s, header)
+        rdata = serialized_result_dict(s, header)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
 
 @app.route('/tags/<book_id>')
 def tags(book_id=None):
-#     db = pymysql.connect(**conf)
-#     search_str = "SELECT a.Label as Tag"
-#     search_str += " FROM `tag labels` a JOIN `books tags` b ON a.TagID =b.TagID"
-#     search_str += f" WHERE b.BookID = {book_id} ORDER BY Tag"
-#     app.logger.debug(search_str)
-#     c = db.cursor()
-#     try:
-#         c.execute(search_str)
-#     except pymysql.Error as e:
-#         app.logger.error(e)
-#         rdata = {"error": str(e)}
-#     else:
-#         s = c.fetchall()
-#         tag_list = [x[0].strip() for x in s]
-#         s = list(s)
-#         rdata = json.dumps({"BookID": book_id, "tag_list": tag_list})
-    rdata, s, header = book_tags(book_id)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    """
+    Retrieve serialized tags for a book by its identifier.
+
+    This Flask view handles GET requests to the `/tags/<book_id>` endpoint. It
+    fetches the tags associated with the given book, serializes the result into a
+    dictionary, sets appropriate response headers, and returns a Flask
+    `Response` object with a status code of 200.
+
+    Parameters:
+        book_id (str): The unique identifier of the book whose tags are to be
+            retrieved. If omitted, the route will not match and Flask will
+            return a 404.
+
+    Returns:
+        Response: A Flask `Response` object containing the serialized tag data
+            and custom headers.
+    """
+    rdata, error_list = book_tags(book_id)
+    if error_list:
+        rdata["error"] = error_list
+    result = json.dumps(rdata)
+    response_headers = resp_header(result)
+    return Response(response=result, status=200, headers=response_headers)
 
 
 @app.route('/update_tag_value/<current>/<updated>', methods=["PUT"])
-@require_appkey
+@require_app_key
 def update_tag_value(current, updated):
-    db = pymysql.connect(**conf)
+    """
+    Handles updating a tag label in the database.
+
+    This endpoint accepts the current tag label and the updated tag label as URL
+    parameters, performs an UPDATE statement on the `tag labels` table and returns
+    a JSON response with the number of affected rows or an error message.  The
+    operation is protected by the @require_app_key decorator and logs any
+    database errors.
+
+    Parameters
+    ----------
+    current : str
+        The tag label to be replaced.
+    updated : str
+        The new tag label to use in place of the current one.
+
+    Returns
+    -------
+    Response
+        A Flask Response object with status 200 and a JSON body.  The body
+        contains either a ``data`` key with the update information or an
+        ``error`` key if a database error occurred.
+
+    Raises
+    ------
+    None
+    """
+    db = pymysql.connect(**books_conf)
     with db:
         with db.cursor() as c:
             try:
@@ -597,14 +705,34 @@ def update_tag_value(current, updated):
 
 @app.route('/tags_search/<match_str>')
 def tags_search(match_str):
-    rdata, s, header = tags_search_utility(match_str)
-    response_headers = resp_header(rdata)
-    return Response(response=rdata, status=200, headers=response_headers)
+    """
+    Search tags for the given match string.
+
+    Parameters
+    ----------
+    match_str : str
+        The string to match tags against.
+
+    Returns
+    -------
+    flask.Response
+        A Flask Response object containing the tag search results
+        with status 200 and appropriate response headers.
+
+    Raises
+    ------
+    Any exception raised by `tags_search_utility`, `resp_header` or
+    `Response` constructor will propagate to the caller.
+    """
+    row_data, s, header, error_list = tags_search_utility(match_str)
+    result = serialized_result_dict(row_data, header, error_list)
+    response_headers = resp_header(result)
+    return Response(response=result, status=200, headers=response_headers)
 
 
 @app.route('/tag_maintenance')
 def tag_maintenance():
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     rdata = {"tag_maintenance": {}}
     with db:
         with db.cursor() as c:
@@ -639,7 +767,7 @@ def date_page_records(record_id=None):
 
 @app.route('/record_set/<book_id>')
 def record_set(book_id=None):
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": [], "Estimate": []}}
     q = ("SELECT StartDate, RecordID FROM `complete date estimates` "
          f"WHERE BookCollectionID = {book_id} ORDER BY StartDate ASC")
@@ -661,7 +789,7 @@ def record_set(book_id=None):
 
 
 @app.route('/add_date_page', methods=['POST'])
-@require_appkey
+@require_app_key
 def add_date_page():
     """
     Post Payload:
@@ -684,7 +812,7 @@ def add_date_page():
     search_str += 'RecordDate="{RecordDate}", '
     search_str += 'page="{Page}";'
     app.logger.debug(search_str.format(**record))
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     rdata = json.dumps({"error": "No record added."})
     with db:
         with db.cursor() as c:
@@ -701,10 +829,10 @@ def add_date_page():
 
 @app.route('/add_book_estimate/<book_id>/<last_readable_page>', methods=["PUT"])
 @app.route('/add_book_estimate/<book_id>/<last_readable_page>/<start_date>', methods=["PUT"])
-@require_appkey
+@require_app_key
 def add_book_estimate(book_id, last_readable_page, start_date=None):
     # TODO: if you call it again, you get a new record_id for a second reading of the same book
-    db = pymysql.connect(**conf)
+    db = pymysql.connect(**books_conf)
     last_readable_page = int(last_readable_page)
     if start_date is None:
         start_date = datetime.datetime.now().strftime(FMT)

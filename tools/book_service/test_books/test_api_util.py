@@ -1,5 +1,6 @@
 import datetime
 import unittest
+from decimal import Decimal
 
 from books import api_util as au
 
@@ -12,7 +13,7 @@ class TestAppUtilityFunctions(unittest.TestCase):
         self.assertTrue(len(au.API_KEY) > 0)
 
     def test_get_configuration(self):
-        config1, config2 = au.get_configuration()
+        config1, config2 = au.read_json_configuration()
         self.assertGreaterEqual(len(config1['user']), 4)
         self.assertGreaterEqual(len(config1['passwd']), 4)
         self.assertEqual(config1["db"], "books")
@@ -21,15 +22,15 @@ class TestAppUtilityFunctions(unittest.TestCase):
     def test_sort_by_indexes(self):
         lst = [1, 2, 3, 4, 5]
         indexes = [4, 3, 2, 1, 0]
-        sorted_lst = au.sort_by_indexes(lst, indexes)
+        sorted_lst = au.sort_list_by_index_list(lst, indexes)
         self.assertEqual(sorted_lst, [5, 4, 3, 2, 1])
 
     def test_serialize_rows(self):
-        cursor = [(1, 'Title1', 'Author1', datetime.date(2022, 1, 1)),
-                  (2, 'Title2', 'Author2', datetime.date(2022, 1, 2))]
+        cursor = [(Decimal(1), 'Title1', 'Author1', datetime.date(2022, 1, 1)),
+                  (Decimal(2), 'Title2', 'Author2', datetime.date(2022, 1, 2))]
         header = ['ID', 'Title', 'Author', 'Date']
-        expected_result = '{"header": ["ID", "Title", "Author", "Date"], "data": [[1, "Title1", "Author1", "2022-01-01"], [2, "Title2", "Author2", "2022-01-02"]]}'
-        result = au.serialize_rows(cursor, header)
+        expected_result = '{"header": ["ID", "Title", "Author", "Date"], "data": [[1.0, "Title1", "Author1", "2022-01-01"], [2.0, "Title2", "Author2", "2022-01-02"]]}'
+        result = au.serialized_result_dict(cursor, header)
         self.assertEqual(result, expected_result)
 
     def test_resp_header(self):
@@ -43,22 +44,23 @@ class TestAppUtilityFunctions(unittest.TestCase):
         self.assertEqual(response_header, expected_header)
 
     def test_summary_books_read_by_year(self):
-        res = au.summary_books_read_by_year_utility(target_year=1966)
-        self.assertEqual(len(res), 3)
-        self.assertEqual(str(res),
-                         """('{"header": ["year", "pages read", "books read"], "data": [[1966, 2527.0, 13]]}', ((1966, Decimal('2527'), 13),), ['year', 'pages read', 'books read'])""")
+        res, res1, header, error = au.summary_books_read_by_year_utility(target_year=1966)
+        self.assertEqual(len(res[0]), 3)
+        print(res)
+        print(str(res[0]))
+        self.assertEqual(str(res[0]), """(1966, Decimal('2527'), 13)""")
 
     def test_books_read(self):
-        res = au.books_read_by_year_utility(target_year=1966)
-        self.assertEqual(len(res), 3)
+        res, res1, header, error = au.books_read_by_year_utility(target_year=1966)
+        self.assertEqual(len(res), 13)
         # print(res)
-        print(str(res[1])[:65])
-        self.assertEqual(str(res[1])[:65],
-                         """((155, 'Letters To Children', 'Lewis, C S', datetime.datetime(198""")
+        print(str(res[0])[:64])
+        self.assertEqual(str(res[0])[:64],
+                         """(155, 'Letters To Children', 'Lewis, C S', datetime.datetime(198""")
 
     def test_tags_search(self):
         res = au.tags_search_utility("zander")
-        self.assertEqual(len(res), 3)
+        self.assertEqual(len(res), 4)
         print(str(res[2]))
         self.assertEqual(str(res[2]),
                          """['BookCollectionID', 'TagID', 'Tag']""")
@@ -99,19 +101,18 @@ class TestAppUtilityFunctions(unittest.TestCase):
         next_id = au.get_next_book_id(2, -1)  # last as of 2025-11-26
         self.assertGreaterEqual(next_id, 1875)
 
-
     def test_get_book_ids_(self):
-        book_ids = au.get_book_ids(2, 20)
+        book_ids = au.get_book_ids_in_window(2, 20)
         self.assertTrue(set([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).issubset(book_ids))
         self.assertEqual(len(book_ids), 20)
-        book_ids = au.get_book_ids(3000, 20)  # last as of 2025-11-26
+        book_ids = au.get_book_ids_in_window(3000, 20)  # last as of 2025-11-26
         self.assertTrue(set([2, 3, 4, 5, 6, 7, 8, 9, 10]).issubset(book_ids))
         self.assertEqual(len(book_ids), 20)
-        book_ids = au.get_book_ids(477, 30)
+        book_ids = au.get_book_ids_in_window(477, 30)
         self.assertEqual(len(book_ids), 30)
 
     def test_complete_book_record(self):
-        rec = au.complete_book_record(1873)
+        rec = au.get_complete_book_record(1873)
         print(rec)
         self.assertEqual(len(rec), 3)
         self.assertEqual(rec["book"]["data"][0][0], 1873)
@@ -125,7 +126,7 @@ class TestAppUtilityFunctions(unittest.TestCase):
             "Title": "FKA - Demon Copperhead A Novel"
         }
         res = au.update_book_record_by_key(update_data)
-        rec = au.complete_book_record(1873)
+        rec = au.get_complete_book_record(1873)
         self.assertTrue(res)
         self.assertEqual(rec["book"]["data"][0][1], "FKA - Demon Copperhead A Novel")
         # Change it back
@@ -135,9 +136,8 @@ class TestAppUtilityFunctions(unittest.TestCase):
         }
         res = au.update_book_record_by_key(update_data)
         self.assertTrue(res)
-        rec = au.complete_book_record(1873)
+        rec = au.get_complete_book_record(1873)
         self.assertEqual(rec["book"]["data"][0][1], "Demon Copperhead A Novel")
-
 
 
 if __name__ == '__main__':

@@ -13,11 +13,11 @@ uWSGI = "^2.0.20"
 matplotlib = "^3.5.2"
 Flask-Cors = "^3.0.10"
 cryptography = "^41.0.5"
-pytest = "^8.0.0"
-pytest-cov = "^4.1.0"
 pandas = "^2.3.3"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
