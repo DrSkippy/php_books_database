@@ -1,13 +1,14 @@
 import datetime
 import functools
 import json
+import logging
 from decimal import Decimal
 
 import numpy as np
 import pymysql
-from flask import request, abort, current_app
+from flask import request, abort
 
-app_logger = current_app.logger
+app_logger = logging.getLogger(__name__)
 
 table_header = ["BookCollectionID",
                 "Title",
@@ -980,7 +981,7 @@ def books_search_utility(args):
         elif key == "ReadDate":
             where.append(f"b.{key} LIKE \"%{args.get(key)}%\"")
         elif key == "Tags":
-            _, s, _ = tags_search_utility(args.get(key))
+            _, s, _, _ = tags_search_utility(args.get(key))
             id_list = str(tuple([int(x[0]) for x in s]))
             if len(s) == 1:
                 # remove trailing comma

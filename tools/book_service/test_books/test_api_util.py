@@ -65,6 +65,17 @@ class TestAppUtilityFunctions(unittest.TestCase):
         self.assertEqual(str(res[2]),
                          """['BookCollectionID', 'TagID', 'Tag']""")
 
+    def test_books_search(self):
+        res, res1, header, error = au.books_search_utility({"Title":"lewis"})
+        print(f"Title=lewis results: {len(res)} books found")
+        self.assertGreater(len(res), 0)
+        self.assertIsNone(error)
+
+        res2, res21, header2, error2 = au.books_search_utility({"Tags":"science"})
+        print(f"Tags=science results: {len(res2)} books found")
+        self.assertGreater(len(res2), 0)
+        self.assertIsNone(error2)
+
     def test_depending_on_daily_page_record_from_db(self):
         d, _ = au.daily_page_record_from_db(1)
         self.assertEqual(len(d), 4)

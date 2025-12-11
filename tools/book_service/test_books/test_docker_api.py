@@ -45,13 +45,27 @@ class TestAppFunctions(unittest.TestCase):
         ep = ENDPOINT + "/books_search"
         ep1 = ep + "?Author=lewis"
         print(f"QUERY={ep1}")
-        res1 = requests.get(ep1, headers={'x-api-key': f'{au.API_KEY}'})
+        res1 = requests.post(ep1, headers={'x-api-key': f'{au.API_KEY}'})
+        self.assertGreater(len(res1.json()["data"]), 0)
         print(res1.json())
         self.assertTrue(res1.status_code == 200)
         ep2 = ep + "?PublisherName=dover"
-        res2 = requests.get(ep2, headers={'x-api-key': f'{au.API_KEY}'})
+        res2 = requests.post(ep2, headers={'x-api-key': f'{au.API_KEY}'})
+        self.assertGreater(len(res2.json()["data"]), 0)
         print(res2.json())
         self.assertTrue(res2.status_code == 200)
+        ep3 = ep + "?Tags=science"
+        print(f"QUERY={ep3}")
+        res3 = requests.post(ep3, headers={'x-api-key': f'{au.API_KEY}'})
+        self.assertGreater(len(res3.json()["data"]), 0)
+        print(res3.json())
+        self.assertTrue(res3.status_code == 200)
+        ep4 = ep + "?note=bought"
+        print(f"QUERY={ep4}")
+        res4 = requests.post(ep4, headers={'x-api-key': f'{au.API_KEY}'})
+        self.assertGreater(len(res4.json()["data"]), 0)
+        print(res4.json())
+        self.assertTrue(res4.status_code == 200)
 
     def test_tag_counts(self):
         ep = ENDPOINT + "/tag_counts/deleteme"
