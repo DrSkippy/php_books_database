@@ -1,0 +1,10 @@
+# MCP Server - Standard Python packages
+mcp>=1.0.0
+
+# HTTP Server
+uvicorn[standard]>=0.30.0
+starlette>=0.37.0
+
+# Database (from parent booksdb module)
+pymysql>=1.1.0
+numpy>=1.24.0

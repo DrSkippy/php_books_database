@@ -1,5 +1,4 @@
 import datetime
-import functools
 import json
 import logging
 import os
@@ -7,7 +6,6 @@ from decimal import Decimal
 
 import numpy as np
 import pymysql
-from flask import request, abort
 
 app_logger = logging.getLogger(__name__)
 
@@ -112,47 +110,6 @@ def sort_list_by_index_list(lst, indexes, reverse=False):
     """
     return [val for (_, val) in sorted(zip(indexes, lst), key=lambda x: \
         x[0], reverse=reverse)]
-
-
-def require_app_key(view_function):
-    """
-    Verify that an incoming HTTP request contains a valid API key before executing
-    the wrapped view function.
-
-    Parameters
-    ----------
-    view_function : callable
-        The view function to be protected. It will be called with the same
-        positional and keyword arguments that the decorated function receives.
-
-    Returns
-    -------
-    callable
-        A new function that first checks the request header 'x-api-key' against
-        the configured API_KEY. If the key matches, it forwards the call to
-        view_function; otherwise it logs an error and aborts with a 401
-        Unauthorized response.
-
-    Raises
-    ------
-    HTTPException
-        Raised when the 'x-api-key' header is missing or does not match
-        the expected API_KEY. The abort(401) call from Flask triggers this
-        exception, causing an HTTP 401 Unauthorized error to be returned.
-    """
-
-    @functools.wraps(view_function)
-    # the new, post-decoration function. Note *args and **kwargs here.
-    def decorated_function(*args, **kwargs):
-        # Select one of these:
-        # if request.args.get('key') and request.args.get('key') == key:
-        if request.headers.get('x-api-key') and request.headers.get('x-api-key') == API_KEY:
-            return view_function(*args, **kwargs)
-        else:
-            app_logger.error("x-api-key missing or incorrect.")
-            abort(401)
-
-    return decorated_function
 
 
 def serialized_result_dict(db_result_rows, header=None, error_list=None):

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  booksmcp:
+    image: localhost:5000/booksmcp:latest
+    container_name: booksmcp-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=3002
+      - HOST=0.0.0.0
+      - BOOKDB_CONFIG=/app/config/configuration.json
+
+    restart: unless-stopped
+    networks:
+      - books-network
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3002/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  books-network:
+    driver: bridge

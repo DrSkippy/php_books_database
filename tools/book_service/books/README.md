@@ -14,11 +14,13 @@
 
 ## BUILD and DEPLOY SERVICE for local testing
 
-On OSX and Linux to run local tests: 
+On OSX and Linux to run local tests:
+
 ```angular2html
-docker build . -t book-test
+docker build -f ./DockerBooksDB . -t book-test
 docker run -p 127.0.0.1:9999:8083 book-test
 ```
+
 ```
 curl -H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" localhost/valid_locations
 ```
@@ -26,6 +28,7 @@ curl -H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" localhost/valid_locatio
 ## BUILD and DEPLOY SERVICE with Portainer.io
 
 Run a local registry in Portainer.io
+
 ```aiignore
 version: '3.8'
 services:
@@ -37,7 +40,9 @@ services:
       - ./data/registry:/var/lib/registry # Persist registry data
     restart: always # Ensure the registry restarts if it stops
 ```
+
 Set insecure registry in /etc/docker/daemon.json
+
 ```aiignore
 {
   "insecure-registries" : ["localhost:5000"]
@@ -47,7 +52,7 @@ Set insecure registry in /etc/docker/daemon.json
 Push to registry:
 
 ```
-docker build . -t localhost:5000/book-service:latest
+docker build -f./DockerBooksDB . -t localhost:5000/book-service:latest
 docker push localhost:5000/book-service:latest
 curl localhost:5000/v2/_catalog
 ```
@@ -60,9 +65,10 @@ docker push localhost:32000/book-service
 ```
 
 ### Deployment to K8s
+
 ```angular2html
-kubectl apply -f deployment.yaml 
-kubectl apply -f ingress.yaml 
+kubectl apply -f deployment.yaml
+kubectl apply -f ingress.yaml
 kubectl expose deployment book-service --type=LoadBalancer --port=8083
 ```
 
