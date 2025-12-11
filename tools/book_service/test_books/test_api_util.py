@@ -2,7 +2,7 @@ import datetime
 import unittest
 from decimal import Decimal
 
-from books import api_util as au
+from booksdb import api_util as au
 
 
 class TestAppUtilityFunctions(unittest.TestCase):
@@ -18,6 +18,14 @@ class TestAppUtilityFunctions(unittest.TestCase):
         self.assertGreaterEqual(len(config1['passwd']), 4)
         self.assertEqual(config1["db"], "books")
         self.assertEqual(len(config2), 2)
+
+    def test_valid_locations(self):
+        sll, loc, h, e = au.get_valid_locations()
+        print(sll, loc, h, e)
+        self.assertTrue(len(sll) == 7)
+        self.assertTrue(len(loc) == 8)
+        self.assertTrue(h[0] == 'Location')
+        self.assertTrue(e is None)
 
     def test_sort_by_indexes(self):
         lst = [1, 2, 3, 4, 5]
@@ -66,12 +74,12 @@ class TestAppUtilityFunctions(unittest.TestCase):
                          """['BookCollectionID', 'TagID', 'Tag']""")
 
     def test_books_search(self):
-        res, res1, header, error = au.books_search_utility({"Title":"lewis"})
+        res, res1, header, error = au.books_search_utility({"Title": "lewis"})
         print(f"Title=lewis results: {len(res)} books found")
         self.assertGreater(len(res), 0)
         self.assertIsNone(error)
 
-        res2, res21, header2, error2 = au.books_search_utility({"Tags":"science"})
+        res2, res21, header2, error2 = au.books_search_utility({"Tags": "science"})
         print(f"Tags=science results: {len(res2)} books found")
         self.assertGreater(len(res2), 0)
         self.assertIsNone(error2)
@@ -149,6 +157,48 @@ class TestAppUtilityFunctions(unittest.TestCase):
         self.assertTrue(res)
         rec = au.get_complete_book_record(1873)
         self.assertEqual(rec["book"]["data"][0][1], "Demon Copperhead A Novel")
+
+    def test_get_recently_touched(self):
+        recent_books, raw_rows, header, error = au.get_recently_touched(limit=5)
+        self.assertIsNone(error)
+        self.assertEqual(header, ["BookCollectionID", "LastUpdate", "Title"])
+        self.assertGreater(len(recent_books), 0)
+        self.assertLessEqual(len(recent_books), 5)
+        self.assertEqual(len(recent_books), len(raw_rows))
+        # Check structure of first result
+        self.assertEqual(len(recent_books[0]), 3)
+        self.assertIsInstance(int(recent_books[0][0]), int)  # BookCollectionID is int represented as string
+        # LastUpdate can be a string or None
+        self.assertTrue(isinstance(recent_books[0][1], str) or recent_books[0][1] is None)
+        self.assertIsInstance(recent_books[0][2], str)  # Title
+        # Verify title truncation (should be <= 43 chars)
+        self.assertLessEqual(len(recent_books[0][2]), 43)
+
+    def test_book_tags(self):
+        rdata, error = au.book_tags(1873)
+        self.assertIsNone(error)
+        self.assertIn("BookID", rdata)
+        self.assertIn("tag_list", rdata)
+        self.assertEqual(rdata["BookID"], 1873)
+        self.assertIsInstance(rdata["tag_list"], list)
+        self.assertGreater(len(rdata["tag_list"]), 0)
+        # Verify all tags are strings
+        for tag in rdata["tag_list"]:
+            self.assertIsInstance(tag, str)
+
+    def test_status_read_utility(self):
+        # Test with a book ID that has read records
+        s, s_dup, header, error_list = au.status_read_utility(1873)
+        self.assertIsNone(error_list)
+        self.assertEqual(header, ["BookCollectionID", "ReadDate", "ReadNote"])
+        self.assertIsNotNone(s)
+        self.assertEqual(s, s_dup)  # Verify duplicate return value
+        # Check structure if records exist
+        if len(s) > 0:
+            self.assertEqual(len(s[0]), 3)  # BookCollectionID, ReadDate, ReadNote
+            self.assertIsInstance(s[0][0], int)  # BookCollectionID
+            # ReadDate should be datetime or None
+            self.assertTrue(isinstance(s[0][1], datetime.date))
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ import datetime
 import functools
 import json
 import logging
+import os
 from decimal import Decimal
 
 import numpy as np
@@ -59,7 +60,7 @@ def read_json_configuration():
     ``isbn_com.url_isbn``, ``isbn_com.key`` and ``api_key``.  If any key is
     absent a ``SystemExit`` exception is raised and the error is logged.
     """
-    config_filename = "./config/configuration.json"
+    config_filename = os.getenv("BOOKDB_CONFIG", "./config/configuration.json")
     with open(config_filename, "r") as config_file:
         c = json.load(config_file)
         try:
@@ -897,6 +898,28 @@ def status_read_utility(book_id):
 
 
 def tags_search_utility(match_str):
+    """
+    Search for book tags that match the given string.
+
+    Parameters
+    ----------
+    match_str : str
+        The substring used to search tag labels.  The value is converted to lower case,
+        stripped of surrounding whitespace, and embedded in a SQL LIKE pattern.
+
+    Returns
+    -------
+    tuple
+        A tuple containing four elements:
+
+        1. A list of rows returned by the database query.  Each row is a tuple of
+           (BookID, TagID, Tag).
+        2. A duplicate reference to the same list of rows (kept for backward
+           compatibility).
+        3. A list of column header names: ['BookCollectionID', 'TagID', 'Tag'].
+        4. Either None if the query succeeded, or a list of error message strings
+           collected from a pymysql.Error exception.
+    """
     match_str = match_str.lower().strip()
     error_list = None
     db = pymysql.connect(**books_conf)
@@ -1014,6 +1037,28 @@ def books_search_utility(args):
 
 
 def book_tags(book_id):
+    """
+    Retrieve tag labels for a specified book from the database.
+
+    Parameters
+    ----------
+    book_id : int
+        The unique identifier of the book for which tag labels are to be retrieved.
+
+    Returns
+    -------
+    tuple
+        A tuple containing two elements:
+        1. A dictionary with keys ``"BookID"`` and ``"tag_list"``, where ``"tag_list"``
+           holds a list of tag label strings associated with the book.
+        2. A list of error messages or ``None`` if no errors occurred during the query.
+
+    Raises
+    ------
+    None
+        The function handles database errors internally and does not propagate
+        exceptions to the caller.
+    """
     error_list = None
     s = None
     db = pymysql.connect(**books_conf)

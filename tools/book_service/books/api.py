@@ -1,14 +1,14 @@
-__version__ = '0.15.0'
+__version__ = '0.15.2'
 
 from io import BytesIO
 from logging.config import dictConfig
 
 import pandas as pd
+from booksdb.api_util import *
 from flask import Flask, Response, send_file
 from flask_cors import CORS
 from matplotlib import pylab as plt
 
-from api_util import *
 from isbn_com import Endpoint as isbn
 
 dictConfig({
@@ -438,7 +438,7 @@ def status_read(book_id=None):
 # SEARCH
 ##########################################################################
 
-@app.route('/books_search', methods=['POST'])
+@app.route('/books_search', methods=['POST', 'GET'])
 def books_search():
     """
     Search for books by query parameters.

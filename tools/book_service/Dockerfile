@@ -21,7 +21,10 @@ COPY ./pyproject.toml ./poetry.lock $APP/
 RUN poetry install --no-root --without dev
 
 COPY ./books $APP/
+COPY ./booksdb/* $APP/booksdb/
 COPY ./config/* $APP/config/
+
+ENV BOOKSDB_CONFIG = "./$APP/config/configuration.json"
 
 EXPOSE 8083
 

@@ -10,7 +10,7 @@ const apiHeaders = {
 }
 
 $.ajaxSetup({
-  headers : apiHeaders
+    headers: apiHeaders
 });
 
 function topnavbar() {
@@ -112,7 +112,7 @@ function setval(bcid) {
         for (var i = 0; i < recordList.length; i++) {
             console.log(recordList[i]);
             console.log(estList[i]);
-            trFour += "<tr><td>" + recordList[i][0].substring(0,11) + "</td><td>";
+            trFour += "<tr><td>" + recordList[i][0].substring(0, 11) + "</td><td>";
             trFour += '<a href=\"' + baseApiPath + 'js_reports/add_date_pages.html?record_id=' +
                 recordList[i][1] + "&book_id=" + bookCollectionID + "\">Add pages to " + recordList[i][1] + "</a>";
             trFour += "</td><td>" + estList[i][0] + "</td>" +
@@ -121,7 +121,8 @@ function setval(bcid) {
         trFour += "</tbody></table></tr>";
         $("#replace-me-four").replaceWith(trFour);
         $('html, body').animate({
-            scrollTop: $(document).height()},'slow'); // 'slow' can be replaced with a duration in milliseconds, e.g., 1000
+            scrollTop: $(document).height()
+        }, 'slow'); // 'slow' can be replaced with a duration in milliseconds, e.g., 1000
     });
 }
 
@@ -129,9 +130,9 @@ function tag_links_list(tags_list) {
     let tag_links = "";
     for (var i = 0; i < tags_list.length; i++) {
         tag_links += '<a href=\"' + baseApiPath + 'js_reports/books_detail.html?tags=' +
-            tags_list[i] + "\">"+tags_list[i]+"</a>, ";
+            tags_list[i] + "\">" + tags_list[i] + "</a>, ";
     }
-    return tag_links.substring(0,tag_links.length - 2);
+    return tag_links.substring(0, tag_links.length - 2);
 }
 
 function createDetailTableRows() {
