@@ -2,7 +2,7 @@
 """
 Test Suite for Books MCP Server (HTTP Transport)
 
-This test suite validates the MCP server's HTTP endpoints and MCP resources
+This test suite validates the MCP server's HTTP endpoints and MCP tools
 when deployed in Docker. It tests both direct HTTP access and MCP protocol
 communication over SSE.
 
@@ -97,20 +97,20 @@ class TestHTTPEndpoints(unittest.TestCase):
         self.assertEqual(data["name"], "Books MCP Server")
         self.assertIn("version", data)
         self.assertIn("endpoints", data)
-        self.assertIn("resources", data)
+        self.assertIn("tools", data)
         self.assertIn("examples", data)
 
-        # Verify resources
-        resources = data["resources"]
-        self.assertEqual(len(resources), 2)
+        # Verify tools
+        tools = data["tools"]
+        self.assertEqual(len(tools), 2)
 
-        book_resource = next((r for r in resources if r["uri"] == "books://search"), None)
-        self.assertIsNotNone(book_resource)
-        self.assertEqual(book_resource["name"], "Book Search")
+        book_tool = next((t for t in tools if t["name"] == "search_books"), None)
+        self.assertIsNotNone(book_tool)
+        self.assertIn("description", book_tool)
 
-        tag_resource = next((r for r in resources if r["uri"] == "tags://search"), None)
-        self.assertIsNotNone(tag_resource)
-        self.assertEqual(tag_resource["name"], "Tag Search")
+        tag_tool = next((t for t in tools if t["name"] == "search_tags"), None)
+        self.assertIsNotNone(tag_tool)
+        self.assertIn("description", tag_tool)
 
         print("  ✓ Server info verified")
 
@@ -140,7 +140,7 @@ class TestHTTPEndpoints(unittest.TestCase):
         test_message = {
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "resources/list"
+            "method": "tools/list"
         }
 
         response = requests.post(
@@ -185,8 +185,8 @@ class TestMCPProtocol(unittest.TestCase):
         if not self.server_available:
             self.skipTest("MCP server not running")
 
-    def test_10_list_resources(self):
-        """Test listing resources via MCP protocol."""
+    def test_10_list_tools(self):
+        """Test listing tools via MCP protocol."""
         async def run_test():
             print("\n  Connecting via SSE...")
 
@@ -196,37 +196,36 @@ class TestMCPProtocol(unittest.TestCase):
                     await session.initialize()
                     print("  ✓ Session initialized")
 
-                    # List resources
-                    result = await session.list_resources()
+                    # List tools
+                    result = await session.list_tools()
 
-                    self.assertIn("resources", result)
-                    resources = result["resources"]
+                    self.assertIn("tools", result)
+                    tools = result["tools"]
 
-                    self.assertEqual(len(resources), 2)
+                    self.assertEqual(len(tools), 2)
 
-                    print(f"  ✓ Found {len(resources)} resources:")
-                    for r in resources:
-                        print(f"    - {r['uri']}: {r['name']}")
+                    print(f"  ✓ Found {len(tools)} tools:")
+                    for t in tools:
+                        print(f"    - {t['name']}: {t['description'][:50]}...")
 
         asyncio.run(run_test())
 
     def test_11_book_search_by_title(self):
         """Test book search by title."""
         async def run_test():
-            print("\n  Testing: books://search?Title=lewis")
+            print("\n  Testing: search_books tool with Title='lewis'")
 
             async with sse_client(f"{self.BASE_URL}/sse") as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
 
-                    # Search for books
-                    uri = "books://search?Title=lewis"
-                    result = await session.read_resource(uri)
+                    # Search for books using tool
+                    result = await session.call_tool("search_books", {"Title": "lewis"})
 
-                    self.assertIn("contents", result)
-                    content = result["contents"][0]
+                    self.assertIn("content", result)
+                    content = result["content"][0]
 
-                    self.assertEqual(content["mimeType"], "application/json")
+                    self.assertEqual(content["type"], "text")
 
                     data = json.loads(content["text"])
 
@@ -245,16 +244,15 @@ class TestMCPProtocol(unittest.TestCase):
     def test_12_book_search_by_author(self):
         """Test book search by author."""
         async def run_test():
-            print("\n  Testing: books://search?Author=tolkien")
+            print("\n  Testing: search_books tool with Author='tolkien'")
 
             async with sse_client(f"{self.BASE_URL}/sse") as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
 
-                    uri = "books://search?Author=tolkien"
-                    result = await session.read_resource(uri)
+                    result = await session.call_tool("search_books", {"Author": "tolkien"})
 
-                    content = result["contents"][0]
+                    content = result["content"][0]
                     data = json.loads(content["text"])
 
                     self.assertIn("count", data)
@@ -265,16 +263,18 @@ class TestMCPProtocol(unittest.TestCase):
     def test_13_book_search_multiple_params(self):
         """Test book search with multiple parameters."""
         async def run_test():
-            print("\n  Testing: books://search?Author=lewis&Category=fiction")
+            print("\n  Testing: search_books tool with Author='lewis' and Category='fiction'")
 
             async with sse_client(f"{self.BASE_URL}/sse") as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
 
-                    uri = "books://search?Author=lewis&Category=fiction"
-                    result = await session.read_resource(uri)
+                    result = await session.call_tool("search_books", {
+                        "Author": "lewis",
+                        "Category": "fiction"
+                    })
 
-                    content = result["contents"][0]
+                    content = result["content"][0]
                     data = json.loads(content["text"])
 
                     self.assertIn("count", data)
@@ -285,16 +285,15 @@ class TestMCPProtocol(unittest.TestCase):
     def test_14_tag_search(self):
         """Test tag search."""
         async def run_test():
-            print("\n  Testing: tags://search?science")
+            print("\n  Testing: search_tags tool with query='science'")
 
             async with sse_client(f"{self.BASE_URL}/sse") as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
 
-                    uri = "tags://search?science"
-                    result = await session.read_resource(uri)
+                    result = await session.call_tool("search_tags", {"query": "science"})
 
-                    content = result["contents"][0]
+                    content = result["content"][0]
                     data = json.loads(content["text"])
 
                     self.assertIn("query", data)
@@ -313,16 +312,15 @@ class TestMCPProtocol(unittest.TestCase):
     def test_15_error_handling_no_params(self):
         """Test error handling when no parameters provided."""
         async def run_test():
-            print("\n  Testing error handling: books://search (no params)")
+            print("\n  Testing error handling: search_books tool with no params")
 
             async with sse_client(f"{self.BASE_URL}/sse") as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
 
-                    uri = "books://search"
-                    result = await session.read_resource(uri)
+                    result = await session.call_tool("search_books", {})
 
-                    content = result["contents"][0]
+                    content = result["content"][0]
                     data = json.loads(content["text"])
 
                     self.assertIn("error", data)
@@ -333,16 +331,15 @@ class TestMCPProtocol(unittest.TestCase):
     def test_16_error_handling_no_query(self):
         """Test error handling for tag search without query."""
         async def run_test():
-            print("\n  Testing error handling: tags://search (no query)")
+            print("\n  Testing error handling: search_tags tool with no query")
 
             async with sse_client(f"{self.BASE_URL}/sse") as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
 
-                    uri = "tags://search"
-                    result = await session.read_resource(uri)
+                    result = await session.call_tool("search_tags", {})
 
-                    content = result["contents"][0]
+                    content = result["content"][0]
                     data = json.loads(content["text"])
 
                     self.assertIn("error", data)
@@ -368,16 +365,16 @@ class TestSummary(unittest.TestCase):
         if MCP_CLIENT_AVAILABLE:
             print("\n✓ MCP Protocol Tested (via SSE):")
             print("  • Initialize session")
-            print("  • List resources")
-            print("  • Read resources")
+            print("  • List tools")
+            print("  • Call tools")
 
-            print("\n✓ Resources Tested:")
-            print("  • books://search")
+            print("\n✓ Tools Tested:")
+            print("  • search_books")
             print("    - Search by Title")
             print("    - Search by Author")
             print("    - Multiple parameters")
             print("    - Error handling (no params)")
-            print("  • tags://search")
+            print("  • search_tags")
             print("    - Tag search")
             print("    - Error handling (no query)")
         else:

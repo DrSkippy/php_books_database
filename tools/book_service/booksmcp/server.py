@@ -4,10 +4,10 @@ Books MCP Server - HTTP Transport
 
 A Model Context Protocol (MCP) server that exposes book and tag search
 functionality over HTTP. This server uses the standard Python MCP packages
-and provides two main resources:
+and provides two main tools:
 
-1. books://search - Search books by various criteria
-2. tags://search - Search books by tag labels
+1. search_books - Search books by various criteria (Title, Author, ISBN, etc.)
+2. search_tags - Search books by tag labels
 
 The server runs on port 3002 and uses HTTP/SSE for MCP communication.
 """
@@ -19,7 +19,6 @@ import os
 import sys
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, unquote, urlparse
 
 # Add parent directory to path to import booksdb
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -29,7 +28,7 @@ from booksdb import api_util
 # MCP imports
 from mcp.server import Server
 from mcp.server.sse import SseServerTransport
-from mcp.types import Resource, TextContent
+from mcp.types import Tool, TextContent
 
 # HTTP server imports
 from starlette.applications import Starlette
@@ -50,85 +49,88 @@ mcp_server = Server("books-mcp-server")
 
 
 # ============================================================================
-# MCP Resource Handlers
+# MCP Tool Handlers
 # ============================================================================
 
-@mcp_server.list_resources()
-async def list_resources() -> list[Resource]:
+@mcp_server.list_tools()
+async def list_tools() -> list[Tool]:
     """
-    List available MCP resources.
+    List available MCP tools.
 
     Returns:
-        List of available resources (books search and tags search)
+        List of available tools (book search and tag search)
     """
-    logger.info("Listing resources")
+    logger.info("Listing tools")
     return [
-        Resource(
-            uri="books://search",
-            name="Book Search",
-            mimeType="application/json",
+        Tool(
+            name="search_books",
             description="Search books by title, author, ISBN, or other fields. "
                        "Supports parameters: Title, Author, ISBNNumber, ISBNNumber13, "
-                       "PublisherName, Category, Location, Tags, ReadDate"
+                       "PublisherName, Category, Location, Tags, ReadDate",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "Title": {"type": "string", "description": "Book title to search for"},
+                    "Author": {"type": "string", "description": "Author name to search for"},
+                    "ISBNNumber": {"type": "string", "description": "ISBN-10 number"},
+                    "ISBNNumber13": {"type": "string", "description": "ISBN-13 number"},
+                    "PublisherName": {"type": "string", "description": "Publisher name"},
+                    "Category": {"type": "string", "description": "Book category"},
+                    "Location": {"type": "string", "description": "Book location"},
+                    "Tags": {"type": "string", "description": "Tags associated with the book"},
+                    "ReadDate": {"type": "string", "description": "Date when the book was read"}
+                },
+                "additionalProperties": False
+            }
         ),
-        Resource(
-            uri="tags://search",
-            name="Tag Search",
-            mimeType="application/json",
-            description="Search for books by tag labels. Returns books with matching tags."
+        Tool(
+            name="search_tags",
+            description="Search for books by tag labels. Returns books with matching tags.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Tag name to search for"}
+                },
+                "required": ["query"],
+                "additionalProperties": False
+            }
         )
     ]
 
 
-@mcp_server.read_resource()
-async def read_resource(uri: str) -> str:
+@mcp_server.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     """
-    Read a resource by URI.
+    Call a tool by name with the provided arguments.
 
     Args:
-        uri: Resource URI (e.g., 'books://search?Title=lewis')
+        name: Tool name ('search_books' or 'search_tags')
+        arguments: Tool arguments as a dictionary
 
     Returns:
-        JSON string with search results
+        List of TextContent with search results
     """
-    logger.info(f"Reading resource: {uri}")
-
-    # Parse the URI
-    parsed = urlparse(uri)
-    scheme = parsed.scheme
-    path = parsed.path or "search"
-    query_string = parsed.query
-
-    # Parse query parameters
-    params = {}
-    if query_string:
-        # Handle both encoded and plain query strings
-        query_string = unquote(query_string)
-
-        # Parse as query string if it contains '='
-        if '=' in query_string:
-            parsed_qs = parse_qs(query_string)
-            params = {k: v[0] if len(v) == 1 else v for k, v in parsed_qs.items()}
-        else:
-            # For tags://search?term format, use the whole string as search term
-            params = {"query": query_string}
+    logger.info(f"Calling tool: {name} with arguments: {arguments}")
 
     try:
-        if scheme == "books":
-            return await handle_book_search(params)
-        elif scheme == "tags":
-            return await handle_tag_search(params)
+        if name == "search_books":
+            result = await handle_book_search(arguments)
+        elif name == "search_tags":
+            result = await handle_tag_search(arguments)
         else:
-            return json.dumps({
-                "error": f"Unknown resource scheme: {scheme}. Supported: books://, tags://",
+            result = json.dumps({
+                "error": f"Unknown tool: {name}. Supported: search_books, search_tags",
                 "results": []
             })
+
+        return [TextContent(type="text", text=result)]
     except Exception as e:
-        logger.error(f"Error reading resource {uri}: {e}", exc_info=True)
-        return json.dumps({
+        logger.error(f"Error calling tool {name}: {e}", exc_info=True)
+        error_result = json.dumps({
             "error": str(e),
             "results": []
         })
+        return [TextContent(type="text", text=error_result)]
 
 
 async def handle_book_search(params: dict) -> str:
@@ -264,26 +266,24 @@ async def handle_root(request: Request) -> JSONResponse:
             "sse": "/sse",
             "messages": "/messages"
         },
-        "resources": [
+        "tools": [
             {
-                "uri": "books://search",
-                "name": "Book Search",
+                "name": "search_books",
                 "description": "Search books by title, author, ISBN, category, tags, etc.",
                 "parameters": ["Title", "Author", "ISBNNumber", "ISBNNumber13",
                              "PublisherName", "Category", "Location", "Tags", "ReadDate"]
             },
             {
-                "uri": "tags://search",
-                "name": "Tag Search",
+                "name": "search_tags",
                 "description": "Search books by tag labels",
-                "usage": "tags://search?<tag_name>"
+                "parameters": ["query"]
             }
         ],
         "examples": {
-            "book_by_title": "books://search?Title=lewis",
-            "book_by_author": "books://search?Author=tolkien",
-            "book_by_tags": "books://search?Tags=science",
-            "tag_search": "tags://search?history"
+            "book_by_title": {"tool": "search_books", "arguments": {"Title": "lewis"}},
+            "book_by_author": {"tool": "search_books", "arguments": {"Author": "tolkien"}},
+            "book_by_tags": {"tool": "search_books", "arguments": {"Tags": "science"}},
+            "tag_search": {"tool": "search_tags", "arguments": {"query": "history"}}
         }
     })
 
@@ -388,9 +388,9 @@ async def main():
     logger.info(f"  GET  http://{host}:{port}/sse      - SSE connection")
     logger.info(f"  POST http://{host}:{port}/messages - Messages")
     logger.info("")
-    logger.info("Resources:")
-    logger.info("  books://search - Search books")
-    logger.info("  tags://search  - Search tags")
+    logger.info("Tools:")
+    logger.info("  search_books - Search books by title, author, ISBN, etc.")
+    logger.info("  search_tags  - Search books by tag labels")
     logger.info("="*70)
 
     config = uvicorn.Config(
