@@ -5,7 +5,7 @@
 ```
 cat config/configuration.json | jq . 
 docker images 
-docker build . -t books-test
+docker build -f ./books/Dockerfile . -t books-test
 docker run -d -p 9999:8083 --name books-test-container books-test
 docker ps
 poetry run python test_books/generate_curl_commands.py > curl_test_script.bash

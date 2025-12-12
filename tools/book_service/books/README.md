@@ -17,7 +17,7 @@
 On OSX and Linux to run local tests:
 
 ```angular2html
-docker build -f ./DockerBooksDB . -t book-test
+docker build -f ./books/Dockerfile . -t book-test
 docker run -p 127.0.0.1:9999:8083 book-test
 ```
 
@@ -52,7 +52,7 @@ Set insecure registry in /etc/docker/daemon.json
 Push to registry:
 
 ```
-docker build -f./DockerBooksDB . -t localhost:5000/book-service:latest
+docker build -f ./books/Dockerfile . -t localhost:5000/book-service:latest
 docker push localhost:5000/book-service:latest
 curl localhost:5000/v2/_catalog
 ```
