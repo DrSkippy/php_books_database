@@ -1,378 +1,56 @@
 # Books MCP Server
 
-**HTTP-accessible MCP server for book and tag search functionality**
-
-A Model Context Protocol (MCP) server that exposes book database search capabilities over HTTP using Server-Sent
-Events (SSE) transport. Built with standard Python MCP packages and deployed via Docker on port 3002.
+A Model Context Protocol (MCP) server that provides book and tag search functionality using **FastMCP** and **streamable HTTP transport**.
 
 ## Overview
 
-This MCP server provides two main resources that wrap the existing `booksdb` module:
+This MCP server exposes a books database through two main tools:
+- **search_books** - Search books by title, author, ISBN, category, tags, and more
+- **search_tags** - Search books by tag labels
 
-1. **`books://search`** - Search books by various criteria
-2. **`tags://search`** - Search books by tag labels
-
-The server uses HTTP/SSE transport, making it accessible via standard HTTP clients and MCP clients that support SSE.
+The server uses the latest MCP specifications (2025-03-26) with FastMCP and streamable HTTP transport for efficient, scalable communication.
 
 ## Features
 
-✅ **HTTP Transport** - Accessible via HTTP on port 3002
-✅ **SSE Protocol** - MCP communication over Server-Sent Events
-✅ **Standard MCP** - Uses official Python MCP packages
-✅ **Docker Deployment** - Containerized with Docker Compose
-✅ **Database Integration** - Reuses existing `booksdb` module
-✅ **Health Checks** - Built-in health monitoring
-✅ **Resource Discovery** - MCP resource listing support
+- ✨ **Streamable HTTP Transport** - Modern, efficient communication protocol
+- 🚀 **FastMCP Framework** - Simplified MCP server implementation
+- 🔍 **Flexible Search** - Multiple search parameters for finding books
+- 🏷️ **Tag Support** - Search books by tags
+- 🐳 **Docker Support** - Easy deployment with Docker and Docker Compose
+- 🔧 **Health Checks** - Built-in health monitoring
+- 📊 **Structured Results** - JSON-formatted search results
 
-## Architecture
+## Requirements
 
-```
-booksmcp/
-├── __init__.py          # Package initialization
-├── server.py            # MCP server with HTTP/SSE transport
-├── requirements.txt     # Python dependencies
-├── Dockerfile          # Docker container definition
-├── docker-compose.yml  # Docker Compose configuration
-└── README.md           # This file
+- Python 3.11+
+- FastMCP 0.5.0+
+- PyMySQL 1.1.0+
+- NumPy 1.24.0+
 
-Dependencies:
-├── booksdb/            # Database utility module (reused)
-└── config/             # Database configuration
-```
+Or use Docker (recommended).
 
-## Resources
+## Installation
 
-### 1. Book Search Resource
+### Using Docker (Recommended)
 
-**URI:** `books://search?<parameters>`
-
-Search books using various criteria. Multiple parameters can be combined.
-
-**Supported Parameters:**
-
-- `Title` - Book title (partial match)
-- `Author` - Author name (partial match)
-- `ISBNNumber` - ISBN-10
-- `ISBNNumber13` - ISBN-13
-- `PublisherName` - Publisher name
-- `Category` - Book category
-- `Location` - Physical location
-- `Tags` - Tag labels
-- `ReadDate` - Date when book was read
-
-**Examples:**
-
-```
-books://search?Title=lewis
-books://search?Author=tolkien
-books://search?Tags=science
-books://search?Author=lewis&Category=fiction
-```
-
-**Response Format:**
-
-```json
-{
-  "query": {
-    "Title": "lewis"
-  },
-  "count": 5,
-  "results": [
-    {
-      "BookCollectionID": 155,
-      "Title": "Letters To Children",
-      "Author": "Lewis, C S",
-      "CopyrightDate": "1985-01-01",
-      "ISBNNumber": "0020861206",
-      "PublisherName": "Macmillan Publishing Company",
-      "CoverType": "hardcover",
-      "Pages": 120,
-      "Category": "Non-Fiction",
-      "Note": null,
-      "Recycled": 0,
-      "Location": "Study",
-      "ISBNNumber13": null,
-      "ReadDate": "1966-01-15"
-    }
-  ]
-}
-```
-
-### 2. Tag Search Resource
-
-**URI:** `tags://search?<tag_name>`
-
-Search for books by tag labels. Returns all books that have tags matching the search term.
-
-**Examples:**
-
-```
-tags://search?science
-tags://search?history
-tags://search?fiction
-```
-
-**Response Format:**
-
-```json
-{
-  "query": "science",
-  "count": 12,
-  "results": [
-    {
-      "BookCollectionID": 234,
-      "TagID": 5,
-      "Tag": "science fiction"
-    }
-  ]
-}
-```
-
-## HTTP Endpoints
-
-### GET /
-
-Server information, available endpoints, resources, and usage examples.
-
-```bash
-curl http://localhost:3002/
-```
-
-### GET /health
-
-Health check endpoint for monitoring.
-
-```bash
-curl http://localhost:3002/health
-```
-
-**Response:**
-
-```json
-{
-  "status": "healthy",
-  "service": "books-mcp-server",
-  "version": "1.0.0",
-  "transport": "HTTP/SSE",
-  "port": 3002
-}
-```
-
-### GET /sse
-
-SSE endpoint for MCP protocol communication. This is where MCP clients connect.
-
-```bash
-curl -N http://localhost:3002/sse
-```
-
-### POST /messages
-
-Endpoint for receiving MCP messages from clients.
-
-```bash
-curl -X POST http://localhost:3002/messages \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc": "2.0", "id": 1, "method": "resources/list"}'
-```
-
-## Prerequisites
-
-- Docker and Docker Compose
-- Database configuration at `../config/configuration.json`
-- MySQL books database accessible
-
-## Configuration
-
-The server requires a configuration file at `/app/config/configuration.json`:
-
-```json
-{
-  "username": "db_user",
-  "password": "db_password",
-  "database": "books",
-  "host": "localhost",
-  "port": 3306,
-  "api_key": "your-api-key",
-  "isbn_com": {
-    "url_isbn": "https://api.isbndb.com/book/",
-    "key": "your-isbn-key"
-  }
-}
-```
-
-## Deployment
-
-### Using Docker Compose (Recommended)
-
-1. **Navigate to the directory:**
-   ```bash
-   cd tools/book_service/booksmcp
-   ```
-
-2. **Build and start:**
-   ```bash
-   docker-compose up -d --build
-   ```
-
-3. **View logs:**
-   ```bash
-   docker-compose logs -f
-   ```
-
-4. **Check health:**
-   ```bash
-   curl http://localhost:3002/health
-   ```
-
-5. **Stop the server:**
-   ```bash
-   docker-compose down
-   ```
-
-### Using Docker Directly
-
-1. **Build the image:**
+1. **Build the Docker image:**
    ```bash
    cd tools/book_service
    docker build -t booksmcp:latest -f booksmcp/Dockerfile .
    ```
 
-For production:
-
-    ```aiignore
-    docker build -t localhost:5000/booksmcp:latest -f booksmcp/Dockerfile .
-    docker push localhost:5000/booksmcp:latest 
-    ```
-
-2. **Run the container:**
+2. **Run with Docker Compose:**
    ```bash
-   docker run -d \
-     --name booksmcp-server \
-     -p 3002:3002 \
-     booksmcp:latest
+   cd booksmcp
+   docker-compose up -d
    ```
 
-3. **Check logs:**
+3. **Check the logs:**
    ```bash
-   docker logs -f booksmcp-server
+   docker-compose logs -f booksmcp
    ```
 
-## Usage
-
-### Testing with HTTP/curl
-
-```bash
-# Check server status
-curl http://localhost:3002/health
-
-# Get server information
-curl http://localhost:3002/
-
-# Connect to SSE endpoint
-curl -N http://localhost:3002/sse
-```
-
-### Using MCP Client (Python)
-
-Install the MCP client:
-
-```bash
-pip install mcp
-```
-
-Example usage:
-
-```python
-import asyncio
-import json
-from mcp import ClientSession
-from mcp.client.sse import sse_client
-
-
-async def search_books():
-    # Connect to the MCP server
-    async with sse_client("http://localhost:3002/sse") as (read, write):
-        async with ClientSession(read, write) as session:
-            # Initialize the session
-            await session.initialize()
-
-            # List available resources
-            resources = await session.list_resources()
-            print("Available resources:", resources)
-
-            # Search for books by title
-            result = await session.read_resource("books://search?Title=lewis")
-            content = result["contents"][0]
-            data = json.loads(content["text"])
-
-            print(f"Found {data['count']} books:")
-            for book in data["results"]:
-                print(f"  - {book['Title']} by {book['Author']}")
-
-
-# Run the async function
-asyncio.run(search_books())
-```
-
-### MCP Client Examples
-
-**List Resources:**
-
-```python
-resources = await session.list_resources()
-```
-
-**Search Books by Title:**
-
-```python
-result = await session.read_resource("books://search?Title=tolkien")
-```
-
-**Search Books by Multiple Criteria:**
-
-```python
-result = await session.read_resource("books://search?Author=lewis&Category=fiction")
-```
-
-**Search by Tags:**
-
-```python
-result = await session.read_resource("tags://search?science")
-```
-
-## Testing
-
-### Run Test Suite
-
-```bash
-cd tools/book_service/test_books
-python test_booksmcp.py
-```
-
-The test suite includes:
-
-- HTTP endpoint tests (always run)
-- MCP protocol tests (requires `pip install mcp`)
-- Resource validation
-- Error handling tests
-
-### Manual Testing
-
-```bash
-# Test health endpoint
-curl http://localhost:3002/health
-
-# Test server info
-curl http://localhost:3002/ | jq .
-
-# Test SSE connection
-curl -N http://localhost:3002/sse
-```
-
-## Development
-
-### Local Development (Without Docker)
+### Manual Installation
 
 1. **Install dependencies:**
    ```bash
@@ -380,179 +58,517 @@ curl -N http://localhost:3002/sse
    pip install -r requirements.txt
    ```
 
-2. **Run the server:**
+2. **Set environment variables:**
+   ```bash
+   export PORT=3002
+   export HOST=0.0.0.0
+   export BOOKDB_CONFIG=/path/to/config/configuration.json
+   ```
+
+3. **Run the server:**
    ```bash
    cd ..
    python -m booksmcp.server
    ```
 
-3. **Server will start on:**
-   ```
-   http://localhost:3002
-   ```
+## Configuration
 
-### Project Structure
+### Environment Variables
 
-```
-tools/book_service/
-├── booksdb/              # Database utilities (reused)
-│   ├── __init__.py
-│   └── api_util.py      # books_search_utility, tags_search_utility
-├── booksmcp/            # MCP server application
-│   ├── __init__.py
-│   ├── server.py        # Main server implementation
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── README.md
-├── config/              # Configuration files
-│   └── configuration.json
-└── test_books/          # Test suites
-    └── test_booksmcp.py
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3002` | Server port |
+| `HOST` | `0.0.0.0` | Server host |
+| `BOOKDB_CONFIG` | `/app/config/configuration.json` | Database configuration file path |
 
-## Troubleshooting
+### Database Configuration
 
-### Container Won't Start
+The server requires a configuration file at the path specified by `BOOKDB_CONFIG`:
 
-```bash
-# Check logs
-docker-compose logs booksmcp
-
-# Rebuild without cache
-docker-compose build --no-cache
-docker-compose up -d
+```json
+{
+  "username": "db_user",
+  "password": "db_password",
+  "database": "books",
+  "host": "localhost",
+  "port": 3306
+}
 ```
 
-### Database Connection Issues
+### Docker Compose
 
-- Verify `config/configuration.json` has correct credentials
-- Ensure MySQL is accessible from Docker container
-- For local MySQL on macOS/Windows, use `host.docker.internal` as host
+The `docker-compose.yml` file includes:
+- Port mapping (3002:3002)
+- Health checks
+- Automatic restart policy
+- Network configuration
+- Host gateway access for connecting to host MySQL
 
-### Port Already in Use
+## API Endpoints
 
-```bash
-# Check what's using port 3002
-lsof -i :3002
+### MCP Protocol Endpoint
+- **URL:** `/mcp`
+- **Methods:** GET, POST
+- **Description:** Main MCP protocol communication endpoint (streamable HTTP)
 
-# Change port in docker-compose.yml
-ports:
-  - "3003:3002"  # Map to different host port
+### Health Check
+- **URL:** `/health`
+- **Method:** GET
+- **Description:** Returns server health status
+- **Response:**
+  ```json
+  {
+    "status": "healthy"
+  }
+  ```
+
+### Server Information
+- **URL:** `/info`
+- **Method:** GET
+- **Description:** Returns server metadata and available tools
+- **Response:**
+  ```json
+  {
+    "name": "Books MCP Server",
+    "version": "2.0.0",
+    "description": "MCP server for book and tag search functionality",
+    "transport": "Streamable HTTP (FastMCP)",
+    "tools": [
+      {
+        "name": "search_books",
+        "description": "Search books by title, author, ISBN, category, tags, etc.",
+        "parameters": ["Title", "Author", "ISBNNumber", "ISBNNumber13", "PublisherName", "Category", "Location", "Tags", "ReadDate"]
+      },
+      {
+        "name": "search_tags",
+        "description": "Search books by tag labels",
+        "parameters": ["query"]
+      }
+    ]
+  }
+  ```
+
+## MCP Tools
+
+### 1. search_books
+
+Search books by various criteria.
+
+**Parameters:**
+- `Title` (string, optional) - Book title to search for
+- `Author` (string, optional) - Author name to search for
+- `ISBNNumber` (string, optional) - ISBN-10 number
+- `ISBNNumber13` (string, optional) - ISBN-13 number
+- `PublisherName` (string, optional) - Publisher name
+- `Category` (string, optional) - Book category
+- `Location` (string, optional) - Book location
+- `Tags` (string, optional) - Tags associated with the book
+- `ReadDate` (string, optional) - Date when the book was read
+
+**Returns:** JSON string with search results
+
+**Example Response:**
+```json
+{
+  "query": {
+    "Author": "tolkien"
+  },
+  "count": 5,
+  "results": [
+    {
+      "BookID": "123",
+      "Title": "The Lord of the Rings",
+      "Author": "J.R.R. Tolkien",
+      "ISBNNumber": "0618574948",
+      "ISBNNumber13": "9780618574940",
+      "PublisherName": "Houghton Mifflin",
+      "Category": "Fantasy",
+      "Location": "Shelf A1",
+      "ReadDate": "2024-01-15"
+    }
+  ]
+}
 ```
 
-### MCP Client Connection Issues
+### 2. search_tags
 
-- Verify server is running: `curl http://localhost:3002/health`
-- Check SSE endpoint: `curl -N http://localhost:3002/sse`
-- Ensure MCP client is installed: `pip install mcp`
+Search for books by tag labels.
 
-### Health Check Failing
+**Parameters:**
+- `query` (string, required) - Tag name to search for
 
-```bash
-# Check container health
-docker ps
+**Returns:** JSON string with search results
 
-# View health check logs
-docker inspect booksmcp-server | jq '.[0].State.Health'
+**Example Response:**
+```json
+{
+  "query": "history",
+  "count": 12,
+  "results": [
+    {
+      "BookID": "456",
+      "Title": "A Brief History of Time",
+      "TagLabel": "history",
+      "TagID": "78"
+    }
+  ]
+}
 ```
 
-## Dependencies
+## Testing
 
-### Python Packages
-
-- **mcp** (>=1.0.0) - Model Context Protocol SDK
-- **uvicorn[standard]** (>=0.30.0) - ASGI server
-- **starlette** (>=0.37.0) - Web framework
-- **pymysql** (>=1.1.0) - MySQL connector
-- **numpy** (>=1.24.0) - Numerical operations
-
-### System Requirements
-
-- Python 3.11+
-- Docker 20.10+
-- Docker Compose 2.0+
-
-## Environment Variables
-
-- `PORT` - Server port (default: 3002)
-- `HOST` - Bind address (default: 0.0.0.0)
-- `PYTHONUNBUFFERED` - Python output buffering (default: 1)
-
-## Monitoring
-
-### Health Checks
-
-The server includes built-in health checks:
-
-**Docker Health Check:**
-
-```yaml
-healthcheck:
-  test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3002/health')" ]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-```
-
-**Manual Health Check:**
+### 1. Basic Health Check
 
 ```bash
 curl http://localhost:3002/health
 ```
 
-### Logs
-
-```bash
-# View real-time logs
-docker-compose logs -f
-
-# View last 100 lines
-docker-compose logs --tail=100
-
-# View logs for specific container
-docker logs booksmcp-server
+Expected response:
+```json
+{"status": "healthy"}
 ```
 
-## Performance
+### 2. Server Information
 
-- **Resource caching:** Results are not cached; each request queries the database
-- **Connection pooling:** Not implemented; uses direct database connections
-- **Concurrent requests:** Supported via async/await
+```bash
+curl http://localhost:3002/info
+```
 
-## Security
+### 3. MCP Client Configuration
 
-- Database credentials are mounted read-only
-- No authentication on HTTP endpoints (add reverse proxy with auth if needed)
+Configure your MCP client (like Claude Desktop) with the server URL:
+
+```json
+{
+  "mcpServers": {
+    "books": {
+      "url": "http://localhost:3002/mcp"
+    }
+  }
+}
+```
+
+### 4. Test with Python MCP Client
+
+```python
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+async def test_books_search():
+    # For HTTP MCP servers, use appropriate HTTP client
+    # This is a conceptual example
+    server_params = StdioServerParameters(
+        command="http",
+        args=["http://localhost:3002/mcp"]
+    )
+
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            # List available tools
+            tools = await session.list_tools()
+            print("Available tools:", tools)
+
+            # Call search_books tool
+            result = await session.call_tool("search_books", {
+                "Author": "tolkien"
+            })
+            print("Search results:", result)
+
+asyncio.run(test_books_search())
+```
+
+### 5. Manual Tool Testing
+
+Use curl to test the MCP protocol directly:
+
+```bash
+# Initialize connection
+curl -X POST http://localhost:3002/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2024-11-05",
+      "clientInfo": {
+        "name": "test-client",
+        "version": "1.0.0"
+      }
+    }
+  }'
+
+# List available tools
+curl -X POST http://localhost:3002/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/list"
+  }'
+
+# Call search_books tool
+curl -X POST http://localhost:3002/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "search_books",
+      "arguments": {
+        "Author": "tolkien"
+      }
+    }
+  }'
+
+# Call search_tags tool
+curl -X POST http://localhost:3002/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tools/call",
+    "params": {
+      "name": "search_tags",
+      "arguments": {
+        "query": "fantasy"
+      }
+    }
+  }'
+```
+
+### 6. Docker Health Check
+
+```bash
+docker-compose ps
+```
+
+Should show healthy status:
+```
+NAME                COMMAND                  SERVICE    STATUS
+booksmcp-service    "python -m booksmcp.…"   booksmcp   Up (healthy)
+```
+
+### 7. Log Monitoring
+
+Monitor server logs for debugging:
+```bash
+# Real-time logs
+docker-compose logs -f booksmcp
+
+# Last 100 lines
+docker-compose logs --tail=100 booksmcp
+```
+
+## Usage Examples
+
+### Search by Title
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "search_books",
+    "arguments": {
+      "Title": "lord of the rings"
+    }
+  }
+}
+```
+
+### Search by Author
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "search_books",
+    "arguments": {
+      "Author": "tolkien"
+    }
+  }
+}
+```
+
+### Search by Multiple Criteria
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "search_books",
+    "arguments": {
+      "Author": "asimov",
+      "Category": "science fiction"
+    }
+  }
+}
+```
+
+### Search by Tags
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "search_tags",
+    "arguments": {
+      "query": "history"
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+### Server won't start
+- Check if port 3002 is already in use: `lsof -i :3002`
+- Verify environment variables are set correctly
+- Check Docker logs: `docker-compose logs booksmcp`
+
+### Database connection errors
+- Verify `BOOKDB_CONFIG` points to a valid configuration file
+- Check database credentials in the config file
+- Ensure database server is accessible from the container
+- For local MySQL, use `host.docker.internal` as host in Docker
+
+### MCP client connection issues
+- Verify server is running: `curl http://localhost:3002/health`
+- Check firewall settings
+- Ensure client is using correct URL: `http://localhost:3002/mcp`
+- Review server logs for connection errors
+
+### Empty search results
+- Verify database contains data
+- Check search parameters match database fields
+- Review server logs for errors
+- Test with different search criteria
+
+### Docker build fails
+- Clear Docker cache: `docker system prune -a`
+- Rebuild without cache: `docker-compose build --no-cache`
+- Check Dockerfile paths are correct
+
+## Development
+
+### Running in Development Mode
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Run with debug logging
+export PYTHONUNBUFFERED=1
+python -m booksmcp.server
+```
+
+### Project Structure
+
+```
+booksmcp/
+├── server.py           # Main server implementation (FastMCP)
+├── requirements.txt    # Python dependencies
+├── Dockerfile         # Docker image configuration
+├── docker-compose.yml # Docker Compose configuration
+└── README.md          # This file
+
+Parent structure:
+tools/book_service/
+├── booksdb/           # Database access layer
+├── booksmcp/          # This MCP server
+└── config/            # Database configuration
+```
+
+## Architecture
+
+The server is built using:
+- **FastMCP** - Simplified MCP server framework with built-in streamable HTTP support
+- **Streamable HTTP Transport** - Modern MCP transport specification (2025-03-26)
+- **booksdb** - Database access layer for book and tag queries
+- **Uvicorn** - ASGI server (included with FastMCP)
+
+### Key Components
+
+1. **FastMCP Server** - Handles MCP protocol, routing, and tool registration
+2. **Tool Decorators** - Simple `@mcp.tool()` decorator for exposing functions
+3. **Custom Routes** - Additional HTTP endpoints via `@mcp.custom_route()`
+4. **Database Layer** - Reuses existing `booksdb.api_util` module
+
+### Transport Flow
+
+```
+Client Request → /mcp endpoint → FastMCP Router → Tool Handler → Database → Response
+```
+
+## Performance Considerations
+
+- **Stateless Design** - Each request is independent
+- **Async Support** - FastMCP uses async/await for concurrency
+- **Direct DB Queries** - No caching (add if needed for production)
+- **JSON Serialization** - Results returned as JSON strings
+
+## Security Notes
+
+- No authentication implemented (add reverse proxy with auth for production)
+- Database credentials stored in config file (use secrets management in production)
 - SQL injection protection via parameterized queries in booksdb module
+- No rate limiting (add if exposing publicly)
+
+## Version History
+
+### v2.0.0 (Current)
+- **Breaking Changes:** Reimplemented using FastMCP
+- Streamable HTTP transport (2025-03-26 spec)
+- Simplified architecture
+- Enhanced logging
+- Custom `/info` endpoint
+- Removed SSE-specific endpoints (now handled by FastMCP)
+
+### v1.0.0 (Legacy)
+- Manual SSE implementation
+- Starlette-based routing
+- Deprecated HTTP+SSE specification
+
+## Migration from v1.0.0
+
+If upgrading from v1.0.0:
+
+1. **Endpoints changed:**
+   - Old: `/sse` (GET) + `/messages/` (POST)
+   - New: `/mcp` (GET/POST) - single endpoint
+
+2. **MCP clients need updating:**
+   - Update URL to `http://localhost:3002/mcp`
+   - Streamable HTTP transport now used
+
+3. **Dependencies changed:**
+   - Old: `mcp`, `starlette`, `uvicorn`
+   - New: `fastmcp` (includes everything)
+
+## Resources
+
+- **MCP Protocol Specification:** https://modelcontextprotocol.io/
+- **FastMCP Documentation:** https://github.com/jlowin/fastmcp
+- **Streamable HTTP Transport:** https://modelcontextprotocol.io/specification/2025-03-26/basic/transports
 
 ## License
 
-Inherits license from the parent Books Database project.
-
-## Contributing
-
-When contributing:
-
-1. Follow existing code style
-2. Add tests for new features
-3. Update documentation
-4. Test with Docker Compose before committing
+See main project license.
 
 ## Support
 
 For issues or questions:
+1. Check the logs: `docker-compose logs booksmcp`
+2. Verify configuration is correct
+3. Review this README
+4. Test with curl commands
+5. Check MCP protocol documentation
 
-1. Check this README
-2. Review Docker logs: `docker-compose logs`
-3. Run test suite: `python test_booksmcp.py`
-4. Check server info: `curl http://localhost:3002/`
+## Contributing
 
-## Version History
-
-- **1.0.0** - Initial release with HTTP/SSE transport
-    - Books search resource
-    - Tags search resource
-    - Docker deployment
-    - Health checks
-    - Comprehensive test suite
+When contributing:
+1. Follow existing code style
+2. Test with Docker Compose
+3. Update documentation
+4. Add usage examples
+5. Test with actual MCP clients

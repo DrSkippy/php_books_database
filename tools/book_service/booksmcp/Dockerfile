@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 LABEL maintainer="Books MCP Server"
-LABEL description="MCP Server for Books Database with HTTP/SSE transport"
+LABEL description="MCP Server for Books Database with Streamable HTTP transport (FastMCP)"
 
 # Set working directory
 WORKDIR /app

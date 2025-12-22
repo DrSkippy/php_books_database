@@ -1,9 +1,5 @@
-# MCP Server - Standard Python packages
-mcp>=1.0.0
-
-# HTTP Server
-uvicorn[standard]>=0.30.0
-starlette>=0.37.0
+# MCP Server - FastMCP for streamable HTTP transport
+fastmcp>=0.5.0
 
 # Database (from parent booksdb module)
 pymysql>=1.1.0
