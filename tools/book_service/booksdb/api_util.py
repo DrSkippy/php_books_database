@@ -967,7 +967,11 @@ def books_search_utility(args):
                 # remove trailing comma
                 id_list = id_list.replace(",", "")
             app_logger.debug(id_list)
-            where.append(f"a.BookCollectionID in {id_list}")
+            if id_list == "()":
+                # no matching tags - force no results
+                where.append("a.BookCollectionID in (0)")
+            else:
+                where.append(f"a.BookCollectionID in {id_list}")
         else:
             where.append(f"a.{key} LIKE \"%{args.get(key)}%\"")
     where_str = " AND ".join(where)
