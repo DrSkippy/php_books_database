@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+__version__= "3.0.0"
 """
 Books MCP Server - Streamable HTTP Transport
 
@@ -479,7 +480,7 @@ def main():
     """Start the MCP server with streamable HTTP transport."""
 
     logger.info("=" * 70)
-    logger.info("Starting Books MCP Server (FastMCP)")
+    logger.info(f"Starting Books MCP Server (FastMCP) [Version: {__version__}]")
     logger.info("=" * 70)
     logger.info(f"Server: http://{host}:{port}")
     logger.info(f"Transport: Streamable HTTP")
