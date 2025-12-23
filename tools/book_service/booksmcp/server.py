@@ -407,7 +407,7 @@ async def server_info(request: Request) -> dict[str, Any]:
     """
     return JSONResponse({
         "name": "Books MCP Server",
-        "version": "3.0.0",
+        "version": __version__,
         "description": "MCP server for searching the Hendrickson Book Collection",
         "transport": "Streamable HTTP (FastMCP)",
         "tools": [
