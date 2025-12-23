@@ -500,7 +500,6 @@ def main():
     logger.info("  search_books_by_location  - Search books by location")
     logger.info("  search_books_by_tags      - Search books by tags")
     logger.info("  search_books_by_read_date - Search books by read date")
-    logger.info("  search_tags               - Search books by tag labels")
     logger.info("=" * 70)
 
     # Run with streamable HTTP transport
