@@ -5,9 +5,19 @@ Books MCP Server - Streamable HTTP Transport
 A Model Context Protocol (MCP) server that exposes book and tag search
 functionality over HTTP using FastMCP and streamable HTTP transport.
 
-This server provides two main tools:
-1. search_books - Search books by various criteria (Title, Author, ISBN, etc.)
-2. search_tags - Search books by tag labels
+This server provides tools to search the Hendrickson Book Collection:
+1. search_books_by_title - Search books by title
+2. search_books_by_author - Search books by author
+3. search_books_by_isbn - Search books by ISBN-10
+4. search_books_by_isbn13 - Search books by ISBN-13
+5. search_books_by_publisher - Search books by publisher name
+6. search_books_by_category - Search books by category
+7. search_books_by_location - Search books by physical location
+8. search_books_by_tags - Search books by associated tags
+9. search_books_by_read_date - Search books by read date
+10. search_tags - Search books by tag labels
+
+All tools return book information including: title, author, tags, book notes, and reading notes.
 
 The server runs on port 3002 and uses streamable HTTP for MCP communication.
 """
@@ -46,70 +56,22 @@ mcp = FastMCP(
 
 
 # ============================================================================
-# MCP Tool: Search Books
+# Helper Function: Execute Book Search
 # ============================================================================
 
-@mcp.tool()
-def search_books(
-        Title: str = None,
-        Author: str = None,
-        ISBNNumber: str = None,
-        ISBNNumber13: str = None,
-        PublisherName: str = None,
-        Category: str = None,
-        Location: str = None,
-        Tags: str = None,
-        ReadDate: str = None
-) -> str:
+def _execute_book_search(params: dict) -> str:
     """
-    Search books by title, author, ISBN, or other fields.
+    Internal helper function to execute book search via booksdb API.
 
-    Supports searching across multiple fields:
-    - Title: Book title to search for
-    - Author: Author name to search for
-    - ISBNNumber: ISBN-10 number
-    - ISBNNumber13: ISBN-13 number
-    - PublisherName: Publisher name
-    - Category: Book category
-    - Location: Book location
-    - Tags: Tags associated with the book
-    - ReadDate: Date when the book was read
+    Queries the Hendrickson Book Collection database and returns formatted results
+    including title, author, tags, book notes, and reading notes.
+
+    Args:
+        params: Dictionary of search parameters matching booksdb field names
 
     Returns:
         JSON string with search results including count and book details
     """
-    logger.info(f"Book search called with params: Title={Title}, Author={Author}, "
-                f"ISBN={ISBNNumber}, ISBN13={ISBNNumber13}, Publisher={PublisherName}, "
-                f"Category={Category}, Location={Location}, Tags={Tags}, ReadDate={ReadDate}")
-
-    # Build parameters dictionary
-    params = {}
-    if Title is not None:
-        params["Title"] = Title
-    if Author is not None:
-        params["Author"] = Author
-    if ISBNNumber is not None:
-        params["ISBNNumber"] = ISBNNumber
-    if ISBNNumber13 is not None:
-        params["ISBNNumber13"] = ISBNNumber13
-    if PublisherName is not None:
-        params["PublisherName"] = PublisherName
-    if Category is not None:
-        params["Category"] = Category
-    if Location is not None:
-        params["Location"] = Location
-    if Tags is not None:
-        params["Tags"] = Tags
-    if ReadDate is not None:
-        params["ReadDate"] = ReadDate
-
-    if not params:
-        return json.dumps({
-            "error": "No search parameters provided. Supported: Title, Author, "
-                     "ISBNNumber, ISBNNumber13, PublisherName, Category, Location, Tags, ReadDate",
-            "results": []
-        })
-
     try:
         # Call the books_search_utility from booksdb
         data_rows, raw_data, header, error_list = api_util.books_search_utility(params)
@@ -151,62 +113,283 @@ def search_books(
 
 
 # ============================================================================
-# MCP Tool: Search Tags
+# MCP Tool: Search Books by Title
 # ============================================================================
 
 @mcp.tool()
-def search_tags(query: str) -> str:
+def search_books_by_title(title: str) -> str:
     """
-    Search for books by tag labels.
+    Search the Hendrickson Book Collection by book title.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs partial string matching against the Title field in the books database
+    - Case-insensitive search
+    - Returns all books where the title contains the search string
 
     Args:
-        query: Tag name to search for
+        title: Book title or partial title to search for
 
     Returns:
-        JSON string with search results including count and tagged books
+        JSON string with count and array of matching books with full details
     """
-    logger.info(f"Tag search called with query: {query}")
+    logger.info(f"Search books by title: {title}")
+    return _execute_book_search({"Title": title})
 
-    if not query:
-        return json.dumps({
-            "error": "No search query provided. Usage: provide a tag name to search for",
-            "results": []
-        })
 
-    try:
-        # Call the tags_search_utility from booksdb
-        data_rows, raw_data, header, error_list = api_util.tags_search_utility(query)
+# ============================================================================
+# MCP Tool: Search Books by Author
+# ============================================================================
 
-        if error_list:
-            return json.dumps({
-                "query": query,
-                "error": error_list,
-                "results": []
-            })
+@mcp.tool()
+def search_books_by_author(author: str) -> str:
+    """
+    Search the Hendrickson Book Collection by author name.
 
-        # Convert results to list of dictionaries
-        results = []
-        if data_rows:
-            for row in data_rows:
-                tag = {}
-                for i, col_name in enumerate(header):
-                    if i < len(row):
-                        tag[col_name] = row[i]
-                results.append(tag)
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
 
-        return json.dumps({
-            "query": query,
-            "count": len(results),
-            "results": results
-        }, indent=2)
+    Technical details:
+    - Performs partial string matching against the Author field in the books database
+    - Case-insensitive search
+    - Returns all books where the author name contains the search string
 
-    except Exception as e:
-        logger.error(f"Tag search error: {e}", exc_info=True)
-        return json.dumps({
-            "query": query,
-            "error": [str(e)],
-            "results": []
-        })
+    Args:
+        author: Author name or partial name to search for
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by author: {author}")
+    return _execute_book_search({"Author": author})
+
+
+# ============================================================================
+# MCP Tool: Search Books by ISBN
+# ============================================================================
+
+@mcp.tool()
+def search_books_by_isbn(isbn: str) -> str:
+    """
+    Search the Hendrickson Book Collection by ISBN-10 number.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs exact or partial matching against the ISBNNumber field
+    - ISBN-10 format (10-digit number)
+    - Use search_books_by_isbn13 for ISBN-13 searches
+
+    Args:
+        isbn: ISBN-10 number (full or partial) to search for
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by ISBN: {isbn}")
+    return _execute_book_search({"ISBNNumber": isbn})
+
+
+# ============================================================================
+# MCP Tool: Search Books by ISBN-13
+# ============================================================================
+
+@mcp.tool()
+def search_books_by_isbn13(isbn13: str) -> str:
+    """
+    Search the Hendrickson Book Collection by ISBN-13 number.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs exact or partial matching against the ISBNNumber13 field
+    - ISBN-13 format (13-digit number)
+    - Use search_books_by_isbn for ISBN-10 searches
+
+    Args:
+        isbn13: ISBN-13 number (full or partial) to search for
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by ISBN-13: {isbn13}")
+    return _execute_book_search({"ISBNNumber13": isbn13})
+
+
+# ============================================================================
+# MCP Tool: Search Books by Publisher
+# ============================================================================
+
+@mcp.tool()
+def search_books_by_publisher(publisher: str) -> str:
+    """
+    Search the Hendrickson Book Collection by publisher name.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs partial string matching against the PublisherName field
+    - Case-insensitive search
+    - Returns all books where the publisher name contains the search string
+
+    Args:
+        publisher: Publisher name or partial name to search for
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by publisher: {publisher}")
+    return _execute_book_search({"PublisherName": publisher})
+
+
+# ============================================================================
+# MCP Tool: Search Books by Category
+# ============================================================================
+
+@mcp.tool()
+def search_books_by_category(category: str) -> str:
+    """
+    Search the Hendrickson Book Collection by category.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs partial string matching against the Category field
+    - Case-insensitive search
+    - Categories represent subject classifications or genres
+
+    Args:
+        category: Category name or partial name to search for
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by category: {category}")
+    return _execute_book_search({"Category": category})
+
+
+# ============================================================================
+# MCP Tool: Search Books by Location
+# ============================================================================
+
+@mcp.tool()
+def search_books_by_location(location: str) -> str:
+    """
+    Search the Hendrickson Book Collection by physical location.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs partial string matching against the Location field
+    - Case-insensitive search
+    - Location indicates where the physical book is stored
+
+    Args:
+        location: Location name or partial name to search for
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by location: {location}")
+    return _execute_book_search({"Location": location})
+
+
+# ============================================================================
+# MCP Tool: Search Books by Tags
+# ============================================================================
+
+@mcp.tool()
+def search_books_by_tags(tags: str) -> str:
+    """
+    Search the Hendrickson Book Collection by associated tags.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs partial string matching against the Tags field
+    - Case-insensitive search
+    - Tags are keyword labels assigned to books for classification
+    - Multiple tags may be associated with each book
+
+    Args:
+        tags: Tag name or partial tag to search for
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by tags: {tags}")
+    return _execute_book_search({"Tags": tags})
+
+
+# ============================================================================
+# MCP Tool: Search Books by Read Date
+# ============================================================================
+
+@mcp.tool()
+def search_books_by_read_date(read_date: str) -> str:
+    """
+    Search the Hendrickson Book Collection by the date the book was read.
+
+    Returns book information for each book matched, including:
+    - Title
+    - Author
+    - Tags
+    - Book notes
+    - Read date, the date Scott last read this book
+
+    Technical details:
+    - Performs partial string matching against the ReadDate field
+    - Date format: YYYY-MM-DD or partial (e.g., "2024" for all books read in 2024)
+    - Returns books read on or matching the specified date pattern
+
+    Args:
+        read_date: Date or partial date in YYYY-MM-DD format
+
+    Returns:
+        JSON string with count and array of matching books with full details
+    """
+    logger.info(f"Search books by read date: {read_date}")
+    return _execute_book_search({"ReadDate": read_date})
 
 
 # ============================================================================
@@ -223,27 +406,62 @@ async def server_info(request: Request) -> dict[str, Any]:
     """
     return JSONResponse({
         "name": "Books MCP Server",
-        "version": "2.0.0",
-        "description": "MCP server for book and tag search functionality",
+        "version": "3.0.0",
+        "description": "MCP server for searching the Hendrickson Book Collection",
         "transport": "Streamable HTTP (FastMCP)",
         "tools": [
             {
-                "name": "search_books",
-                "description": "Search books by title, author, ISBN, category, tags, etc.",
-                "parameters": ["Title", "Author", "ISBNNumber", "ISBNNumber13",
-                               "PublisherName", "Category", "Location", "Tags", "ReadDate"]
+                "name": "search_books_by_title",
+                "description": "Search books by title",
+                "parameters": ["title"]
             },
             {
-                "name": "search_tags",
-                "description": "Search books by tag labels",
-                "parameters": ["query"]
+                "name": "search_books_by_author",
+                "description": "Search books by author name",
+                "parameters": ["author"]
+            },
+            {
+                "name": "search_books_by_isbn",
+                "description": "Search books by ISBN-10",
+                "parameters": ["isbn"]
+            },
+            {
+                "name": "search_books_by_isbn13",
+                "description": "Search books by ISBN-13",
+                "parameters": ["isbn13"]
+            },
+            {
+                "name": "search_books_by_publisher",
+                "description": "Search books by publisher name",
+                "parameters": ["publisher"]
+            },
+            {
+                "name": "search_books_by_category",
+                "description": "Search books by category",
+                "parameters": ["category"]
+            },
+            {
+                "name": "search_books_by_location",
+                "description": "Search books by physical location",
+                "parameters": ["location"]
+            },
+            {
+                "name": "search_books_by_tags",
+                "description": "Search books by associated tags",
+                "parameters": ["tags"]
+            },
+            {
+                "name": "search_books_by_read_date",
+                "description": "Search books by read date",
+                "parameters": ["read_date"]
             }
         ],
         "examples": {
-            "book_by_title": {"tool": "search_books", "arguments": {"Title": "lewis"}},
-            "book_by_author": {"tool": "search_books", "arguments": {"Author": "tolkien"}},
-            "book_by_tags": {"tool": "search_books", "arguments": {"Tags": "science"}},
-            "tag_search": {"tool": "search_tags", "arguments": {"query": "history"}}
+            "book_by_title": {"tool": "search_books_by_title", "arguments": {"title": "lewis"}},
+            "book_by_author": {"tool": "search_books_by_author", "arguments": {"author": "tolkien"}},
+            "book_by_isbn": {"tool": "search_books_by_isbn", "arguments": {"isbn": "0123456789"}},
+            "book_by_tags": {"tool": "search_books_by_tags", "arguments": {"tags": "science"}},
+            "book_by_category": {"tool": "search_books_by_category", "arguments": {"category": "fiction"}}
         }
     })
 
@@ -272,14 +490,20 @@ def main():
     logger.info(f"  *    http://{host}:{port}/mcp    - MCP protocol endpoint")
     logger.info("")
     logger.info("Tools:")
-    logger.info("  search_books - Search books by title, author, ISBN, etc.")
-    logger.info("  search_tags  - Search books by tag labels")
+    logger.info("  search_books_by_title     - Search books by title")
+    logger.info("  search_books_by_author    - Search books by author")
+    logger.info("  search_books_by_isbn      - Search books by ISBN-10")
+    logger.info("  search_books_by_isbn13    - Search books by ISBN-13")
+    logger.info("  search_books_by_publisher - Search books by publisher")
+    logger.info("  search_books_by_category  - Search books by category")
+    logger.info("  search_books_by_location  - Search books by location")
+    logger.info("  search_books_by_tags      - Search books by tags")
+    logger.info("  search_books_by_read_date - Search books by read date")
+    logger.info("  search_tags               - Search books by tag labels")
     logger.info("=" * 70)
 
     # Run with streamable HTTP transport
-    mcp.run(
-        transport="streamable-http"
-    )
+    mcp.run(transport="streamable-http")
 
 
 if __name__ == "__main__":
