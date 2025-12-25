@@ -133,11 +133,12 @@ class TestAppUtilityFunctions(unittest.TestCase):
     def test_complete_book_record(self):
         rec = au.get_complete_book_record(1873)
         print(rec)
-        self.assertEqual(len(rec), 3)
+        self.assertEqual(len(rec), 4)
         self.assertEqual(rec["book"]["data"][0][0], 1873)
         self.assertEqual(rec["book"]["data"][0][7], 548)
         self.assertEqual(len(rec["reads"]["data"]), 1)
         self.assertEqual(len(rec["tags"]["data"][0]), 8)
+        self.assertEqual(len(rec["img"]["data"][0]), 0)
 
     def test_update_book_record_by_key(self):
         update_data = {

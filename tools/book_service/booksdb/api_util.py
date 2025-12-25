@@ -607,11 +607,17 @@ def get_complete_book_record(book_id):
               "ON b.TagID = a.TagID "
               f"WHERE a.BookID = {book_id};")
     h_tags = ["Tag"]
+    q_img = ("SELECT a.image_path "
+             "FROM `images` as a "
+             f"WHERE a.BookCollectionID = {book_id} "
+             "AND a.image_type = \"cover-face\"; ")
+    h_img = ["ImageURL"]
     app_logger.debug(q_book)
     app_logger.debug(q_read)
     app_logger.debug(q_tags)
+    app_logger.debug(q_img)
 
-    result_data = {"book": None, "reads": None, "tags": None, "error": []}
+    result_data = {"book": None, "reads": None, "tags": None, "img": None, "error": []}
     c = db.cursor()
     try:
         c.execute(q_book)
@@ -637,6 +643,14 @@ def get_complete_book_record(book_id):
     else:
         s = c.fetchall()
         result_data["tags"] = _create_serializeable_result_dict([[x[0] for x in s]], h_tags)
+    try:
+        c.execute(q_img)
+    except pymysql.Error as e:
+        app_logger.error(e)
+        result_data["error"].append(str(e))
+    else:
+        s = c.fetchall()
+        result_data["img"] = _create_serializeable_result_dict([[x[0] for x in s]], h_tags)
 
     if len(result_data["error"]) == 0:
         del result_data["error"]

@@ -1,7 +1,8 @@
-__version__ = '0.15.2'
+__version__ = '0.15.3'
 
 from io import BytesIO
 from logging.config import dictConfig
+import functools
 
 import pandas as pd
 from booksdb.api_util import *

@@ -16,7 +16,8 @@ $(document).ready(function () {
             const bookObj = data[bookIdx]['book'];
             const readObj = data[bookIdx]['reads'];
             const tagObj = data[bookIdx]['tags'];
-            var bookString = listItems(bookObj, readObj, tagObj);
+	    const imgObj = data[bookIdx]['img'];
+            var bookString = listItems(bookObj, readObj, tagObj, imgObj);
             $("#card-deck").append(bookString);
         }
         //console.log(minCarouselBookId, maxCarouselBookId, url);
@@ -24,11 +25,17 @@ $(document).ready(function () {
     });
 });
 
-function listItems(bookObj, readObj, tagObj)  {
+function listItems(bookObj, readObj, tagObj, imgObj)  {
+    var imgUrl = "https://resources.drskippy.worse-than.tv/books/default.webp";
+    //console.log(imgObj['data'][0]);
+    if (imgObj['data'][0].length > 0) {
+    	imgUrl = imgObj['data'][0][0];
+    }
+
     let bookString = "\n<li class=\"card-item swiper-slide\">\n" +
         " <a href=\"#\" class=\"card-link\">\n";
     bookString += "  <div class=\"book-record\">\n";
-    bookString += "    <img src=\"/img/bookparts.webp\" class=\"card-image\">\n";
+    bookString += "    <img src=\"" + imgUrl + "\" class=\"card-image\">\n";
     bookString += "    <div class=\"badge\"> Book ID: " + bookObj['data'][0][0] + "</div>\n";
     let fieldsList = [1,2,3,4,12,5,6,7,11,9];
     for (const i of fieldsList) {
@@ -89,7 +96,8 @@ swiper.on('reachBeginning', function () {
         const bookObj = data['book'];
         const readObj = data['reads'];
         const tagObj = data['tags'];
-        swiper.prependSlide(listItems(bookObj, readObj, tagObj));
+	const imgObj = data[bookIdx]['img'];
+        swiper.prependSlide(listItems(bookObj, readObj, tagObj, imgObj));
         swiper.update(); // Update Swiper after adding new slides
     });
 });
@@ -104,7 +112,8 @@ swiper.on('reachEnd', function () {
         const bookObj = data['book'];
         const readObj = data['reads'];
         const tagObj = data['tags'];
-        swiper.appendSlide(listItems(bookObj, readObj, tagObj));
+	const imgObj = data[bookIdx]['img'];
+        swiper.appendSlide(listItems(bookObj, readObj, tagObj, imgObj));
         swiper.update(); // Update Swiper after adding new slides
     });
 });
