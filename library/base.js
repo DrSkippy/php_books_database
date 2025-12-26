@@ -141,14 +141,14 @@ function setval(bcid) {
                     "</td></tr>"
             }
             imageRow += "</table></td><td colspan=3><input type=\"file\" id=\"fileInput\">" +
-                "<button onclick=\"uploadFiles()\">Upload Image</button></td></tr>";
+                "<button onclick=\"uploadFiles(bookCollectionID)\">Upload Image</button></td></tr>";
         } else {
             imgUrl = "No url available";
             imageRow = "<tr id='replace-me-five'>" +
                 "<td colspan=2>(No image available)</td>" +
                 "<td colspan=8>URL: " + imgUrl + "</td>" +
                 "<td colspan=3><input type=\"file\" id=\"fileInput\">" +
-                "<button onclick=\"uploadFiles()\">Upload Image</button></td></tr>";
+                "<button onclick=\"uploadFiles(bookCollectionID)\">Upload Image</button></td></tr>";
         }
         $("#replace-me-five").replaceWith(imageRow);
     });
@@ -182,7 +182,7 @@ function createDetailTableRows() {
     $("#sumtable").append(bookImage);
 }
 
-function uploadFiles() {
+function uploadFiles(booKCollectionID) {
     const input = document.getElementById('fileInput');
     const files = input.files;
     if (files.length = 1) {
@@ -197,7 +197,30 @@ function uploadFiles() {
             .then(response => response.json())
             .then(data => {
                 console.log('Upload successful:', data);
-                alert('Files uploaded successfully!');
+                let payload = JSON.stringify({
+                    "BookCollectionID": booKCollectionID,
+                    "name": "Uploaded through books app " + new Date().toJSON().slice(0, 10),
+                    "url": "https://resources.drskippy.worse-than.tv/books/" + data.upload_image.filename
+                });
+                console.log('BookCollectionID:', payload);
+                fetch(baseApiUrl + '/add_image', {
+                    method: 'POST',
+                    body: payload,
+                    headers: {
+                        'Accept': "application/json, text/plain, */*",
+                        'Content-Type': "application/json;charset=utf-8",
+                        'x-api-key': apiKey
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Image added to database:', data);
+                        alert('Files uploaded successfully!');
+                    })
+                    .catch(error => {
+                        console.error('Failed to add image:', error);
+                        alert('Failed to add image to database.');
+                    })
             })
             .catch(error => {
                 console.error('Upload failed:', error);
