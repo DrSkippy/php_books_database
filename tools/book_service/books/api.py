@@ -1,14 +1,17 @@
-__version__ = '0.15.3'
+__version__ = '0.15.5'
 
+import functools
+import os
 from io import BytesIO
 from logging.config import dictConfig
-import functools
 
 import pandas as pd
+import requests
 from booksdb.api_util import *
 from flask import Flask, Response, send_file, request, abort
 from flask_cors import CORS
 from matplotlib import pylab as plt
+from werkzeug.utils import secure_filename
 
 from isbn_com import Endpoint as isbn
 
@@ -899,6 +902,221 @@ def add_book_estimate(book_id, last_readable_page, start_date=None):
 ##########################################################################
 # IMAGES
 ##########################################################################
+@app.route('/images/<book_id>')
+def get_images(book_id):
+    """
+    Retrieve all image information for a given BookCollectionID.
+
+    Parameters:
+        book_id: The BookCollectionID to fetch images for
+
+    Returns:
+        JSON response with list of image records for the book
+
+    E.g.
+    curl http://172.17.0.2:5000/images/1234
+    """
+    db = pymysql.connect(**books_conf)
+    search_str = "SELECT id, BookCollectionID, name, url, type FROM `images` WHERE BookCollectionID = %s"
+
+    with db:
+        with db.cursor() as c:
+            try:
+                c.execute(search_str, (book_id,))
+                results = c.fetchall()
+
+                # Convert results to list of dictionaries
+                images = []
+                for row in results:
+                    images.append({
+                        "id": row[0],
+                        "BookCollectionID": row[1],
+                        "name": row[2],
+                        "url": row[3],
+                        "type": row[4]
+                    })
+
+                rdata = json.dumps({
+                    "BookCollectionID": int(book_id),
+                    "images": images,
+                    "count": len(images)
+                })
+            except pymysql.Error as e:
+                app.logger.error(e)
+                rdata = json.dumps({"error": str(e)})
+
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/add_image', methods=['POST'])
+@require_app_key
+def add_image():
+    """
+    Add an image entry to the images database table.
+
+    Post Payload:
+    {
+      "BookCollectionID": 1234,
+      "name": "book_cover.jpg",
+      "url": "/resources/books/book_cover.jpg",
+      "type": "cover-face"
+    }
+
+    E.g.
+    curl -X POST -H "Content-type: application/json" -H "x-api-key: YOUR_API_KEY" \
+    -d '{"BookCollectionID": 1234, "name": "cover.jpg", "url": "/resources/books/cover.jpg", "type": "cover-face"}' \
+    http://172.17.0.2:5000/add_image
+
+    Returns:
+        JSON response with the inserted image record including the auto-generated id
+    """
+    db = pymysql.connect(**books_conf)
+    record = request.get_json()
+
+    # Validate required fields
+    if 'BookCollectionID' not in record:
+        rdata = json.dumps({"error": "Missing required field: BookCollectionID"})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=400, headers=response_headers)
+
+    # Set default type if not provided
+    if 'type' not in record:
+        record['type'] = 'cover-face'
+
+    # Verify image exists at the provided url
+    if 'url' in record and record['url']:
+        image_url = record['url']
+
+        # Check if it's a web URL (http:// or https://)
+        if image_url.startswith('http://') or image_url.startswith('https://'):
+            try:
+                # Make a HEAD request to check if the URL is accessible
+                response = requests.head(image_url, timeout=5, allow_redirects=True)
+
+                # If HEAD is not supported, try GET with stream
+                if response.status_code == 405:
+                    response = requests.get(image_url, timeout=5, stream=True, headers={'Range': 'bytes=0-0'})
+
+                if response.status_code != 200:
+                    app.logger.warning(f"Image URL returned status {response.status_code}: {image_url}")
+                    rdata = json.dumps(
+                        {"error": f"Image URL not accessible (status {response.status_code}): {image_url}"})
+                    response_headers = resp_header(rdata)
+                    return Response(response=rdata, status=400, headers=response_headers)
+
+                # Optionally verify it's an image by checking content-type
+                content_type = response.headers.get('Content-Type', '')
+                if not content_type.startswith('image/'):
+                    app.logger.warning(f"URL does not point to an image (content-type: {content_type}): {image_url}")
+                    rdata = json.dumps({"error": f"URL does not appear to be an image (content-type: {content_type})"})
+                    response_headers = resp_header(rdata)
+                    return Response(response=rdata, status=400, headers=response_headers)
+
+            except requests.exceptions.Timeout:
+                app.logger.error(f"Timeout while verifying image URL: {image_url}")
+                rdata = json.dumps({"error": f"Timeout while verifying image URL: {image_url}"})
+                response_headers = resp_header(rdata)
+                return Response(response=rdata, status=400, headers=response_headers)
+            except requests.exceptions.RequestException as e:
+                app.logger.error(f"Error verifying image URL: {image_url} - {str(e)}")
+                rdata = json.dumps({"error": f"Error verifying image URL: {str(e)}"})
+                response_headers = resp_header(rdata)
+                return Response(response=rdata, status=400, headers=response_headers)
+
+    search_str = ("INSERT INTO `images` "
+                  "(BookCollectionID, name, url, type) "
+                  "VALUES "
+                  "({BookCollectionID}, \"{name}\", \"{url}\", \"{type}\");")
+    image_id_str = "SELECT LAST_INSERT_ID();"
+
+    with db:
+        with db.cursor() as c:
+            try:
+                app.logger.debug(search_str.format(**record))
+                c.execute(search_str.format(**record))
+                c.execute(image_id_str)
+                record["id"] = c.fetchall()[0][0]
+                rdata = json.dumps({"add_image": record})
+            except pymysql.Error as e:
+                app.logger.error(e)
+                rdata = json.dumps({"error": str(e)})
+        db.commit()
+
+    response_headers = resp_header(rdata)
+    return Response(response=rdata, status=200, headers=response_headers)
+
+
+@app.route('/upload_image', methods=['POST'])
+@require_app_key
+def upload_image():
+    """
+    Upload an image file and store it in the configured image path.
+
+    Post Payload (multipart/form-data):
+    - file: The image file to upload
+    - filename (optional): Custom filename for the uploaded file
+
+    E.g.
+    curl -X POST -H "x-api-key: YOUR_API_KEY" -F "file=@/path/to/image.jpg" \
+    http://172.17.0.2:5000/upload_image
+
+    Returns:
+        JSON response with upload status and file path
+    """
+    if 'file' not in request.files:
+        rdata = json.dumps({"error": "No file part in the request"})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=400, headers=response_headers)
+
+    file = request.files['file']
+
+    if file.filename == '':
+        rdata = json.dumps({"error": "No file selected"})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=400, headers=response_headers)
+
+    # Get the configured image path
+    image_path = '/books/uploads'
+
+    # Ensure the directory exists
+    if not os.path.exists(image_path):
+        try:
+            os.makedirs(image_path)
+        except OSError as e:
+            app.logger.error(f"Failed to create directory {image_path}: {e}")
+            rdata = json.dumps({"error": f"Failed to create directory: {str(e)}"})
+            response_headers = resp_header(rdata)
+            return Response(response=rdata, status=500, headers=response_headers)
+
+    # Use custom filename if provided, otherwise use secure_filename on original
+    custom_filename = request.form.get('filename')
+    if custom_filename:
+        filename = secure_filename(custom_filename)
+    else:
+        filename = secure_filename(file.filename)
+
+    file_path = os.path.join(image_path, filename)
+
+    try:
+        file.save(file_path)
+        app.logger.info(f"File uploaded successfully: {file_path}")
+        rdata = json.dumps({
+            "upload_image": {
+                "status": "success",
+                "filename": filename,
+                "path": file_path
+            }
+        })
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=200, headers=response_headers)
+    except Exception as e:
+        app.logger.error(f"Failed to save file: {e}")
+        rdata = json.dumps({"error": f"Failed to save file: {str(e)}"})
+        response_headers = resp_header(rdata)
+        return Response(response=rdata, status=500, headers=response_headers)
+
+
 @app.route('/image/year_progress_comparison.png')
 @app.route('/image/year_progress_comparison.png/<window>')
 def year_progress_comparison(window=15):

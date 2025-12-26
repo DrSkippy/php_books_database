@@ -37,6 +37,7 @@ function setval(bcid) {
     const urlTag = baseApiUrl + "/tags/" + bookCollectionID;
     const urlRead = baseApiUrl + "/status_read/" + bookCollectionID;
     const urlListRecords = baseApiUrl + "/record_set/" + bookCollectionID;
+    const urlImages = baseApiUrl + "/images/" + bookCollectionID;
     $.getJSON(urlId, function (data) {
         var obj = data['data'];
         var trOne = "<tr id='replace-me-one'>" +
@@ -77,7 +78,7 @@ function setval(bcid) {
             "<table id='readtable' class=\"styled-inner-table\">\n" +
             "<thead>\n" +
             "<tr>\n" +
-            "<th>Date</th>\n" +
+            "<th class='min-width-column'>Date Read</th>\n" +
             "<th>Notes</th>\n" +
             "</tr>\n" +
             "</thead>\n" +
@@ -124,6 +125,33 @@ function setval(bcid) {
             scrollTop: $(document).height()
         }, 'slow'); // 'slow' can be replaced with a duration in milliseconds, e.g., 1000
     });
+    $.getJSON(urlImages, function (data) {
+        const obj = data['images'];
+        var imageRow = "";
+        if (obj.length > 0) {
+            imageRow += "<tr id='replace-me-five'><td colspan='10'><table>";
+            for (var i = 0; i < obj.length; i++) {
+                const imgUrl = obj[i]['url'];
+                imageRow += "<tr>" +
+                    "<td>Image: " + i + " </td>" +
+                    "<td><img src=\"" + imgUrl + "\" class=\"detail-image\"></td>" +
+                    "<td>URL: <a href=\"" + imgUrl + "\" target=\"_blank\">" + imgUrl + " </a></br>" +
+                    "Name: " + obj[i]['name'] + "</br>" +
+                    "Type: " + obj[i]['type'] + "</br>" +
+                    "</td></tr>"
+            }
+            imageRow += "</table></td><td colspan=3><input type=\"file\" id=\"fileInput\">" +
+                "<button onclick=\"uploadFiles()\">Upload Image</button></td></tr>";
+        } else {
+            imgUrl = "No url available";
+            imageRow = "<tr id='replace-me-five'>" +
+                "<td colspan=2>(No image available)</td>" +
+                "<td colspan=8>URL: " + imgUrl + "</td>" +
+                "<td colspan=3><input type=\"file\" id=\"fileInput\">" +
+                "<button onclick=\"uploadFiles()\">Upload Image</button></td></tr>";
+        }
+        $("#replace-me-five").replaceWith(imageRow);
+    });
 }
 
 function tag_links_list(tags_list) {
@@ -136,19 +164,49 @@ function tag_links_list(tags_list) {
 }
 
 function createDetailTableRows() {
-    const trOne = "<tr id='replace-me-one'>" +
+    const bookRecordRow = "<tr id='replace-me-one'>" +
         "<td/><td>(select a record)</td><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/>" +
         "</tr>";
-    $("#sumtable").append(trOne);
-    const trTwo = "<tr id='replace-me-two'>" +
+    $("#sumtable").append(bookRecordRow);
+    const tagRow = "<tr id='replace-me-two'>" +
         "<td>Tags:</td><td colspan=12></td></tr>";
-    $("#sumtable").append(trTwo);
-    const trThree = "<tr id='replace-me-three'>" +
+    $("#sumtable").append(tagRow);
+    const bookReadRow = "<tr id='replace-me-three'>" +
         "<td>Read:</td><td colspan=12></td></tr>";
-    $("#sumtable").append(trThree);
-    const trFour = "<tr id='replace-me-four'>" +
+    $("#sumtable").append(bookReadRow);
+    const bookFinishEstimate = "<tr id='replace-me-four'>" +
         "<td>Reading Record:</td><td colspan=12></td></tr>";
-    $("#sumtable").append(trFour);
+    $("#sumtable").append(bookFinishEstimate);
+    const bookImage = "<tr id='replace-me-five'>" +
+        "<td>Images:</td><td colspan=12></td></tr>";
+    $("#sumtable").append(bookImage);
+}
+
+function uploadFiles() {
+    const input = document.getElementById('fileInput');
+    const files = input.files;
+    if (files.length = 1) {
+        const formData = new FormData();
+        formData.append('file', files[0]);
+
+        fetch(baseApiUrl + '/upload_image', {
+            method: 'POST',
+            body: formData,
+            headers: apiHeaders
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Upload successful:', data);
+                alert('Files uploaded successfully!');
+            })
+            .catch(error => {
+                console.error('Upload failed:', error);
+                alert('File upload failed.');
+            });
+
+    } else {
+        alert('Please select file to upload.');
+    }
 }
 
 function sortTable(n) {

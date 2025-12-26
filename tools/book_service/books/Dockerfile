@@ -24,6 +24,8 @@ COPY ./books $APP/
 COPY ./booksdb/* $APP/booksdb/
 COPY ./config/* $APP/config/
 
+RUN mkdir $APP/uploads
+
 ENV BOOKSDB_CONFIG = "./$APP/config/configuration.json"
 
 EXPOSE 8083

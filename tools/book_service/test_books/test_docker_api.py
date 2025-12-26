@@ -1,5 +1,7 @@
 import json
 import unittest
+import os
+from io import BytesIO
 
 import requests
 from booksdb import api_util as au
@@ -173,14 +175,163 @@ class TestAppFunctions(unittest.TestCase):
         print(res.json())
         self.assertTrue(res.status_code == 200)
 
+    def test_add_image_with_valid_url(self):
+        """Test adding an image with a valid URL"""
+        book_id = self.book_id_list[0]
+        ep = ENDPOINT + "/add_image"
+        print(f"QUERY={ep}")
+
+        # Use a valid test image URL
+        data = {
+            "BookCollectionID": int(book_id),
+            "name": "test_image.jpg",
+            "url": "https://httpbin.org/image/jpeg",
+            "type": "cover-face"
+        }
+
+        res = requests.post(ep, json=data, headers={'x-api-key': f'{au.API_KEY}'})
+        print(res.json())
+        self.assertTrue(res.status_code == 200)
+        self.assertIn("add_image", res.json())
+        self.assertIn("id", res.json()["add_image"])
+
+    def test_add_image_with_invalid_url(self):
+        """Test adding an image with an invalid URL returns error"""
+        book_id = self.book_id_list[0]
+        ep = ENDPOINT + "/add_image"
+        print(f"QUERY={ep}")
+
+        data = {
+            "BookCollectionID": int(book_id),
+            "name": "test_image.jpg",
+            "url": "https://invalid-url-that-does-not-exist-12345.com/image.jpg",
+            "type": "cover-face"
+        }
+
+        res = requests.post(ep, json=data, headers={'x-api-key': f'{au.API_KEY}'})
+        print(res.json())
+        self.assertTrue(res.status_code == 400)
+        self.assertIn("error", res.json())
+
+    def test_add_image_missing_book_id(self):
+        """Test adding an image without BookCollectionID returns error"""
+        ep = ENDPOINT + "/add_image"
+        print(f"QUERY={ep}")
+
+        data = {
+            "name": "test_image.jpg",
+            "url": "https://httpbin.org/image/jpeg",
+            "type": "cover-face"
+        }
+
+        res = requests.post(ep, json=data, headers={'x-api-key': f'{au.API_KEY}'})
+        print(res.json())
+        self.assertTrue(res.status_code == 400)
+        self.assertIn("error", res.json())
+
+    def test_add_image_no_api_key(self):
+        """Test adding an image without API key returns 401"""
+        book_id = self.book_id_list[0]
+        ep = ENDPOINT + "/add_image"
+        print(f"QUERY={ep}")
+
+        data = {
+            "BookCollectionID": int(book_id),
+            "name": "test_image.jpg",
+            "url": "https://httpbin.org/image/jpeg",
+            "type": "cover-face"
+        }
+
+        res = requests.post(ep, json=data)
+        print(res.status_code)
+        self.assertTrue(res.status_code == 401)
+
+    def test_upload_image(self):
+        """Test uploading an image file"""
+        ep = ENDPOINT + "/upload_image"
+        print(f"QUERY={ep}")
+
+        # Create a small test image in memory (1x1 pixel PNG)
+        test_image_data = (
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01'
+            b'\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00'
+            b'\x00\x0cIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4'
+            b'\x00\x00\x00\x00IEND\xaeB`\x82'
+        )
+
+        files = {'file': ('test_upload.png', BytesIO(test_image_data), 'image/png')}
+
+        res = requests.post(ep, files=files, headers={'x-api-key': f'{au.API_KEY}'})
+        print(res.json())
+        self.assertTrue(res.status_code == 200)
+        self.assertIn("upload_image", res.json())
+        self.assertEqual(res.json()["upload_image"]["status"], "success")
+        self.assertIn("filename", res.json()["upload_image"])
+        self.assertIn("path", res.json()["upload_image"])
+
+    def test_upload_image_with_custom_filename(self):
+        """Test uploading an image file with custom filename"""
+        ep = ENDPOINT + "/upload_image"
+        print(f"QUERY={ep}")
+
+        # Create a small test image in memory
+        test_image_data = (
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01'
+            b'\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00'
+            b'\x00\x0cIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4'
+            b'\x00\x00\x00\x00IEND\xaeB`\x82'
+        )
+
+        files = {'file': ('original.png', BytesIO(test_image_data), 'image/png')}
+        data = {'filename': 'custom_test_name.png'}
+
+        res = requests.post(ep, files=files, data=data, headers={'x-api-key': f'{au.API_KEY}'})
+        print(res.json())
+        self.assertTrue(res.status_code == 200)
+        self.assertEqual(res.json()["upload_image"]["filename"], "custom_test_name.png")
+
+    def test_upload_image_no_file(self):
+        """Test uploading without a file returns error"""
+        ep = ENDPOINT + "/upload_image"
+        print(f"QUERY={ep}")
+
+        res = requests.post(ep, headers={'x-api-key': f'{au.API_KEY}'})
+        print(res.json())
+        self.assertTrue(res.status_code == 400)
+        self.assertIn("error", res.json())
+
+    def test_upload_image_no_api_key(self):
+        """Test uploading image without API key returns 401"""
+        ep = ENDPOINT + "/upload_image"
+        print(f"QUERY={ep}")
+
+        test_image_data = (
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01'
+            b'\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00'
+            b'\x00\x0cIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4'
+            b'\x00\x00\x00\x00IEND\xaeB`\x82'
+        )
+
+        files = {'file': ('test.png', BytesIO(test_image_data), 'image/png')}
+
+        res = requests.post(ep, files=files)
+        print(res.status_code)
+        self.assertTrue(res.status_code == 401)
+
     @classmethod
     def tearDownClass(cls):
         print("""For DB Cleanup:
-        
+
         USE books;
         DELETE FROM `tag labels` where label="delete_me";
         DELETE FROM `book collection` WHERE PublisherName="Printerman";
         DELETE FROM `books read` WHERE ReadDate="1945-10-19";
+        DELETE FROM `images` WHERE name LIKE "test_%";
+        DELETE FROM `images` WHERE name LIKE "custom_test%";
+
+        # Also delete test uploaded files from filesystem if needed:
+        # rm /var/www/html/resources/books/test_upload.png
+        # rm /var/www/html/resources/books/custom_test_name.png
         """)
 
 

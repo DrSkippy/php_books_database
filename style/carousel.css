@@ -66,8 +66,9 @@ body {
 }
 
 .card-list .card-link .card-image {
-    width: 95%;
-    aspect-ratio: 9 / 16;
+/ / width: 75 %;
+    height: 320px;
+/ / aspect-ratio: 9 / 15;
     object-fit: cover;
     border-radius: 10px;
 }

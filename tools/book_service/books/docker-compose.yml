@@ -1,0 +1,12 @@
+services:
+
+  books:
+    restart: unless-stopped
+    image: localhost:5000/book-service:latest
+    container_name: books
+    volumes:
+      - /var/www/html/resources/books:/books/uploads
+    ports:
+      - "8083:8083"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
