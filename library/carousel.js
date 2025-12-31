@@ -16,7 +16,7 @@ $(document).ready(function () {
             const bookObj = data[bookIdx]['book'];
             const readObj = data[bookIdx]['reads'];
             const tagObj = data[bookIdx]['tags'];
-	    const imgObj = data[bookIdx]['img'];
+            const imgObj = data[bookIdx]['img'];
             var bookString = listItems(bookObj, readObj, tagObj, imgObj);
             $("#card-deck").append(bookString);
         }
@@ -25,11 +25,11 @@ $(document).ready(function () {
     });
 });
 
-function listItems(bookObj, readObj, tagObj, imgObj)  {
-    var imgUrl = "https://resources.drskippy.worse-than.tv/books/default.webp";
+function listItems(bookObj, readObj, tagObj, imgObj) {
+    var imgUrl = "https://resources.drskippy.app/books/default.webp";
     //console.log(imgObj['data'][0]);
     if (imgObj['data'][0].length > 0) {
-    	imgUrl = imgObj['data'][0][0];
+        imgUrl = imgObj['data'][0][0];
     }
 
     let bookString = "\n<li class=\"card-item swiper-slide\">\n" +
@@ -37,7 +37,7 @@ function listItems(bookObj, readObj, tagObj, imgObj)  {
     bookString += "  <div class=\"book-record\">\n";
     bookString += "    <img src=\"" + imgUrl + "\" class=\"card-image\">\n";
     bookString += "    <div class=\"badge\"> Book ID: " + bookObj['data'][0][0] + "</div>\n";
-    let fieldsList = [1,2,3,4,12,5,6,7,11,9];
+    let fieldsList = [1, 2, 3, 4, 12, 5, 6, 7, 11, 9];
     for (const i of fieldsList) {
         bookString += "    <span class='field-title'>" + bookObj['header'][i] + ":</span> " + bookObj['data'][0][i] + "</br>\n";
     }
@@ -96,7 +96,7 @@ swiper.on('reachBeginning', function () {
         const bookObj = data['book'];
         const readObj = data['reads'];
         const tagObj = data['tags'];
-	const imgObj = data[bookIdx]['img'];
+        const imgObj = data['img'];
         swiper.prependSlide(listItems(bookObj, readObj, tagObj, imgObj));
         swiper.update(); // Update Swiper after adding new slides
     });
@@ -106,13 +106,13 @@ swiper.on('reachEnd', function () {
     const endpointUrl = baseApiUrl + "/complete_record";
     const direction = "next";
     const url = endpointUrl + "/" + maxCarouselBookId + "/" + direction;
-    //console.log(minCarouselBookId, maxCarouselBookId, url);
+    console.log(minCarouselBookId, maxCarouselBookId, url);
     $.getJSON(url, function (data) {
         maxCarouselBookId = data['book']['data'][0][0];
         const bookObj = data['book'];
         const readObj = data['reads'];
         const tagObj = data['tags'];
-	const imgObj = data[bookIdx]['img'];
+        const imgObj = data['img'];
         swiper.appendSlide(listItems(bookObj, readObj, tagObj, imgObj));
         swiper.update(); // Update Swiper after adding new slides
     });

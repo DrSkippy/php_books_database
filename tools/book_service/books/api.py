@@ -1,4 +1,4 @@
-__version__ = '0.15.5'
+__version__ = '0.16.0'
 
 import functools
 import os
@@ -9,7 +9,6 @@ import pandas as pd
 import requests
 from booksdb.api_util import *
 from flask import Flask, Response, send_file, request, abort
-from flask_cors import CORS
 from matplotlib import pylab as plt
 from werkzeug.utils import secure_filename
 
@@ -31,7 +30,6 @@ dictConfig({
 })
 
 app = Flask(__name__)
-cors = CORS(app)
 
 
 def require_app_key(view_function):
@@ -75,6 +73,11 @@ def require_app_key(view_function):
     return decorated_function
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
+
 @app.route('/configuration')
 @require_app_key
 def configuration():
@@ -89,11 +92,17 @@ def configuration():
         configuration dictionaries, the ISBN configuration, and the current
         date/time in ISO 8601 format.
     """
-    rdata = json.dumps({
+    books_conf_clean = books_conf.copy()
+    books_conf_clean["passwd"] = "******"
+    isbn_conf_clean = isbn_conf.copy()
+    isbn_conf_clean["key"] = "******"
+    clean = {
         "version": __version__,
-        "configuration": books_conf,
-        "isbn_configuration": isbn_conf,
-        "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")})
+        "configuration": books_conf_clean,
+        "isbn_configuration": isbn_conf_clean,
+        "date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
+    }
+    rdata = json.dumps(clean)
     response_headers = resp_header(rdata)
     return Response(response=rdata, status=200, headers=response_headers)
 
@@ -103,6 +112,7 @@ def configuration():
 ##########################################################################
 
 @app.route('/valid_locations')
+@require_app_key
 def valid_locations():
     """
     Retrieve a list of all valid locations.
@@ -404,6 +414,7 @@ def update_book_record():
 
 @app.route('/summary_books_read_by_year')
 @app.route('/summary_books_read_by_year/<target_year>')
+@require_app_key
 def summary_books_read_by_year(target_year=None):
     """
     Generates a summarized list of books read by year, optionally filtered by a
@@ -429,6 +440,7 @@ def summary_books_read_by_year(target_year=None):
 
 @app.route('/books_read')
 @app.route('/books_read/<target_year>')
+@require_app_key
 def books_read(target_year=None):
     """
     Handles HTTP GET requests for books read statistics.
@@ -456,6 +468,7 @@ def books_read(target_year=None):
 
 
 @app.route('/status_read/<book_id>')
+@require_app_key
 def status_read(book_id=None):
     """
     Return the status of a book identified by book_id.
@@ -484,6 +497,7 @@ def status_read(book_id=None):
 ##########################################################################
 
 @app.route('/books_search', methods=['POST', 'GET'])
+@require_app_key
 def books_search():
     """
     Search for books by query parameters.
@@ -522,6 +536,7 @@ def books_search():
 
 
 @app.route('/complete_records_window/<book_id>/<window>')
+@require_app_key
 def complete_record_window(book_id, window=20):
     """
     Return a JSON list of complete book records for a window of book IDs
@@ -568,6 +583,7 @@ def complete_record_window(book_id, window=20):
 
 @app.route('/complete_record/<book_id>')
 @app.route('/complete_record/<book_id>/<adjacent>')
+@require_app_key
 def complete_record(book_id, adjacent=None):
     """
     Detailed summary:
@@ -642,6 +658,7 @@ def add_tag(book_id, tag):
 
 @app.route('/tag_counts')
 @app.route('/tag_counts/<tag>')
+@require_app_key
 def tag_counts(tag=None):
     """
     Retrieve tag count information from the database.
@@ -676,6 +693,7 @@ def tag_counts(tag=None):
 
 
 @app.route('/tags/<book_id>')
+@require_app_key
 def tags(book_id=None):
     """
     Retrieve serialized tags for a book by its identifier.
@@ -711,7 +729,7 @@ def update_tag_value(current, updated):
     This endpoint accepts the current tag label and the updated tag label as URL
     parameters, performs an UPDATE statement on the `tag labels` table and returns
     a JSON response with the number of affected rows or an error message.  The
-    operation is protected by the @require_app_key decorator and logs any
+    operation is protected by the # @require_app_key decorator and logs any
     database errors.
 
     Parameters
@@ -749,6 +767,7 @@ def update_tag_value(current, updated):
 
 
 @app.route('/tags_search/<match_str>')
+@require_app_key
 def tags_search(match_str):
     """
     Search tags for the given match string.
@@ -776,6 +795,7 @@ def tags_search(match_str):
 
 
 @app.route('/tag_maintenance')
+@require_app_key
 def tag_maintenance():
     db = pymysql.connect(**books_conf)
     rdata = {"tag_maintenance": {}}
@@ -797,6 +817,7 @@ def tag_maintenance():
 # READING ESTIMATES
 ##########################################################################
 @app.route('/date_page_records/<record_id>')
+@require_app_key
 def date_page_records(record_id=None):
     # data is [(RecordDate, page, day_number from first page record), ...]
     data, record_id = daily_page_record_from_db(record_id)
@@ -811,6 +832,7 @@ def date_page_records(record_id=None):
 
 
 @app.route('/record_set/<book_id>')
+@require_app_key
 def record_set(book_id=None):
     db = pymysql.connect(**books_conf)
     rdata = {"record_set": {"BookCollectionID": book_id, "RecordID": [], "Estimate": []}}
@@ -903,6 +925,7 @@ def add_book_estimate(book_id, last_readable_page, start_date=None):
 # IMAGES
 ##########################################################################
 @app.route('/images/<book_id>')
+@require_app_key
 def get_images(book_id):
     """
     Retrieve all image information for a given BookCollectionID.
@@ -1119,6 +1142,7 @@ def upload_image():
 
 @app.route('/image/year_progress_comparison.png')
 @app.route('/image/year_progress_comparison.png/<window>')
+@require_app_key
 def year_progress_comparison(window=15):
     window = int(window)
     img = BytesIO()
@@ -1151,6 +1175,7 @@ def year_progress_comparison(window=15):
 
 @app.route('/image/all_years.png')
 @app.route('/image/all_years.png/<year>')
+@require_app_key
 def all_years(year=None):
     if year is None:
         year = datetime.datetime.now().year
