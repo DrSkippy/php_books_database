@@ -1,12 +1,14 @@
 services:
-
-  books:
+  book-service:
     restart: unless-stopped
     image: localhost:5000/book-service:latest
-    container_name: books
+    container_name: book-service
+    environment:
+      - API_KEY=${API_KEY}
     volumes:
       - /var/www/html/resources/books:/books/uploads
     ports:
-      - "8083:8083"
+      - 8083:8083
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - host.docker.internal:host-gateway
+networks: {}
