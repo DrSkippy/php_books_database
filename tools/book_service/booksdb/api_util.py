@@ -74,10 +74,15 @@ def read_json_configuration():
                 "key": c["isbn_com"]["key"].strip()
             }
             global API_KEY
-            API_KEY = c["api_key"].replace('\n', '')
+            if os.getenv("API_KEY") is not None:
+                API_KEY = os.getenv("API_KEY").replace('\n', '')
+            elif "api_key" in c:
+                API_KEY = c["api_key"].replace('\n', '')
+            else:
+                raise KeyError("Missing API key configuration.")
         except KeyError as e:
             app_logger.error(e)
-            raise SystemExit("Missing configuration file.")
+            raise SystemExit("Missing or incomplete configuration file.")
         return books_db_config, isbn_lookup_config
 
 

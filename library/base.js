@@ -1,11 +1,8 @@
+const apiKey = 'abcsdf876a234hqkajsdv9876x87ehruia76df'; // FIRST LINE: Replace with your actual API key
 const baseApiUrl = 'https://book-service.drskippy.app'
-// const baseApiUrl = 'http://192.168.127.166:8083'
-//const baseApiUrl = 'https://drskippy.worse-than.tv/book_service'
-//const baseApiUrl = 'https://book-service.drskippy.worse-than.tv'
-//const baseApiPath = '/php_books_database/';
+const resourceUrl = 'resourceUrl';
 const baseApiPath = '/';
 var bookCollectionID = 102;
-const apiKey = 'abcsdf876a234hqkajsdv9876x87ehruia76df';
 const apiHeaders = {
     'x-api-key': apiKey
 }
@@ -201,7 +198,7 @@ function uploadFiles(booKCollectionID) {
                 let payload = JSON.stringify({
                     "BookCollectionID": booKCollectionID,
                     "name": "Uploaded through books app " + new Date().toJSON().slice(0, 10),
-                    "url": "https://resources.drskippy.app/books/" + data.upload_image.filename
+                    "url": resourceUrl + data.upload_image.filename
                 });
                 console.log('BookCollectionID:', payload);
                 fetch(baseApiUrl + '/add_image', {
