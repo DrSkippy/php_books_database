@@ -7,7 +7,7 @@ from decimal import Decimal
 import numpy as np
 import pymysql
 
-app_logger = logging.getLogger(__name__)
+app_logger = logging.getLogger('flask.app')
 
 table_header = ["BookCollectionID",
                 "Title",
@@ -80,6 +80,7 @@ def read_json_configuration():
                 API_KEY = c["api_key"].replace('\n', '')
             else:
                 raise KeyError("Missing API key configuration.")
+            app_logger.debug(f"API key configuration loaded successfully. Using API_KEY={API_KEY}")
         except KeyError as e:
             app_logger.error(e)
             raise SystemExit("Missing or incomplete configuration file.")

@@ -26,7 +26,7 @@ $(document).ready(function () {
 });
 
 function listItems(bookObj, readObj, tagObj, imgObj) {
-    var imgUrl = "https://resources.drskippy.app/books/default.webp";
+    var imgUrl = resourceUrl + "/default.webp";
     //console.log(imgObj['data'][0]);
     if (imgObj['data'][0].length > 0) {
         imgUrl = imgObj['data'][0][0];

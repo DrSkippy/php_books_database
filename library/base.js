@@ -1,6 +1,6 @@
-const apiKey = 'abcsdf876a234hqkajsdv9876x87ehruia76df'; // FIRST LINE: Replace with your actual API key
+const apiKey = '77f13a1915fafe230754fe61669dcc0a5a1c79a3'; // FIRST LINE: Replace with your actual API key
 const baseApiUrl = 'https://book-service.drskippy.app'
-const resourceUrl = 'resourceUrl';
+const resourceUrl = 'https://resources.drskippy.app/books';
 const baseApiPath = '/';
 var bookCollectionID = 102;
 const apiHeaders = {
@@ -198,7 +198,7 @@ function uploadFiles(booKCollectionID) {
                 let payload = JSON.stringify({
                     "BookCollectionID": booKCollectionID,
                     "name": "Uploaded through books app " + new Date().toJSON().slice(0, 10),
-                    "url": resourceUrl + data.upload_image.filename
+                    "url": resourceUrl + "/" + data.upload_image.filename
                 });
                 console.log('BookCollectionID:', payload);
                 fetch(baseApiUrl + '/add_image', {
