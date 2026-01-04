@@ -10,6 +10,7 @@
         stop-test-all stop-test-book-service stop-test-mcp-service \
         logs-test-book-service logs-test-mcp-service \
         test test-book-service test-mcp-service test-local test-coverage \
+        test-bookdbtool test-bookdbtool-coverage \
         up-book-service up-mcp-server down-book-service down-mcp-server \
         clean clean-images stop-all info
 
@@ -56,46 +57,48 @@ help:
 	@echo "Available targets:"
 	@echo ""
 	@echo "  BUILD TARGETS:"
-	@echo "    build-all               - Build all Docker images (production)"
-	@echo "    build-book-service      - Build book service Docker image"
-	@echo "    build-mcp-service       - Build MCP server Docker image"
-	@echo "    build-test              - Build test Docker images (both services)"
-	@echo "    build-test-book-service - Build book service test image"
-	@echo "    build-test-mcp-service  - Build MCP server test image"
+	@echo "    build-all                - Build all Docker images (production)"
+	@echo "    build-book-service       - Build book service Docker image"
+	@echo "    build-mcp-service        - Build MCP server Docker image"
+	@echo "    build-test               - Build test Docker images (both services)"
+	@echo "    build-test-book-service  - Build book service test image"
+	@echo "    build-test-mcp-service   - Build MCP server test image"
 	@echo ""
 	@echo "  PUSH TARGETS (to local registry):"
-	@echo "    push-all                - Push all images to registry"
-	@echo "    push-book-service       - Push book service to registry"
-	@echo "    push-mcp-service        - Push MCP server to registry"
+	@echo "    push-all                 - Push all images to registry"
+	@echo "    push-book-service        - Push book service to registry"
+	@echo "    push-mcp-service         - Push MCP server to registry"
 	@echo ""
 	@echo "  LOCAL RUN TARGETS (without Docker):"
-	@echo "    run-local-book-service  - Run book service locally with poetry"
-	@echo "    run-local-mcp-service   - Run MCP server locally with poetry"
+	@echo "    run-local-book-service   - Run book service locally with poetry"
+	@echo "    run-local-mcp-service    - Run MCP server locally with poetry"
 	@echo ""
 	@echo "  TEST CONTAINER TARGETS:"
-	@echo "    run-test-all            - Run all test containers locally"
-	@echo "    run-test-book-service   - Run book service test container (port 9999)"
-	@echo "    run-test-mcp-service    - Run MCP server test container (port 3002)"
-	@echo "    stop-test-all           - Stop all test containers"
-	@echo "    stop-test-book-service  - Stop book service test container"
-	@echo "    stop-test-mcp-service   - Stop MCP server test container"
-	@echo "    logs-test-book-service  - View book service test logs"
-	@echo "    logs-test-mcp-service   - View MCP server test logs"
+	@echo "    run-test-all             - Run all test containers locally"
+	@echo "    run-test-book-service    - Run book service test container (port 9999)"
+	@echo "    run-test-mcp-service     - Run MCP server test container (port 3002)"
+	@echo "    stop-test-all            - Stop all test containers"
+	@echo "    stop-test-book-service   - Stop book service test container"
+	@echo "    stop-test-mcp-service    - Stop MCP server test container"
+	@echo "    logs-test-book-service   - View book service test logs"
+	@echo "    logs-test-mcp-service    - View MCP server test logs"
 	@echo ""
 	@echo "  TEST EXECUTION TARGETS:"
-	@echo "    test                    - Run all tests against Docker instances"
-	@echo "    test-book-service       - Run book service tests only"
-	@echo "    test-mcp-service        - Run MCP server tests only"
-	@echo "    test-local              - Run tests locally with pytest (no Docker)"
-	@echo "    test-coverage           - Run tests with coverage report"
+	@echo "    test                     - Run all tests against Docker instances"
+	@echo "    test-book-service        - Run book service tests only"
+	@echo "    test-mcp-service         - Run MCP server tests only"
+	@echo "    test-local               - Run tests locally with pytest (no Docker)"
+	@echo "    test-coverage            - Run tests with coverage report"
+	@echo "    test-bookdbtool          - Run bookdbtool unit tests"
+	@echo "    test-bookdbtool-coverage - Run bookdbtool tests with coverage"
 	@echo ""
 	@echo "  UTILITY TARGETS:"
-	@echo "    stop-all                - Stop all running containers (prod & test)"
-	@echo "    clean                   - Clean Python cache files"
-	@echo "    clean-images            - Remove all built Docker images"
-	@echo "    logs-book-service       - View book service container logs"
-	@echo "    logs-mcp-service        - View MCP server container logs"
-	@echo "    info                    - Show configuration and status"
+	@echo "    stop-all                 - Stop all running containers (prod & test)"
+	@echo "    clean                    - Clean Python cache files"
+	@echo "    clean-images             - Remove all built Docker images"
+	@echo "    logs-book-service        - View book service container logs"
+	@echo "    logs-mcp-service         - View MCP server container logs"
+	@echo "    info                     - Show configuration and status"
 	@echo ""
 	@echo "==================================================================="
 	@echo "COMMON WORKFLOWS:"
@@ -125,8 +128,8 @@ build-all: build-book-service build-mcp-service build-test
 build-book-service:
 	@echo "Building book service Docker image..."
 	@echo "Tag: $(BOOK_SERVICE_TAG)"
-	cd $(BOOK_SERVICE_DIR) && docker build \
-		-f books/Dockerfile \
+	docker build \
+		-f book_service/books/Dockerfile \
 		-t $(BOOK_SERVICE_TAG) \
 		.
 	@echo "✓ Book service image built: $(BOOK_SERVICE_TAG)"
@@ -143,8 +146,8 @@ build-mcp-service:
 build-test-book-service:
 	@echo "Building book service test Docker image..."
 	@echo "Tag: book-service-test:latest"
-	cd $(BOOK_SERVICE_DIR) && docker build \
-		-f books/Dockerfile \
+	docker build \
+		-f book_service/books/Dockerfile \
 		-t ${BOOK_TEST_TAG} \
 		.
 	@echo "✓ Book service test image built: $(BOOK_TEST_TAG)"
@@ -321,6 +324,16 @@ test-coverage:
 	cd $(BOOK_SERVICE_DIR) && \
 		export PYTHONPATH=$(BOOK_SERVICE_DIR) && \
 		poetry run pytest test_books/test_api_util.py --cov=books --cov=booksmcp --cov=booksdb --cov-report=html --cov-report=term
+
+test-bookdbtool:
+	@echo "Running bookdbtool unit tests..."
+	poetry run pytest test/ -v
+
+test-bookdbtool-coverage:
+	@echo "Running bookdbtool tests with coverage..."
+	@echo "Note: Requires pytest-cov. Install with: poetry add --group dev pytest-cov"
+	poetry run pytest test/ -v --cov=bookdbtool --cov-report=html --cov-report=term 2>/dev/null || \
+		(echo "pytest-cov not installed. Running tests without coverage..." && poetry run pytest test/ -v)
 
 # ===================================================================
 # UTILITY TARGETS

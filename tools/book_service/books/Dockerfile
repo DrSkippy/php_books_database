@@ -1,17 +1,27 @@
+FROM python:3.11-slim
 
-FROM python:3.9.15
-RUN apt update && apt upgrade -y
+LABEL maintainer="Books Server"
+LABEL description="Server for Books Database"
 
+# Set working directory
 ENV APP=/books
 RUN mkdir $APP
 WORKDIR $APP
 
-RUN apt install make curl -y
-RUN pip install --upgrade pip
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+#RUN apt-get -y install curl
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install pipx
+RUN pipx install poetry
 
 # get and install poetry package manager
-RUN curl -sSL https://install.python-poetry.org | python3 -
-# RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+#RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH=/root/.local/bin:$PATH
 # set poetry so it does not use a virtual environment in deployment container
 RUN poetry config virtualenvs.create false
@@ -20,9 +30,9 @@ ENV PYTHONPATH=$APP
 COPY ./pyproject.toml ./poetry.lock $APP/
 RUN poetry install --no-root --without dev
 
-COPY ./books $APP/
-COPY ./booksdb/* $APP/booksdb/
-COPY ./config/* $APP/config/
+COPY ./book_service/books $APP/
+COPY ./book_service/booksdb/* $APP/booksdb/
+COPY ./book_service/config/* $APP/config/
 
 RUN mkdir $APP/uploads
 
