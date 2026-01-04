@@ -237,31 +237,24 @@ class BCTool:
             Book records with tag list and read status.
             bc.result is a book collection id.
         """
-        assert isinstance(book_collection_id, int), "Requires in integer Book ID"
-        q = self.end_point + f"/books_search?BookCollectionID={book_collection_id}"
+        try:
+            book_collection_id = int(book_collection_id)
+        except ValueError:
+            print("Requires in integer Book ID")
+            return
+        q = self.end_point + f"/complete_record/{book_collection_id}"
         try:
             r = requests.get(q, headers=self.header)
             res = r.json()
         except requests.RequestException as e:
             logging.error(e)
         else:
-            q = self.end_point + f"/tags/{book_collection_id}"
-            try:
-                tr = requests.get(q)
-                tres = tr.json()
-            except requests.RequestException as e:
-                logging.error(e)
-            else:
-                _template = ["" for i in range(len(res["data"][0]))]
-                _template[0] = "    Tags:"
-                _data = []
-                for d in res["data"]:
-                    _data.append(d)
-                    if len(tres["tag_list"]) > 0:
-                        _template[1] = "\n".join(tres["tag_list"])
-                        _data.append(_template)
-                self._show_table(_data, res["header"], self.MINIMAL_BOOK_INDEXES, pagination)
-                self.result = book_collection_id
+            self._show_table(res["book"]["data"], res["book"]["header"], [0, 1, 2, 3, 4], pagination)
+            print("  TAGS:\n")
+            print("    " + "\n    ".join(res["tags"]["data"][0]))
+            if res["reads"]["data"] and len(res["reads"]["data"][0]) > 0:
+                self._show_table(res["reads"]["data"], res["reads"]["header"], [0, 1], pagination)
+            self.result = book_collection_id
 
     def books_read_by_year_with_summary(self, year=None, pagination=True):
         """

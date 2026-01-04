@@ -30,10 +30,10 @@ def yearly_comparisons(df, current_year=2020):
     now = df.loc[df.year == current_year]
     fig_size = [12, 6]
     ax = df.hist("pages read", bins=14, color="darkblue", figsize=fig_size)
-    plt.axvline(x=int(now["pages read"]), color="red")
+    plt.axvline(x=int(now["pages read"].iloc[0]), color="red")
     plt.show()
     df.plot.bar(x="rank", y="pages read", width=.95, color="darkblue", figsize=fig_size)
-    plt.axvline(x=int(now["rank"]) - 1, color="red")
+    plt.axvline(x=int(now["rank"].iloc[0]) - 1, color="red")
     plt.show()
     df.sort_values("year").plot.bar(x="year", y="pages read", width=.95, color="darkblue", figsize=fig_size)
     plt.show()

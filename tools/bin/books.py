@@ -1,11 +1,13 @@
 import json
 import readline
 from code import InteractiveConsole
+import os
 
 import bookdbtool.estimate_tools as et
 import bookdbtool.book_db_tools as rt
 import bookdbtool.isbn_lookup_tools as isbn
 import bookdbtool.ai_tools as ai
+import bookdbtool.manual as manual
 
 CONFIG_PATH = "/book_service/config/configuration.json"  # root is "tools"
 
@@ -21,7 +23,10 @@ def get_endpoint():
     with cfile:
         config = json.load(cfile)
         end_point = config["endpoint"]
-        api_key = config["api_key"]
+        if os.getenv("API_KEY") is not None:
+            api_key = os.getenv("API_KEY").replace('\n', '')
+        elif "api_key" in config:
+            api_key = config["api_key"].replace('\n', '')
         # todo fix this so everyone uses the same config
     return config, (end_point, api_key), config["isbn_com"]
 
@@ -39,7 +44,8 @@ scope_vars = {"bc": rt.BCTool(*book_service_conf),
               "est": et.ESTTool(*book_service_conf),
               "isbn": isbn.ISBNLookup(isbn_conf),
               "ai": ai.OllamaAgent(ai_conf),
-              "history": history}
+              "history": history,
+              "man": manual}
 
 header = "************************************************************************\n"
 header += "** Welcome to the Book Collection Database REPL!                      **\n"

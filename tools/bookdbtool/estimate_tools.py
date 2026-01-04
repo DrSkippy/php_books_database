@@ -59,10 +59,14 @@ class ESTTool:
             bres = br.json()["data"][0]
         except requests.RequestException as e:
             logging.error(e)
+        except IndexError as ie:
+            logging.error(f'IndexError: {ie}')
+            print("No estimates found for this book.")
         else:
             logging.debug(br)
             if "error" in tres:
                 print(f'Error: {tres["error"]}')
+                print("No estimates found for this book.")
             elif len(tres["record_set"]) > 0:
                 tres = tres["record_set"]
                 print("*" * DIVIDER_WIDTH)
@@ -72,7 +76,7 @@ class ESTTool:
                     print(f'  Estimated Finish: {tres["Estimate"][i][0]}  Earliest: {tres["Estimate"][i][1]}   Latest: {tres["Estimate"][i][2]}')
                     print(f'  ----------') if len(tres["RecordID"]) > 1 else None
                 print("*" * DIVIDER_WIDTH)
-            self.result = tres["RecordID"][-1][1]
+            self.result = book_id
 
     lbe = list_book_estimates
 
