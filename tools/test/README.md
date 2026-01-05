@@ -2,6 +2,9 @@
 
 This directory contains comprehensive unit tests for the bookdbtool package.
 
+> **For comprehensive testing workflows and Makefile integration**, see:
+> `../README.md#testing` - Main documentation with complete testing procedures
+
 ## Test Coverage
 
 The test suite covers all major modules in the bookdbtool package:

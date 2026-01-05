@@ -1,105 +1,208 @@
-### Use Cases Supported:
+# REST API Service
 
-0. View configuration
-1. Book locations
-1. Add book records
-2. Update read date for a book
-3. Report on books/pages read by year
-4. List books read by year
-5. List books by read/recycled status in Alpha by Author
-6. Update Note on book
-7. Update recycled status
-8. Add tags to book record
-9. Search for books by tag
+Flask-based REST API for managing and querying the book collection database.
 
-## BUILD and DEPLOY SERVICE for local testing
+## Overview
 
-On OSX and Linux to run local tests:
+- **Version**: 0.16.2
+- **Framework**: Flask 3.1.2
+- **Port**: 8083
+- **Authentication**: API key via `x-api-key` header
+- **Endpoints**: 50+ endpoints for books, reading history, tags, and visualizations
 
-```angular2html
-docker build -f ./books/Dockerfile . -t book-test
-docker run -p 127.0.0.1:9999:8083 book-test
+## Quick Start
+
+```bash
+# Run locally (from tools directory)
+make run-local-book-service
+
+# Or with Docker
+make build-book-service
+cd book_service/books
+docker-compose up -d
+
+# Test
+curl -H "x-api-key: YOUR_KEY" http://localhost:8083/configuration
 ```
 
-```
-curl -H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" localhost/valid_locations
-```
+## Key Features
 
-## BUILD and DEPLOY SERVICE with Portainer.io
+- **Book Management**: Add, update, search books
+- **Reading History**: Track books read, dates, notes
+- **Tagging System**: Flexible categorization
+- **Image Management**: Upload and manage book covers
+- **Visualizations**: Generate reading progress charts
+- **ISBN Integration**: Look up books by ISBN
+- **Reading Estimates**: Track reading progress
 
-Run a local registry in Portainer.io
+## Use Cases Supported
 
-```aiignore
-version: '3.8'
-services:
-  registry:
-    image: registry:2
-    ports:
-      - "5000:5000" # Map host port 5000 to container port 5000
-    volumes:
-      - ./data/registry:/var/lib/registry # Persist registry data
-    restart: always # Ensure the registry restarts if it stops
-```
+1. View API configuration and version
+2. List valid book locations
+3. Add new book records
+4. Update read dates for books
+5. Report on books/pages read by year
+6. List books read in a specific year
+7. Search books by read/recycled status (Alpha by Author)
+8. Update notes on books
+9. Update recycled status
+10. Add tags to book records
+11. Search for books by tag
+12. Generate reading progress visualizations
 
-Set insecure registry in /etc/docker/daemon.json
+## Comprehensive Documentation
 
-```aiignore
+For complete API documentation including:
+- **All 50+ endpoint details** with examples
+- **Complete Makefile reference** (build, test, deploy)
+- **Testing procedures**
+- **Deployment workflows**
+- **Troubleshooting**
+
+**See**: `../../README.md` (tools/README.md) - Main documentation with complete API endpoint reference
+
+## Configuration
+
+The API uses `../config/configuration.json`:
+
+```json
 {
-  "insecure-registries" : ["localhost:5000"]
+  "username": "mysql_user",
+  "password": "mysql_password",
+  "database": "books",
+  "host": "localhost",
+  "port": 3306,
+  "endpoint": "http://localhost:8083",
+  "api_key": "your_api_key_here"
 }
 ```
 
-Push to registry:
+For Docker deployments, use `host.docker.internal` as the host to access MySQL on the host machine.
 
-```
-docker build -f ./books/Dockerfile . -t localhost:5000/book-service:latest
-docker push localhost:5000/book-service:latest
-curl localhost:5000/v2/_catalog
-```
+## Testing
 
-## BUILD and DEPLOY SERVICE to K8s
+```bash
+# From tools directory
 
-```angular2html
-docker build -t localhost:32000/book-service .
-docker push localhost:32000/book-service
-```
+# Run all tests
+make test-book-service
 
-### Deployment to K8s
-
-```angular2html
-kubectl apply -f deployment.yaml
-kubectl apply -f ingress.yaml
-kubectl expose deployment book-service --type=LoadBalancer --port=8083
+# Run with coverage
+make test-coverage
 ```
 
-### Updated Image on K8s
+See `../../README.md#testing` for detailed testing documentation.
 
-```angular2html
-kubectl rollout restart deployment/book-service
+## Deployment
+
+### Local Testing
+
+```bash
+# Build test image
+docker build -f ./books/Dockerfile . -t book-test
+
+# Run on port 9999
+docker run -p 127.0.0.1:9999:8083 book-test
+
+# Test
+curl -H "x-api-key: YOUR_KEY" http://localhost:9999/valid_locations
 ```
 
-## DEPLOY SERVICE to production, using docker-compose
+### Production (Docker Compose)
 
-2023-11-24 moved from Raspberry Pi to Ubuntu Desktop.
+```bash
+# From tools directory
+make build-book-service
+make push-book-service  # If using registry
 
-Configuration segment of docker-compose.yaml:
+# Deploy
+cd book_service/books
+export API_KEY=your_key_here
+docker-compose up -d
 
+# Verify
+curl -H "x-api-key: $API_KEY" http://localhost:8083/configuration
 ```
-version: '3'
 
+See `../../README.md#deployment` for comprehensive deployment documentation including:
+- Registry setup
+- Multiple deployment methods
+- Update workflows
+- Health checks
+- Troubleshooting
+
+## Docker Configuration
+
+### Dockerfile
+- Base: `python:3.11-slim`
+- Working directory: `/books`
+- Port: 8083
+- Entrypoint: `poetry run uwsgi --ini api.ini`
+
+### docker-compose.yml
+```yaml
 services:
-
-    books:
-        restart: unless-stopped
-        image: book-service:latest
-        ports:
-            - "8083:8083"
-        extra_hosts:
-            - "host.docker.internal:host-gateway"
+  book-service:
+    image: localhost:5000/book-service:latest
+    container_name: book-service
+    ports:
+      - "8083:8083"
+    environment:
+      - API_KEY=${API_KEY}
+    volumes:
+      - /var/www/html/resources/books:/books/uploads
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 ```
 
-To deploy:
+## API Endpoints Quick Reference
 
-```angular2html
-scott@lambda-dual:/opt/joplin$ docker-compose -f ./joplin-docker-compose.yaml up -d books
-```
+For the complete endpoint reference with examples, see `../../README.md#tool-2-rest-api-service`
+
+### Configuration
+- GET `/configuration` - API version and settings
+- GET `/valid_locations` - Valid book locations
+
+### Books
+- GET/POST `/books_search` - Search books
+- GET `/recent` - Recently updated books
+- GET `/complete_record/<book_id>` - Complete book details
+- POST `/add_books` - Add new books
+- POST `/update_book_record` - Update book fields
+
+### Reading History
+- GET `/books_read/<year>` - Books read in year
+- GET `/summary_books_read_by_year` - Reading statistics
+- GET `/status_read/<book_id>` - Read status
+- POST `/add_read_dates` - Add read dates
+
+### Tags
+- GET `/tags/<book_id>` - Tags for book
+- GET `/tags_search/<match_str>` - Search by tag
+- PUT `/add_tag/<book_id>/<tag>` - Add tag
+
+### Visualizations
+- GET `/image/year_progress_comparison.png` - Progress by year chart
+- GET `/image/all_years.png` - All-time statistics
+
+**Full endpoint reference**: See `../../README.md#complete-api-endpoint-reference`
+
+## Related Documentation
+
+- **Main README**: `../../README.md` - Comprehensive documentation
+- **book_service Overview**: `../README.md` - Service directory overview
+- **MCP Server**: `../booksmcp/README.md` - MCP API documentation
+- **Test Suite**: `../../test/README.md` - Unit test documentation
+
+## Version Information
+
+- API Version: 0.16.2
+- Flask: 3.1.2
+- Python: 3.11+
+- PyMySQL: 1.1.0+
+
+---
+
+For complete API documentation with all endpoints, examples, and workflows, see:
+**`/var/www/html/personal-book-records/tools/README.md`**

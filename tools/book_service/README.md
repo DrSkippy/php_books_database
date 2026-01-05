@@ -1,119 +1,264 @@
-# Test Book Service
+# Book Service
 
-## Tests
+This directory contains two service implementations for the Book Database: a REST API and an MCP (Model Context Protocol) server.
 
-```
-cat config/configuration.json | jq . 
-docker images 
-docker build -f ./books/Dockerfile . -t books-test
-docker run -d -p 9999:8083 --name books-test-container books-test
-docker ps
-poetry run python test_books/generate_curl_commands.py > curl_test_script.bash
-bash curl_test_script.bash
-# note DELETEs...
-poetry run pytest --cov-report term-missing --cov=books test_books/test_api_util.py
-poetry run pytest -s test_books/test_docker_api.py 
-# note DELETES...
-docker rm -f books-test-container
-```
+## Overview
 
-### Test Cleanup:
+The `book_service` directory provides:
 
-- remove test records from database in DBeaver or other MySQL client
-- remove generated images in test_books/...
+### 1. **REST API** (`books/`)
+- Flask-based HTTP API (Port 8083)
+- 50+ endpoints for managing books, reading history, and tags
+- Authentication via `x-api-key` header
+- Visualization and image management
+- Version: 0.16.2
 
-```
-rm *.png
-rm curl_test_script.bash 
-```
+### 2. **MCP Server** (`booksmcp/`)
+- Model Context Protocol server for AI integration (Port 3002)
+- FastMCP framework with 10 search tools
+- Designed for Claude Desktop and other MCP clients
+- Version: 3.0.0
 
+### 3. **Shared Database Layer** (`booksdb/`)
+- Common MySQL query utilities used by all services
+- Database abstraction and helper functions
 
-### Basic API Endpoints harvested from api.py in test script:
+### 4. **Configuration** (`config/`)
+- Shared configuration file for all services
+- Database credentials and API settings
 
+## Quick Start
 
-```
-# Sample data for endpoints:
-#   <target_year>: 2022
-#   <book_id>: 1873
-#   <tag>: fiction
-#   <year>: 2020
-#   <match_str>: Lewis
-#   <current>: recovery
-#   <updated>: recovery
-#   <window>: 20
-#   <record_id>: 50
-#   <last_readable_page>: 15000
-#   <start_date>: 1945-10-19
+### REST API
+```bash
+# Run locally
+cd /var/www/html/personal-book-records/tools
+make run-local-book-service
 
+# Or with Docker
+make build-book-service
+cd book_service/books
+docker-compose up -d
 
-# Getting all of the GET endpoints from book_service/books/api.py
-# /configuration
-# /valid_locations
-# /recent
-# /summary_books_read_by_year
-# /summary_books_read_by_year/2022
-# /books_read
-# /books_read/2022
-# /status_read/1873
-# /books_search
-# /complete_records_window/1873/20
-# /complete_record/1873
-# /tag_counts
-# /tag_counts/fiction
-# /tags/1873
-# /tags_search/Lewis
-# /tag_maintenance
-# /date_page_records/50
-# /record_set/1873
-# /image/year_progress_comparison.png
-# /image/year_progress_comparison.png/20
-# /image/all_years.png
-# /image/all_years.png/2020
-
-
-# Getting all of the PUT endpoints from book_service/books/api.py
-# /add_tag/1873/fiction
-# /update_tag_value/recovery/recovery
-# /add_book_estimate/1873/15000
-# /add_book_estimate/1873/15000/1945-10-19
-
-
+# Test
+curl -H "x-api-key: YOUR_KEY" http://localhost:8083/configuration
 ```
 
-## Curl Examples
+### MCP Server
+```bash
+# Run locally
+cd /var/www/html/personal-book-records/tools
+make run-local-mcp-service
 
-List of Authors of unrecycled books in alphabetical order:
-```angular2html
-curl -H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
-http://172.17.0.2:8083/books_search?Recycled=0 | jq .data[][1]
+# Or with Docker
+make build-mcp-service
+cd book_service/booksmcp
+docker-compose up -d
+
+# Test
+curl http://localhost:3002/health
 ```
 
-Add books:
-```angular2html
-curl -X POST -H "Content-type: application/json" \
--H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
--d @./examples/test_add_book.json \
-http://172.17.0.2:8083/add_books
+## Documentation
+
+### Comprehensive Documentation
+
+For complete documentation on all services, see:
+- **Main Documentation**: `../README.md` (tools/README.md)
+  - Architecture overview
+  - Complete API endpoint reference (50+ endpoints)
+  - Full Makefile documentation (40+ targets)
+  - Testing procedures
+  - Deployment workflows
+  - Troubleshooting
+
+### Service-Specific Documentation
+
+- **REST API Details**: `books/README.md` - REST API quick reference
+- **MCP Server Complete Guide**: `booksmcp/README.md` - Comprehensive MCP documentation (575 lines)
+
+## Directory Structure
+
+```
+book_service/
+├── books/                    # REST API (Flask)
+│   ├── api.py                # Main Flask API (50+ endpoints)
+│   ├── isbn_com.py           # ISBN integration
+│   ├── Dockerfile            # Docker configuration
+│   ├── docker-compose.yml    # Docker Compose
+│   ├── api.ini               # uWSGI configuration
+│   └── README.md             # REST API quick reference
+├── booksdb/                  # Shared database layer
+│   ├── __init__.py
+│   └── api_util.py           # Database query utilities
+├── booksmcp/                 # MCP server
+│   ├── server.py             # FastMCP server
+│   ├── Dockerfile            # Docker configuration
+│   ├── docker-compose.yml    # Docker Compose
+│   ├── requirements.txt      # MCP dependencies
+│   └── README.md             # Comprehensive MCP guide
+├── config/                   # Configuration
+│   ├── configuration.json    # Main config (create from example)
+│   └── configuration_example.json  # Template
+├── example_json_payloads/    # API test examples
+│   ├── test_add_books.json
+│   ├── test_update_book_note_status.json
+│   ├── test_update_read_dates.json
+│   └── test_update_edit_read_note.json
+└── test_books/               # Integration tests
+    ├── test_api_util.py      # Database layer tests
+    ├── test_docker_api.py    # REST API tests
+    ├── test_booksmcp.py      # MCP server tests
+    └── generate_curl_commands.py  # Test script generator
 ```
 
-Update a book:
-```angular2html
-curl -X POST -H "Content-type: application/json" \
--H "x-api-key: sdf876a234hqkajsdv9876x87ehruia76df" \
--d @./examples/test_update_book.json \
-http://172.17.0.2:8083/update_book
+## Configuration
+
+All services use a single configuration file: `config/configuration.json`
+
+### Create Configuration
+
+```bash
+cp config/configuration_example.json config/configuration.json
+vim config/configuration.json
 ```
 
+### Required Fields
 
-FAILED TO OPEN COLLECTION ERROR
-
-```angular2html
-The currently activated Python version 3.9.10 is not supported by the project (3.8.12).
-Trying to find and use a compatible version. 
-Using python3 (3.8.12)
-Updating dependencies
-Resolving dependencies... (0.4s)
-
-Failed to unlock the collection!
-scott@scott-pi-desktop:~/Working/php_books_database/tools/book_service$ export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
+```json
+{
+  "username": "mysql_user",
+  "password": "mysql_password",
+  "database": "books",
+  "host": "localhost",
+  "port": 3306,
+  "isbn_com": {
+    "url_isbn": "https://api2.isbndb.com/book/{}",
+    "key": "your_isbndb_api_key"
+  },
+  "endpoint": "http://localhost:8083",
+  "api_key": "your_api_key_here"
+}
 ```
+
+For detailed configuration documentation, see `../README.md#configuration`
+
+## Testing
+
+```bash
+# From tools directory
+
+# Test REST API
+make test-book-service
+
+# Test MCP server
+make test-mcp-service
+
+# Test both services
+make test
+
+# Test database layer (local, no Docker)
+make test-local
+
+# Test with coverage
+make test-coverage
+```
+
+For detailed testing documentation, see `../README.md#testing`
+
+## Deployment
+
+### Production Deployment
+
+```bash
+# From tools directory
+
+# Build and push images
+make build-all
+make push-all
+
+# Deploy REST API
+cd book_service/books
+export API_KEY=your_key_here
+docker-compose up -d
+
+# Deploy MCP server
+cd book_service/booksmcp
+docker-compose up -d
+
+# Verify
+curl -H "x-api-key: $API_KEY" http://localhost:8083/configuration
+curl http://localhost:3002/health
+```
+
+For detailed deployment documentation, see `../README.md#deployment`
+
+## Shared Database Layer (booksdb)
+
+The `booksdb` module provides common database access functionality used by both services:
+
+### Key Components
+
+- `api_util.py`: Database query utilities
+  - `books_search_utility()` - Main search function
+  - Database connection management
+  - Query formatting and result processing
+  - ISBN validation helpers
+
+### Usage
+
+```python
+from booksdb import api_util
+
+# Search books
+results = api_util.books_search_utility(
+    search_type="Author",
+    search_str="Tolkien"
+)
+```
+
+## Architecture
+
+Both services share the same database layer and configuration:
+
+```
+┌─────────────────────────┐
+│   MySQL Books Database  │
+└───────────┬─────────────┘
+            │
+      ┌─────┴─────┐
+      │ booksdb/  │  Shared database layer
+      │ api_util  │
+      └─────┬─────┘
+            │
+    ┌───────┴───────┐
+    │               │
+┌───▼────┐    ┌────▼────┐
+│REST API│    │MCP      │
+│Flask   │    │Server   │
+│:8083   │    │FastMCP  │
+│        │    │:3002    │
+└────────┘    └─────────┘
+```
+
+## Additional Resources
+
+- **Main README**: `../README.md` - Comprehensive documentation for all tools
+- **REST API README**: `books/README.md` - REST API quick reference
+- **MCP Server README**: `booksmcp/README.md` - Complete MCP guide (575 lines)
+- **Test Documentation**: `../test/README.md` - Test suite documentation
+- **Database Schema**: `../schema_booksdb.sql` - MySQL database schema
+
+## Version Information
+
+- REST API: v0.16.2
+- MCP Server: v3.0.0
+- Python: 3.11+
+- Flask: 3.1.2
+- FastMCP: 0.5.0+
+
+---
+
+For complete documentation, please refer to:
+- **Main documentation**: `/var/www/html/personal-book-records/tools/README.md`
+- **MCP server complete guide**: `/var/www/html/personal-book-records/tools/book_service/booksmcp/README.md`
