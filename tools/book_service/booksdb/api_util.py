@@ -405,6 +405,9 @@ def get_recently_touched(limit=10):
                  '        UNION \n'
                  '        SELECT BookCollectionID, EstimateDate as LastUpdate\n'
                  '        FROM `complete date estimates`) abc\n'
+                 '        UNION \n'
+                 '        SELECT BookCollectionID, LastUpdate\n'
+                 '        FROM `images`\n'
                  'JOIN `book collection` bc ON abc.BookCollectionID = bc.BookCollectionID \n'
                  'GROUP BY abc.BookCollectionID, bc.Title\n'
                  'ORDER BY LastUpdate DESC LIMIT %s;\n')
